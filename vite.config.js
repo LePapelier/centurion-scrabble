@@ -1,6 +1,6 @@
 import { defineConfig } from 'vite';
 
-// Déployé sous https://paul-laurent.fr/scrabble/
+// Déployé sous https://paul-laurent.fr/centurion-scrabble/
 // `base` relatif pour que le sous-répertoire fonctionne sans réécriture serveur.
 export default defineConfig({
   base: './',

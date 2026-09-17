@@ -23,9 +23,12 @@ node tools/simulate.mjs 20  # 140 parties IA contre IA, tous niveaux
 ## Déploiement
 
 `base` vaut `./` : le contenu de `dist/` se copie tel quel dans le
-sous-répertoire voulu, par exemple `paul-laurent.fr/scrabble/`. Un
-`.htaccess` active la compression (le dictionnaire passe de 304 à ~180 Ko)
+sous-répertoire voulu, en l’occurrence `paul-laurent.fr/centurion-scrabble/`.
+Un `.htaccess` active la compression (le dictionnaire passe de 304 à ~180 Ko)
 et le cache long sur les fichiers empreintés.
+
+Le même bundle convient à GitHub Pages, servi sous `/centurion-scrabble/` —
+d'où l'intérêt de ne jamais repasser à une base absolue.
 
 ## Partie à deux
 

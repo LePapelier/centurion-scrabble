@@ -1,4 +1,4 @@
-# Hébergement Apache (paul-laurent.fr/scrabble).
+# Hébergement Apache (paul-laurent.fr/centurion-scrabble).
 # Le dictionnaire est un binaire de ~300 Ko qui se comprime à ~180 Ko :
 # la compression de transport est indispensable ici.
 
