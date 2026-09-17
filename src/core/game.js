@@ -254,7 +254,7 @@ export class Game {
 
   toJSON() {
     return {
-      version: 1,
+      version: 2,
       level: this.level,
       letters: [...this.board.letters],
       blanks: [...this.board.blanks],
@@ -271,7 +271,7 @@ export class Game {
   }
 
   static fromJSON(data) {
-    if (!data || data.version !== 1) return null;
+    if (!data || data.version !== 2) return null;
     const game = Object.create(Game.prototype);
     game.level = data.level;
     game.board = { letters: Int8Array.from(data.letters), blanks: Uint8Array.from(data.blanks) };

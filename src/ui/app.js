@@ -101,6 +101,8 @@ export class App {
     this.shownScores = [0, 0];
     this.scoreFrames = [0, 0];
     this.haloScore = null;
+    this.dragEndedAt = 0;
+    this.dropCell = null;
 
     /** 'solo' face à l'IA, 'host' ou 'guest' en partie à deux. */
     this.mode = 'solo';
@@ -189,6 +191,9 @@ export class App {
 
     board.append(fragment);
     board.addEventListener('click', (event) => {
+      // Un glissement qui vient de se terminer produit aussi un clic : il ne
+      // doit pas être pris pour un appui sur la case d'arrivée.
+      if (performance.now() - this.dragEndedAt < 250) return;
       const cell = event.target.closest('.cell');
       if (cell) this.onCellTap(Number(cell.dataset.index));
     });
@@ -266,7 +271,9 @@ export class App {
       cell.textContent = '';
 
       if (pending) {
-        cell.append(this.tileElement(pending.letter, pending.blank, 'tile pending fresh'));
+        const tile = this.tileElement(pending.letter, pending.blank, 'tile pending fresh');
+        this.attachTileDrag(tile, { from: 'board', index: i });
+        cell.append(tile);
       } else if (letter >= 0) {
         const tile = this.tileElement(letter, Boolean(blanks[i]), 'tile');
         const rank = this.revealCells.indexOf(i);
@@ -378,7 +385,7 @@ export class App {
           tile.style.animationDelay = `${entering++ * 45}ms`;
         }
 
-        this.attachDrag(tile, i);
+        this.attachTileDrag(tile, { from: 'rack', rackIndex: i });
         slot.append(tile);
       }
       rack.append(slot);
@@ -650,7 +657,13 @@ export class App {
   }
 
   /** Glisser-déposer au doigt comme à la souris. */
-  attachDrag(tile, rackIndex) {
+  /**
+   * Rend un jeton déplaçable à la souris comme au doigt.
+   *
+   * @param {HTMLElement} element
+   * @param {{from: 'rack', rackIndex: number}|{from: 'board', index: number}} origin
+   */
+  attachTileDrag(element, origin) {
     let ghost = null;
     let startX = 0;
     let startY = 0;
@@ -663,57 +676,186 @@ export class App {
 
       if (!dragging) {
         dragging = true;
-        tile.classList.add('dragging');
-        const box = tile.getBoundingClientRect();
-        ghost = tile.cloneNode(true);
+        element.classList.add('dragging');
+        const box = element.getBoundingClientRect();
+        ghost = element.cloneNode(true);
         ghost.className = 'drag-ghost';
         ghost.style.width = `${box.width}px`;
         ghost.style.height = `${box.height}px`;
-        ghost.style.fontSize = getComputedStyle(tile).fontSize;
+        ghost.style.fontSize = getComputedStyle(element).fontSize;
         document.body.append(ghost);
       }
       ghost.style.left = `${event.clientX}px`;
       ghost.style.top = `${event.clientY}px`;
+      this.highlightDrop(origin, event.clientX, event.clientY);
     };
 
     const onUp = (event) => {
-      tile.removeEventListener('pointermove', onMove);
-      tile.removeEventListener('pointerup', onUp);
-      tile.removeEventListener('pointercancel', onUp);
-      tile.classList.remove('dragging');
+      element.removeEventListener('pointermove', onMove);
+      element.removeEventListener('pointerup', onUp);
+      element.removeEventListener('pointercancel', onUp);
+      element.classList.remove('dragging');
 
       if (!dragging) {
-        this.selectRackTile(rackIndex);
+        // Simple appui. Sur le chevalet il vaut sélection ; sur le plateau
+        // c'est le gestionnaire de clic du plateau qui s'en charge.
+        if (origin.from === 'rack') this.selectRackTile(origin.rackIndex);
         return;
       }
 
       ghost?.remove();
       ghost = null;
-      const target = document.elementFromPoint(event.clientX, event.clientY)?.closest('.cell');
-      if (target && !this.exchangeMode) {
-        const index = Number(target.dataset.index);
-        if (this.game.board.letters[index] < 0 && !this.pending.has(index)) {
-          this.placeTile(index, rackIndex);
-          return;
-        }
-      }
-      this.refresh();
+      this.clearDropHighlight();
+      // Le clic qui suit un glissement ne doit pas être réinterprété.
+      this.dragEndedAt = performance.now();
+      this.dropTile(origin, event.clientX, event.clientY);
     };
 
-    tile.addEventListener('pointerdown', (event) => {
+    element.addEventListener('pointerdown', (event) => {
       if (this.game.finished || this.busy || this.game.current !== HUMAN) return;
       startX = event.clientX;
       startY = event.clientY;
       dragging = false;
       try {
-        tile.setPointerCapture(event.pointerId);
+        element.setPointerCapture(event.pointerId);
       } catch {
         /* pointeur déjà relâché : le suivi reste correct sans capture */
       }
-      tile.addEventListener('pointermove', onMove);
-      tile.addEventListener('pointerup', onUp);
-      tile.addEventListener('pointercancel', onUp);
+      element.addEventListener('pointermove', onMove);
+      element.addEventListener('pointerup', onUp);
+      element.addEventListener('pointercancel', onUp);
     });
+  }
+
+  /**
+   * Signale la destination survolée : case accueillante, case refusée, ou
+   * chevalet lorsqu'on ramène un jeton déjà posé.
+   */
+  highlightDrop(origin, x, y) {
+    const under = document.elementFromPoint(x, y);
+    const cell = under?.closest('.cell') ?? null;
+
+    if (cell !== this.dropCell) {
+      this.dropCell?.classList.remove('drop-target', 'drop-blocked');
+      this.dropCell = cell;
+    }
+
+    if (cell) {
+      const index = Number(cell.dataset.index);
+      // La case de départ d'un jeton déplacé reste une destination valable.
+      const free =
+        index === origin.index ||
+        (this.game.board.letters[index] < 0 && !this.pending.has(index));
+      cell.classList.toggle('drop-target', free);
+      cell.classList.toggle('drop-blocked', !free);
+    }
+
+    const overRack = Boolean(under?.closest('.rack')) && !cell;
+    $('rack').classList.toggle('drop-active', overRack);
+  }
+
+  clearDropHighlight() {
+    this.dropCell?.classList.remove('drop-target', 'drop-blocked');
+    this.dropCell = null;
+    $('rack').classList.remove('drop-active');
+  }
+
+  /** Applique le lâcher d'un jeton à la position du pointeur. */
+  dropTile(origin, x, y) {
+    if (this.exchangeMode) {
+      this.refresh();
+      return;
+    }
+
+    const under = document.elementFromPoint(x, y);
+    const cell = under?.closest('.cell');
+    const rack = under?.closest('.rack');
+
+    if (cell) {
+      const index = Number(cell.dataset.index);
+      const free = this.game.board.letters[index] < 0 && !this.pending.has(index);
+
+      if (origin.from === 'rack') {
+        if (free) {
+          this.placeTile(index, origin.rackIndex);
+          return;
+        }
+      } else if (index === origin.index) {
+        this.refresh(); // reposé sur sa propre case
+        return;
+      } else if (free) {
+        // Déplacement d'un jeton déjà posé, sans repasser par le chevalet.
+        const tile = this.pending.get(origin.index);
+        this.pending.delete(origin.index);
+        this.pending.set(index, tile);
+        this.cursor = { index: this.nextCell(index), direction: this.cursor?.direction ?? 0 };
+        this.refresh();
+        return;
+      }
+    } else if (rack) {
+      if (origin.from === 'board') {
+        this.pending.delete(origin.index); // retour au chevalet
+        this.refresh();
+        return;
+      }
+      this.reorderRack(origin.rackIndex, this.rackDropIndex(x));
+      return;
+    }
+
+    this.refresh();
+  }
+
+  /**
+   * Position d'insertion sur le chevalet, déduite des milieux d'emplacement.
+   * Les emplacements vides comptent : leur index correspond toujours à celui
+   * du chevalet, même quand des jetons sont posés sur le plateau.
+   */
+  rackDropIndex(x) {
+    const slots = [...$('rack').children];
+    for (let i = 0; i < slots.length; i++) {
+      const box = slots[i].getBoundingClientRect();
+      if (x < box.left + box.width / 2) return i;
+    }
+    return slots.length;
+  }
+
+  /**
+   * Déplace un jeton du chevalet à une autre position.
+   *
+   * Les poses en attente référencent leur jeton par son index de chevalet :
+   * ces références sont donc réécrites, faute de quoi valider le coup
+   * consommerait les mauvaises lettres.
+   */
+  reorderRack(from, insertAt) {
+    const rack = this.game.players[HUMAN].rack;
+    if (from < 0 || from >= rack.length) return;
+
+    let to = Math.max(0, Math.min(insertAt, rack.length));
+    // Après extraction, tout ce qui suit recule d'un cran.
+    if (from < to) to -= 1;
+    if (to === from) {
+      this.refresh();
+      return;
+    }
+
+    const order = rack.map((_, i) => i);
+    const [moved] = order.splice(from, 1);
+    order.splice(to, 0, moved);
+
+    const remap = new Map();
+    order.forEach((oldIndex, newIndex) => remap.set(oldIndex, newIndex));
+
+    this.game.players[HUMAN].rack = order.map((i) => rack[i]);
+    for (const tile of this.pending.values()) {
+      tile.rackIndex = remap.get(tile.rackIndex) ?? tile.rackIndex;
+    }
+    if (this.selected !== null) this.selected = remap.get(this.selected) ?? null;
+    if (this.marked.size > 0) {
+      this.marked = new Set([...this.marked].map((i) => remap.get(i) ?? i));
+    }
+
+    this.save();
+    this.refresh();
   }
 
   askBlankLetter() {
