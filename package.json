@@ -1,0 +1,17 @@
+{
+  "name": "centurion-scrabble",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Scrabble français contre une IA à difficulté modulable, 100% local.",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "build:dict": "node tools/build-dict.mjs"
+  },
+  "devDependencies": {
+    "an-array-of-french-words": "^2.0.0",
+    "vite": "^7.3.6"
+  }
+}

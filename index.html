@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no"
+    />
+    <meta name="theme-color" content="#11161d" />
+    <meta name="description" content="Scrabble français contre une intelligence artificielle à cinq niveaux, jouable hors ligne." />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
+    <title>Centurion Scrabble</title>
+  </head>
+  <body>
+    <div class="app">
+      <header class="topbar">
+        <h1 class="brand"><span class="brand-mark">C</span>Centurion</h1>
+        <div class="topbar-actions">
+          <button type="button" class="icon-button" id="btn-rules" aria-label="Règles et réglages">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 17h.01M12 13a2.5 2.5 0 1 0-2.5-2.5" /><circle cx="12" cy="12" r="9" /></svg>
+          </button>
+          <button type="button" class="icon-button" id="btn-new" aria-label="Nouvelle partie">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7" /><path d="M3 4v5h5" /></svg>
+          </button>
+        </div>
+      </header>
+
+      <section class="scoreboard" aria-label="Scores">
+        <div class="score-card" id="score-human">
+          <span class="score-name">Vous</span>
+          <span class="score-value" id="score-human-value">0</span>
+        </div>
+        <div class="bag" id="bag" title="Jetons restants dans le sac">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 8h12l1.5 11a2 2 0 0 1-2 2.3H6.5a2 2 0 0 1-2-2.3Z" /><path d="M9 8V6a3 3 0 0 1 6 0v2" /></svg>
+          <span id="bag-count">86</span>
+        </div>
+        <div class="score-card" id="score-ai">
+          <span class="score-name" id="ai-name">Centurion</span>
+          <span class="score-value" id="score-ai-value">0</span>
+        </div>
+      </section>
+
+      <div class="board-wrap">
+        <div class="board-stack">
+          <div class="board" id="board" role="grid" aria-label="Plateau de jeu"></div>
+          <div class="board-foot">
+            <div class="status" id="status" role="status" aria-live="polite">
+              Posez votre premier mot sur la case centrale.
+            </div>
+            <div class="thinking" id="thinking" hidden>
+              <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+              <span class="thinking-label">Centurion réfléchit</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <section class="tray">
+        <div class="rack" id="rack" aria-label="Votre chevalet"></div>
+
+        <div class="actions" id="actions">
+          <button type="button" class="btn btn-ghost" id="btn-shuffle" aria-label="Mélanger le chevalet">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 3h5v5" /><path d="M4 20 21 3" /><path d="M21 16v5h-5" /><path d="m15 15 6 6" /><path d="M4 4l5 5" /></svg>
+          </button>
+          <button type="button" class="btn btn-ghost" id="btn-recall" aria-label="Reprendre mes jetons">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14 4 9l5-5" /><path d="M4 9h11a5 5 0 0 1 0 10H9" /></svg>
+          </button>
+          <button type="button" class="btn btn-primary" id="btn-play">
+            Jouer <span class="preview" id="preview" hidden>0</span>
+          </button>
+          <button type="button" class="btn btn-ghost" id="btn-hint" aria-label="Indice">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18h6" /><path d="M10 22h4" /><path d="M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2Z" /></svg>
+          </button>
+          <button type="button" class="btn btn-ghost" id="btn-more" aria-label="Autres actions">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="1.6" /><circle cx="12" cy="12" r="1.6" /><circle cx="19" cy="12" r="1.6" /></svg>
+          </button>
+        </div>
+
+        <div class="exchange-bar" id="exchange-bar" hidden>
+          <span id="exchange-hint">Touchez les jetons à échanger.</span>
+          <button type="button" class="btn btn-small" id="btn-exchange-cancel">Annuler</button>
+          <button type="button" class="btn btn-small btn-primary" id="btn-exchange-confirm">Échanger</button>
+        </div>
+      </section>
+
+      <section class="log-panel">
+        <button type="button" class="log-toggle" id="log-toggle" aria-expanded="false">
+          Historique <span class="chevron" aria-hidden="true">▾</span>
+        </button>
+        <ol class="log" id="log" hidden></ol>
+      </section>
+    </div>
+
+    <!-- Choix de la lettre d'un joker -->
+    <dialog class="sheet" id="blank-dialog" aria-label="Choisir une lettre">
+      <h2>Quelle lettre ?</h2>
+      <div class="letter-grid" id="letter-grid"></div>
+      <button type="button" class="btn btn-ghost" id="blank-cancel">Annuler</button>
+    </dialog>
+
+    <!-- Menu secondaire -->
+    <dialog class="sheet" id="more-dialog" aria-label="Autres actions">
+      <h2>Ce tour</h2>
+      <button type="button" class="sheet-item" id="btn-exchange">Échanger des jetons</button>
+      <button type="button" class="sheet-item" id="btn-pass">Passer mon tour</button>
+      <button type="button" class="sheet-item danger" id="btn-resign">Abandonner la partie</button>
+      <button type="button" class="btn btn-ghost" id="more-cancel">Fermer</button>
+    </dialog>
+
+    <!-- Réglages et règles -->
+    <dialog class="sheet" id="rules-dialog" aria-label="Réglages">
+      <h2>Niveau de l’adversaire</h2>
+      <div class="levels" id="levels"></div>
+      <p class="dict-note" id="dict-note"></p>
+      <button type="button" class="btn btn-ghost" id="rules-close">Fermer</button>
+    </dialog>
+
+    <!-- Nouvelle partie -->
+    <dialog class="sheet" id="new-dialog" aria-label="Nouvelle partie">
+      <h2>Nouvelle partie</h2>
+      <p class="sheet-text">La partie en cours sera perdue.</p>
+      <button type="button" class="sheet-item" id="new-confirm">Commencer</button>
+      <button type="button" class="btn btn-ghost" id="new-cancel">Annuler</button>
+    </dialog>
+
+    <!-- Fin de partie -->
+    <dialog class="sheet" id="end-dialog" aria-label="Fin de partie">
+      <h2 id="end-title">Partie terminée</h2>
+      <p class="sheet-text" id="end-detail"></p>
+      <div class="end-scores" id="end-scores"></div>
+      <button type="button" class="sheet-item" id="end-again">Rejouer</button>
+      <button type="button" class="btn btn-ghost" id="end-close">Voir le plateau</button>
+    </dialog>
+
+    <div class="toast" id="toast" role="alert" hidden></div>
+
+    <div class="loader" id="loader">
+      <div class="loader-tile">C</div>
+      <p>Chargement du dictionnaire…</p>
+    </div>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

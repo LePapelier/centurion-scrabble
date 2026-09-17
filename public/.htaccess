@@ -1,0 +1,21 @@
+# Hébergement Apache (paul-laurent.fr/scrabble).
+# Le dictionnaire est un binaire de ~300 Ko qui se comprime à ~180 Ko :
+# la compression de transport est indispensable ici.
+
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/css text/plain application/javascript application/json image/svg+xml application/octet-stream
+</IfModule>
+
+<IfModule mod_mime.c>
+  AddType application/octet-stream .dawg
+</IfModule>
+
+# Les fichiers produits par Vite portent une empreinte dans leur nom : ils
+# peuvent être mis en cache longtemps. Le dictionnaire ne change jamais.
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresByType application/octet-stream "access plus 1 year"
+  ExpiresByType text/css "access plus 1 year"
+  ExpiresByType application/javascript "access plus 1 year"
+  ExpiresByType text/html "access plus 5 minutes"
+</IfModule>
