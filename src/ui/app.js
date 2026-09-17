@@ -1295,6 +1295,9 @@ export class App {
    */
 
   bindNetwork() {
+    // Clin d'œil : la marque se déhanche quand on la touche.
+    document.querySelector('.brand').addEventListener('click', () => this.wiggleBrand());
+
     $('btn-multi').onclick = () => this.openMultiplayer();
     $('mp-close').onclick = () => $('mp-dialog').close();
 
@@ -1348,6 +1351,21 @@ export class App {
       $('mp-dialog').showModal();
       this.startJoining(invited);
     }
+  }
+
+  /** Fait onduler les jetons de la marque, de gauche à droite. */
+  wiggleBrand() {
+    if (reducedMotion.matches) return;
+    const tiles = [...document.querySelectorAll('.brand-tile')];
+
+    tiles.forEach((tile, i) => {
+      tile.classList.remove('wiggle');
+      tile.style.animationDelay = `${i * 32}ms`;
+    });
+    // Recalcul forcé : sans lui, retirer puis remettre la classe dans la même
+    // image ne relance pas l'animation.
+    void tiles[0]?.offsetWidth;
+    for (const tile of tiles) tile.classList.add('wiggle');
   }
 
   openMultiplayer() {

@@ -120,9 +120,28 @@ svg {
   --brand-tile: clamp(13px, 3.3vw, 23px);
 }
 
+.brand {
+  cursor: pointer;
+  user-select: none;
+}
+
 .brand-word {
   display: flex;
   gap: 2px;
+}
+
+/* Petite cascade au clic sur la marque : chaque jeton grossit et oscille,
+   avec un décalage posé en JavaScript qui fait courir la vague. */
+.brand-tile.wiggle {
+  animation: brand-wiggle 0.5s cubic-bezier(0.3, 0.8, 0.4, 1.2) backwards;
+}
+
+@keyframes brand-wiggle {
+  0% { transform: scale(1) rotate(0deg); }
+  25% { transform: scale(1.3) rotate(-14deg); }
+  50% { transform: scale(1.22) rotate(11deg); }
+  72% { transform: scale(1.1) rotate(-6deg); }
+  100% { transform: scale(1) rotate(0deg); }
 }
 
 .brand-tile {
@@ -341,14 +360,18 @@ svg {
   flex: 1 1 auto;
   min-height: 0;
   display: grid;
-  place-items: center;
+  /* Ancré en bas : la place excédentaire se reporte au-dessus du plateau
+     plutôt que de séparer la ligne d'état du chevalet. */
+  place-items: end center;
 }
 
 .board-stack {
   position: relative;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  /* Espacement imposé entre le plateau et la ligne d'état ; le pendant
+     sous celle-ci est donné par la marge de `.board-foot`. */
+  gap: 12px;
   width: 100%;
   align-items: center;
 }
@@ -612,7 +635,10 @@ svg {
   display: grid;
   place-items: center;
   width: 100%;
-  height: 30px;
+  height: 26px;
+  /* Complète la gouttière de 8 px de `.app` pour retrouver les 12 px
+     séparant la ligne d'état du plateau. */
+  margin-bottom: 4px;
 }
 
 .thinking {
@@ -1388,6 +1414,10 @@ svg {
     row-gap: 10px;
     padding: 16px;
   }
+
+  /* La gouttière de `.app` vaut 10 px ici au lieu de 8 : la marge du pied est
+     ajustée pour conserver les 12 px de part et d'autre de la ligne d'état. */
+  .board-foot { margin-bottom: 2px; }
 
   .topbar { grid-area: top; }
   .scoreboard { grid-area: scores; }
