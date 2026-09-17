@@ -143,11 +143,10 @@ svg {
   opacity: 0.7;
 }
 
-/* Quatre teintes du plateau, en rotation. */
-.brand-tile:nth-child(4n + 1) { background: var(--tw); }
-.brand-tile:nth-child(4n + 2) { background: var(--dl); }
-.brand-tile:nth-child(4n + 3) { background: var(--dw); }
-.brand-tile:nth-child(4n + 4) { background: var(--tl); }
+/* Une couleur par mot, prise au plateau : le rouge des mots comptes triple,
+   le bleu des lettres comptes double. */
+.brand-word:first-child .brand-tile { background: var(--tw); }
+.brand-word:last-child .brand-tile { background: var(--dl); }
 
 /* Sous cette largeur, la marque sur une seule ligne obligerait à des jetons
    minuscules : on empile les deux mots, ce qui tient dans la hauteur de
