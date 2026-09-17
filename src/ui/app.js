@@ -820,7 +820,8 @@ export class App {
     $('btn-exchange-cancel').onclick = () => this.cancelExchange();
     $('btn-exchange-confirm').onclick = () => this.confirmExchange();
 
-    $('btn-rules').onclick = () => $('rules-dialog').showModal();
+    // Le sélecteur de niveau s'ouvre depuis la pastille du bandeau de score :
+    // un bouton dédié dans l'en-tête faisait double emploi.
     $('rules-close').onclick = () => $('rules-dialog').close();
 
     $('btn-new').onclick = () => $('new-dialog').showModal();
