@@ -16,7 +16,11 @@
     <div class="app">
       <header class="topbar">
         <h1 class="brand"><span class="brand-mark">C</span>Centurion</h1>
+        <span class="netchip" id="netchip" hidden></span>
         <div class="topbar-actions">
+          <button type="button" class="icon-button" id="btn-multi" aria-label="Jouer à deux">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="3.2" /><path d="M22 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.5a4 4 0 0 1 0 7.5" /></svg>
+          </button>
           <button type="button" class="icon-button" id="btn-rules" aria-label="Règles et réglages">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 17h.01M12 13a2.5 2.5 0 1 0-2.5-2.5" /><circle cx="12" cy="12" r="9" /></svg>
           </button>
@@ -127,6 +131,48 @@
       <p class="sheet-text">La partie en cours sera perdue.</p>
       <button type="button" class="sheet-item" id="new-confirm">Commencer</button>
       <button type="button" class="btn btn-ghost" id="new-cancel">Annuler</button>
+    </dialog>
+
+    <!-- Partie à deux, en liaison directe -->
+    <dialog class="sheet" id="mp-dialog" aria-label="Jouer à deux">
+      <h2>Jouer à deux</h2>
+      <p class="sheet-text">
+        Les deux navigateurs se relient directement, sans serveur de jeu.
+        Gardez cet onglet ouvert pendant toute la partie.
+      </p>
+
+      <label class="field">
+        <span>Votre nom</span>
+        <input type="text" id="mp-name" maxlength="18" autocomplete="nickname" placeholder="Joueur" />
+      </label>
+
+      <div class="mp-block" id="mp-choice">
+        <button type="button" class="sheet-item" id="mp-create">Créer une partie</button>
+        <div class="mp-join">
+          <input
+            type="text"
+            id="mp-code"
+            maxlength="6"
+            placeholder="CODE"
+            autocapitalize="characters"
+            autocomplete="off"
+            spellcheck="false"
+            aria-label="Code de la partie à rejoindre"
+          />
+          <button type="button" class="btn btn-small btn-primary" id="mp-join">Rejoindre</button>
+        </div>
+      </div>
+
+      <div class="mp-block" id="mp-invite" hidden>
+        <p class="mp-label">Transmettez ce code à votre adversaire</p>
+        <p class="mp-code" id="mp-code-value">------</p>
+        <button type="button" class="sheet-item" id="mp-copy">Copier le lien d’invitation</button>
+      </div>
+
+      <p class="mp-status" id="mp-status" role="status" aria-live="polite"></p>
+
+      <button type="button" class="sheet-item danger" id="mp-leave" hidden>Quitter la partie en ligne</button>
+      <button type="button" class="btn btn-ghost" id="mp-close">Fermer</button>
     </dialog>
 
     <!-- Fin de partie -->

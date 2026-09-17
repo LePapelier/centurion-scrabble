@@ -517,6 +517,7 @@ svg {
 
 .status.win { color: var(--accent); }
 .status.warn { color: var(--danger); }
+.status.warn { color: var(--danger); }
 
 /* --- Chevalet ----------------------------------------------------- */
 
@@ -1039,5 +1040,151 @@ svg {
   *::after {
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Partie à deux                                                       */
+/* ------------------------------------------------------------------ */
+
+.netchip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: 10px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--text-dim);
+  white-space: nowrap;
+}
+
+.netchip::before {
+  content: '';
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.netchip.live {
+  color: var(--accent);
+  border-color: color-mix(in srgb, var(--accent) 45%, transparent);
+}
+
+.netchip.live::before {
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.netchip.lost {
+  color: var(--danger);
+  border-color: color-mix(in srgb, var(--danger) 45%, transparent);
+}
+
+@keyframes pulse {
+  50% { opacity: 0.35; }
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 14px;
+  text-align: left;
+}
+
+.field > span {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-dim);
+}
+
+.field input,
+.mp-join input {
+  width: 100%;
+  padding: 11px 13px;
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+  background: var(--surface-2);
+  color: var(--text);
+  font: inherit;
+  font-size: 0.95rem;
+}
+
+.field input:focus-visible,
+.mp-join input:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.mp-block {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.mp-join {
+  display: flex;
+  gap: 8px;
+}
+
+.mp-join input {
+  flex: 1;
+  min-width: 0;
+  text-align: center;
+  font-family: var(--mono, ui-monospace, 'SF Mono', Menlo, monospace);
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+
+.mp-join .btn {
+  flex: 0 0 auto;
+}
+
+.mp-label {
+  margin: 0;
+  font-size: 0.78rem;
+  color: var(--text-dim);
+}
+
+.mp-code {
+  margin: 0;
+  padding: 12px 8px;
+  border-radius: var(--radius);
+  background: var(--surface-2);
+  border: 1px dashed color-mix(in srgb, var(--accent) 55%, var(--line));
+  font-family: var(--mono, ui-monospace, 'SF Mono', Menlo, monospace);
+  font-size: 1.6rem;
+  font-weight: 800;
+  letter-spacing: 0.3em;
+  text-indent: 0.3em;
+  color: var(--accent);
+  user-select: all;
+}
+
+.mp-status {
+  min-height: 1.2em;
+  margin: 0 0 12px;
+  font-size: 0.84rem;
+  color: var(--text-dim);
+}
+
+.mp-status.error {
+  color: var(--danger);
+}
+
+.mp-status.live {
+  color: var(--accent);
+}
+
+@media (max-width: 380px) {
+  .netchip {
+    display: none;
   }
 }

@@ -1,7 +1,8 @@
 # Centurion Scrabble
 
-Scrabble français jouable dans le navigateur contre une IA à cinq niveaux.
-Tout tourne en local : aucun appel réseau une fois la page chargée.
+Scrabble français jouable dans le navigateur contre une IA à cinq niveaux,
+ou à deux en liaison directe. La partie solo ne fait aucun appel réseau une
+fois la page chargée.
 
 ## Commandes
 
@@ -26,9 +27,25 @@ sous-répertoire voulu, par exemple `paul-laurent.fr/scrabble/`. Un
 `.htaccess` active la compression (le dictionnaire passe de 304 à ~180 Ko)
 et le cache long sur les fichiers empreintés.
 
+## Partie à deux
+
+Aucun serveur de jeu : les deux navigateurs se relient en WebRTC. L'hôte crée
+une partie, obtient un code à six caractères et transmet le lien
+`…/#partie=CODE` ; l'invité l'ouvre, ou saisit le code.
+
+L'hôte fait autorité — il détient le sac et les deux chevalets, valide les
+coups et diffuse l'état après chaque tour. L'invité n'envoie que des
+intentions, et ne reçoit jamais le chevalet adverse. Les instantanés sont
+exprimés du point de vue du destinataire, qui s'y voit toujours en position 0.
+
+La mise en relation initiale passe par le courtier public de PeerJS, qui ne
+voit transiter que l'identifiant de la partie : l'hébergement peut donc rester
+entièrement statique. Revers de la médaille, ce courtier est un tiers, et
+certains réseaux d'entreprise bloquent WebRTC.
+
 ## Dictionnaire
 
-Le lexique par défaut compte 311 509 formes, dérivé de Dicollecte via
+Le lexique par défaut compte 311 495 formes, dérivé de Dicollecte via
 `an-array-of-french-words` (MIT), filtré aux mots jouables : 2 à 15 lettres,
 accents retirés, noms propres exclus. Ce n'est pas l'ODS, qui est une base
 protégée et non redistribuable.
@@ -49,6 +66,7 @@ appliqués en plus, s'ils existent.
 | `src/core/dawg.js` | lecture de l'automate binaire |
 | `src/core/generator.js` | énumération des coups légaux (Appel & Jacobson) |
 | `src/core/ai.js` | valeur du reliquat et choix du coup selon le niveau |
-| `src/core/game.js` | sac, chevalets, tours, fin de partie |
+| `src/core/game.js` | sac, chevalets, tours, fin de partie, instantanés |
+| `src/net/session.js` | liaison directe entre deux navigateurs |
 | `src/ui/app.js` | rendu et saisie |
 | `tools/build-dict.mjs` | construction du DAWG minimal |

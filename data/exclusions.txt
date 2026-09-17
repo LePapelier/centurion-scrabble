@@ -1,0 +1,23 @@
+# Entrées retirées du lexique source : ce sont des symboles ou des
+# abréviations, pas des mots. Elles polluaient surtout la liste des mots de
+# deux lettres, la plus sollicitée en jeu.
+#
+# Une ligne par entrée ; « # » commence un commentaire.
+
+# Symboles d'unités
+cc
+cf
+cg
+ch
+cl
+cm
+dg
+dl
+dm
+kg
+km
+mg
+ms
+
+# Abréviation
+etc

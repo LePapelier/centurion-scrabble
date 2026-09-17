@@ -42,7 +42,7 @@ export class Game {
       { name: options.humanName ?? 'Vous', rack: [], score: 0, isAI: false },
       { name: options.computerName ?? 'Centurion', rack: [], score: 0, isAI: true },
     ];
-    this.current = HUMAN;
+    this.current = options.firstPlayer ?? HUMAN;
     this.history = [];
     this.scorelessTurns = 0;
     this.finished = false;
@@ -187,6 +187,67 @@ export class Game {
 
     const [a, b] = this.players;
     this.winner = a.score === b.score ? null : a.score > b.score ? HUMAN : COMPUTER;
+  }
+
+  /* ---------------------------------------------------------------- */
+  /* Vues distantes                                                    */
+  /* ---------------------------------------------------------------- */
+
+  /**
+   * État transmis à un joueur distant, exprimé de SON point de vue : il s'y
+   * voit toujours en position 0. L'interface n'a donc jamais à savoir quel
+   * siège elle occupe, et le chevalet de l'adversaire n'est jamais transmis.
+   *
+   * @param {number} viewer siège du destinataire dans cette partie
+   */
+  snapshot(viewer) {
+    const other = viewer === HUMAN ? COMPUTER : HUMAN;
+    return {
+      letters: [...this.board.letters],
+      blanks: [...this.board.blanks],
+      rack: [...this.players[viewer].rack],
+      opponentTiles: this.players[other].rack.length,
+      names: [this.players[viewer].name, this.players[other].name],
+      scores: [this.players[viewer].score, this.players[other].score],
+      current: this.current === viewer ? HUMAN : COMPUTER,
+      bagCount: this.bag.length,
+      history: this.history.map((entry) => ({
+        ...entry,
+        player: entry.player === viewer ? HUMAN : COMPUTER,
+      })),
+      scorelessTurns: this.scorelessTurns,
+      finished: this.finished,
+      winner: this.winner === null ? null : this.winner === viewer ? HUMAN : COMPUTER,
+      endReason: this.endReason,
+      lastMoveCells: this.lastMoveCells,
+    };
+  }
+
+  /**
+   * Reconstitue une partie jouable côté invité à partir d'un instantané.
+   * Le sac et le chevalet adverse ne sont représentés que par leur taille :
+   * l'invité n'a aucune information cachée, et seul l'hôte arbitre.
+   */
+  static fromSnapshot(snap) {
+    const game = Object.create(Game.prototype);
+    game.board = {
+      letters: Int8Array.from(snap.letters),
+      blanks: Uint8Array.from(snap.blanks),
+    };
+    game.bag = new Array(snap.bagCount).fill(0);
+    game.players = [
+      { name: snap.names[0], rack: [...snap.rack], score: snap.scores[0], isAI: false },
+      { name: snap.names[1], rack: new Array(snap.opponentTiles).fill(0), score: snap.scores[1], isAI: false },
+    ];
+    game.current = snap.current;
+    game.history = snap.history;
+    game.scorelessTurns = snap.scorelessTurns;
+    game.finished = snap.finished;
+    game.winner = snap.winner;
+    game.endReason = snap.endReason;
+    game.lastMoveCells = snap.lastMoveCells ?? [];
+    game.level = 0;
+    return game;
   }
 
   /* ---------------------------------------------------------------- */

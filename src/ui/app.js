@@ -20,6 +20,13 @@ import {
 } from '../core/constants.js';
 import { Game, HUMAN, COMPUTER } from '../core/game.js';
 import { validateMove } from '../core/board.js';
+import {
+  PeerSession,
+  inviteLink,
+  codeFromLocation,
+  clearLocationCode,
+  normalizeCode,
+} from '../net/session.js';
 
 const PREMIUM_CLASS = {
   [DOUBLE_LETTER]: 'dl',
@@ -37,6 +44,7 @@ const PREMIUM_LABEL = {
 
 const STORAGE_KEY = 'centurion-scrabble/partie';
 const LEVEL_KEY = 'centurion-scrabble/niveau';
+const NAME_KEY = 'centurion-scrabble/nom';
 const MIN_THINKING_MS = 450;
 
 /** Décalage entre deux jetons lors de la révélation d'un coup. */
@@ -77,6 +85,12 @@ export class App {
     this.scoreFrames = [0, 0];
     this.haloScore = null;
 
+    /** 'solo' face à l'IA, 'host' ou 'guest' en partie à deux. */
+    this.mode = 'solo';
+    this.session = null;
+    this.myName = localStorage.getItem(NAME_KEY) || 'Joueur';
+    this.opponentName = 'Adversaire';
+
     this.level = Number(localStorage.getItem(LEVEL_KEY)) || 3;
     this.game = this.restore() ?? new Game({ level: this.level });
     this.level = this.game.level;
@@ -100,6 +114,9 @@ export class App {
   }
 
   save() {
+    // Une partie en ligne appartient à l'hôte : on ne l'écrase pas sur la
+    // sauvegarde solo, qui doit rester reprenable.
+    if (this.mode !== 'solo') return;
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(this.game.toJSON()));
       localStorage.setItem(LEVEL_KEY, String(this.level));
@@ -122,6 +139,8 @@ export class App {
     // Une partie reprise affiche ses scores tels quels, sans les recompter.
     this.shownScores = this.game.players.map((p) => p.score);
     window.addEventListener('resize', () => this.updateHalo());
+
+    this.bindNetwork();
 
     $('dict-note').textContent =
       `Dictionnaire : ${this.meta.words.toLocaleString('fr-FR')} mots, conforme à l’orthographe du Scrabble ` +
@@ -354,7 +373,8 @@ export class App {
     const [human, ai] = this.game.players;
     this.updateScore($('score-human-value'), $('score-human'), 0, human.score);
     this.updateScore($('score-ai-value'), $('score-ai'), 1, ai.score);
-    $('ai-name').textContent = `${difficultyByLevel(this.level).name} · niv. ${this.level}`;
+    $('ai-name').textContent =
+      this.mode === 'solo' ? `${difficultyByLevel(this.level).name} · niv. ${this.level}` : this.opponentName;
     $('bag-count').textContent = String(this.game.bagCount);
 
     const active = this.game.finished ? -1 : this.game.current;
@@ -445,7 +465,8 @@ export class App {
   }
 
   renderControls() {
-    const myTurn = this.game.current === HUMAN && !this.game.finished && !this.busy;
+    const linked = this.mode === 'solo' || Boolean(this.session?.connected);
+    const myTurn = this.game.current === HUMAN && !this.game.finished && !this.busy && linked;
     const hasPending = this.pending.size > 0;
 
     $('btn-play').disabled = !myTurn || !hasPending;
@@ -466,6 +487,7 @@ export class App {
     }
 
     this.renderStatus();
+    this.renderNetChip();
   }
 
   renderStatus() {
@@ -485,8 +507,14 @@ export class App {
       status.textContent = `${this.marked.size} jeton${this.marked.size > 1 ? 's' : ''} sélectionné${this.marked.size > 1 ? 's' : ''}.`;
       return;
     }
+    if (this.mode !== 'solo' && !this.session?.connected) {
+      status.classList.add('warn');
+      status.textContent = 'Liaison interrompue avec votre adversaire.';
+      return;
+    }
     if (this.game.current !== HUMAN) {
-      status.textContent = 'Au tour de votre adversaire.';
+      status.textContent =
+        this.mode === 'solo' ? 'Au tour de votre adversaire.' : `Au tour de ${this.opponentName}.`;
       return;
     }
     if (this.pending.size > 0) {
@@ -501,7 +529,8 @@ export class App {
 
   endSentence() {
     if (this.game.winner === null) return 'Égalité parfaite.';
-    return this.game.winner === HUMAN ? 'Vous gagnez !' : 'Centurion l’emporte.';
+    if (this.game.winner === HUMAN) return 'Vous gagnez !';
+    return this.mode === 'solo' ? 'Centurion l’emporte.' : `${this.opponentName} l’emporte.`;
   }
 
   /* ---------------------------------------------------------------- */
@@ -799,6 +828,18 @@ export class App {
   commitPlay() {
     if (this.pending.size === 0 || this.busy || this.game.current !== HUMAN) return;
 
+    if (this.mode === 'guest') {
+      // L'invité ne fait pas autorité : il vérifie pour lui-même, puis laisse
+      // l'hôte arbitrer et lui renvoyer l'état.
+      const verdict = validateMove(this.game.board, this.placements(), this.dawg);
+      if (!verdict.ok) {
+        this.toast(verdict.reason, 'error');
+        return;
+      }
+      this.sendIntent({ t: 'play', placements: this.placements() });
+      return;
+    }
+
     const result = this.game.play(this.placements(), this.dawg);
     if (!result.ok) {
       this.toast(result.reason, 'error');
@@ -820,14 +861,20 @@ export class App {
 
     this.save();
     this.render();
+    this.broadcast();
     this.afterTurn();
   }
 
   passTurn() {
     this.recall();
+    if (this.mode === 'guest') {
+      this.sendIntent({ t: 'pass' });
+      return;
+    }
     this.game.pass();
     this.save();
     this.render();
+    this.broadcast();
     this.afterTurn();
   }
 
@@ -860,6 +907,13 @@ export class App {
     }
     const rack = this.game.players[HUMAN].rack;
     const tiles = [...this.marked].map((i) => rack[i]);
+
+    if (this.mode === 'guest') {
+      this.cancelExchange();
+      this.sendIntent({ t: 'exchange', tiles });
+      return;
+    }
+
     const result = this.game.exchange(tiles);
     this.cancelExchange();
 
@@ -870,19 +924,37 @@ export class App {
     this.toast(`${tiles.length} jeton${tiles.length > 1 ? 's' : ''} échangé${tiles.length > 1 ? 's' : ''}.`);
     this.save();
     this.render();
+    this.broadcast();
     this.afterTurn();
   }
 
   resign() {
+    if (this.mode === 'guest') {
+      this.session?.send({ t: 'resign' });
+      return;
+    }
     this.game.finished = true;
     this.game.winner = COMPUTER;
-    this.game.endReason = 'Vous avez abandonné la partie.';
+    this.game.endReason =
+      this.mode === 'solo'
+        ? 'Vous avez abandonné la partie.'
+        : `${this.myName} a abandonné la partie.`;
     this.save();
     this.render();
+    this.broadcast();
     this.showEnd();
   }
 
   newGame() {
+    if (this.mode === 'host') {
+      this.startNetworkGame();
+      return;
+    }
+    if (this.mode === 'guest') {
+      this.session?.send({ t: 'rematch' });
+      this.toast('Revanche proposée à votre adversaire.');
+      return;
+    }
     this.game = new Game({ level: this.level });
     this.pending.clear();
     this.selected = null;
@@ -915,7 +987,7 @@ export class App {
       this.showEnd();
       return;
     }
-    if (this.game.current === COMPUTER) this.runComputerTurn();
+    if (this.mode === 'solo' && this.game.current === COMPUTER) this.runComputerTurn();
   }
 
   runComputerTurn() {
@@ -1015,11 +1087,428 @@ export class App {
       `<div class="${this.game.winner === HUMAN ? 'won' : ''}"><div class="n">Vous</div><div class="v">${human.score}</div></div>` +
       `<div class="${this.game.winner === COMPUTER ? 'won' : ''}"><div class="n">${ai.name}</div><div class="v">${ai.score}</div></div>`;
     $('end-dialog').showModal();
+    if (this.mode !== 'solo') return;
     try {
       localStorage.removeItem(STORAGE_KEY);
     } catch {
       /* rien à nettoyer */
     }
+  }
+
+  /* ---------------------------------------------------------------- */
+  /* Partie à deux                                                     */
+  /* ---------------------------------------------------------------- */
+  /*
+   * L'hôte fait autorité : il détient le sac et les deux chevalets, valide
+   * les coups et diffuse l'état après chaque tour. L'invité n'envoie que des
+   * intentions et affiche ce qu'on lui transmet.
+   *
+   * Les instantanés sont exprimés du point de vue du destinataire, qui s'y
+   * voit toujours en position 0 : tout le rendu reste identique au solo.
+   */
+
+  bindNetwork() {
+    $('btn-multi').onclick = () => this.openMultiplayer();
+    $('mp-close').onclick = () => $('mp-dialog').close();
+
+    const nameField = $('mp-name');
+    nameField.value = this.myName;
+    nameField.onchange = () => {
+      this.myName = nameField.value.trim().slice(0, 18) || 'Joueur';
+      nameField.value = this.myName;
+      try {
+        localStorage.setItem(NAME_KEY, this.myName);
+      } catch {
+        /* stockage indisponible : le nom vaudra pour cette session */
+      }
+    };
+
+    $('mp-create').onclick = () => {
+      nameField.onchange();
+      this.startHosting();
+    };
+
+    const codeField = $('mp-code');
+    codeField.oninput = () => {
+      codeField.value = normalizeCode(codeField.value);
+    };
+    $('mp-join').onclick = () => {
+      nameField.onchange();
+      this.startJoining(codeField.value);
+    };
+
+    $('mp-copy').onclick = async () => {
+      const link = inviteLink(this.session?.code ?? '');
+      try {
+        await navigator.clipboard.writeText(link);
+        this.toast('Lien d’invitation copié.');
+      } catch {
+        // Le presse-papiers peut être refusé hors contexte sécurisé : on
+        // affiche alors le lien pour une copie manuelle.
+        this.setNetStatus(link);
+      }
+    };
+
+    $('mp-leave').onclick = () => {
+      $('mp-dialog').close();
+      this.leaveMultiplayer();
+    };
+
+    // Un lien d'invitation ouvre directement la fenêtre de connexion.
+    const invited = codeFromLocation();
+    if (invited) {
+      codeField.value = invited;
+      $('mp-dialog').showModal();
+      this.startJoining(invited);
+    }
+  }
+
+  openMultiplayer() {
+    $('mp-choice').hidden = this.mode !== 'solo';
+    $('mp-invite').hidden = this.mode !== 'host' || !this.session?.code;
+    $('mp-leave').hidden = this.mode === 'solo';
+    if (this.mode === 'solo') this.setNetStatus('');
+    $('mp-dialog').showModal();
+  }
+
+  /* --- Établissement de la liaison --------------------------------- */
+
+  startHosting() {
+    this.teardownSession();
+    this.mode = 'host';
+    this.opponentName = 'Adversaire';
+
+    this.session = new PeerSession({
+      onStatus: (text) => this.setNetStatus(text),
+      onReady: (code) => {
+        $('mp-choice').hidden = true;
+        $('mp-invite').hidden = false;
+        $('mp-leave').hidden = false;
+        $('mp-code-value').textContent = code;
+      },
+      onConnected: () => this.setNetStatus('Adversaire connecté, préparation…', 'live'),
+      onData: (message) => this.onPeerData(message),
+      onClosed: (reason) => this.onPeerLost(reason),
+      onError: (message) => this.onPeerError(message),
+    });
+
+    this.session.host();
+    this.renderNetChip();
+  }
+
+  startJoining(code) {
+    this.teardownSession();
+    this.mode = 'guest';
+    this.opponentName = 'Adversaire';
+
+    this.session = new PeerSession({
+      onStatus: (text) => this.setNetStatus(text),
+      onConnected: () => {
+        this.setNetStatus('Connecté. En attente de la partie…', 'live');
+        $('mp-choice').hidden = true;
+        $('mp-leave').hidden = false;
+        // Le code a rempli son office : on le retire de l'adresse pour qu'un
+        // rechargement ne relance pas une connexion vers une partie close.
+        clearLocationCode();
+        this.session.send({ t: 'hello', name: this.myName });
+      },
+      onData: (message) => this.onPeerData(message),
+      onClosed: (reason) => this.onPeerLost(reason),
+      onError: (message) => this.onPeerError(message),
+    });
+
+    this.session.join(code);
+    this.renderNetChip();
+  }
+
+  /** Nouvelle partie en ligne : seul l'hôte la crée, puis la diffuse. */
+  startNetworkGame() {
+    const first = Math.random() < 0.5 ? HUMAN : COMPUTER;
+    this.game = new Game({
+      firstPlayer: first,
+      humanName: this.myName,
+      computerName: this.opponentName,
+    });
+
+    this.pending.clear();
+    this.selected = null;
+    this.cursor = null;
+    this.cancelExchange();
+    this.shownScores = [0, 0];
+
+    this.session.send({ t: 'welcome', name: this.myName });
+    this.render();
+    this.broadcast();
+    $('mp-dialog').close();
+    this.toast(
+      first === HUMAN ? 'Partie lancée : à vous l’honneur.' : `Partie lancée : ${this.opponentName} commence.`,
+    );
+  }
+
+  /* --- Échange de messages ----------------------------------------- */
+
+  /** Diffuse l'état courant à l'invité. */
+  broadcast() {
+    if (this.mode !== 'host' || !this.session?.connected) return;
+    this.session.send({ t: 'state', snap: this.game.snapshot(COMPUTER) });
+  }
+
+  sendIntent(intent) {
+    if (!this.session?.connected) {
+      this.toast('Liaison perdue : votre coup n’a pas pu être envoyé.', 'error');
+      return;
+    }
+    this.session.send(intent);
+    this.busy = true;
+    this.renderControls();
+  }
+
+  onPeerData(message) {
+    switch (message.t) {
+      case 'hello':
+        if (this.mode !== 'host') return;
+        this.opponentName = this.cleanName(message.name);
+        this.startNetworkGame();
+        return;
+
+      case 'welcome':
+        if (this.mode !== 'guest') return;
+        this.opponentName = this.cleanName(message.name);
+        this.renderScores();
+        return;
+
+      case 'state':
+        if (this.mode !== 'guest') return;
+        this.applySnapshot(message.snap);
+        return;
+
+      case 'reject':
+        if (this.mode !== 'guest') return;
+        this.busy = false;
+        this.toast(String(message.reason ?? 'Coup refusé.'), 'error');
+        this.refresh();
+        return;
+
+      case 'busy':
+        this.toast('Cette partie a déjà deux joueurs.', 'error');
+        this.leaveMultiplayer();
+        return;
+
+      case 'play':
+      case 'pass':
+      case 'exchange':
+      case 'resign':
+      case 'rematch':
+        if (this.mode === 'host') this.handleGuestIntent(message);
+        return;
+
+      default:
+        return;
+    }
+  }
+
+  /**
+   * Arbitrage d'une intention reçue de l'invité. Le contenu vient du réseau :
+   * il est ramené à des valeurs sûres avant d'atteindre le moteur, qui
+   * revérifie de toute façon chevalet, géométrie et dictionnaire.
+   */
+  handleGuestIntent(message) {
+    if (message.t === 'rematch') {
+      this.startNetworkGame();
+      return;
+    }
+
+    if (message.t === 'resign') {
+      this.game.finished = true;
+      this.game.winner = HUMAN;
+      this.game.endReason = `${this.opponentName} a abandonné la partie.`;
+      this.render();
+      this.broadcast();
+      this.showEnd();
+      return;
+    }
+
+    if (this.game.finished || this.game.current !== COMPUTER) {
+      this.session.send({ t: 'reject', reason: 'Ce n’est pas votre tour.' });
+      return;
+    }
+
+    let result;
+    if (message.t === 'play') {
+      result = this.game.play(this.safePlacements(message.placements), this.dawg);
+    } else if (message.t === 'exchange') {
+      result = this.game.exchange(this.safeTiles(message.tiles));
+    } else {
+      result = this.game.pass();
+    }
+
+    if (!result.ok) {
+      this.session.send({ t: 'reject', reason: result.reason });
+      return;
+    }
+
+    if (message.t === 'play') {
+      this.revealCells = [...this.game.lastMoveCells];
+      this.revealKind = 'land';
+      const words = result.words.map((w) => w.word).join(', ');
+      this.toast(
+        result.bingo
+          ? `Scrabble de ${this.opponentName} ! ${words} — ${result.score} points`
+          : `${this.opponentName} : ${words} — ${result.score} points`,
+      );
+      if (result.bingo) this.replay(this.boardEl, 'bingo');
+    } else if (message.t === 'exchange') {
+      this.toast(`${this.opponentName} a échangé des jetons.`);
+    } else {
+      this.toast(`${this.opponentName} passe son tour.`);
+    }
+
+    this.render();
+    this.broadcast();
+    this.afterTurn();
+  }
+
+  /** Applique un instantané reçu de l'hôte. */
+  applySnapshot(snap) {
+    const before = this.game?.history?.length ?? 0;
+    this.game = Game.fromSnapshot(snap);
+    this.opponentName = snap.names[1];
+
+    this.pending.clear();
+    this.selected = null;
+    this.cursor = null;
+    this.busy = false;
+    this.cancelExchange();
+
+    const entry = snap.history.length > before ? snap.history.at(-1) : null;
+    if (entry && entry.player === COMPUTER) {
+      this.revealCells = [...(snap.lastMoveCells ?? [])];
+      this.revealKind = 'land';
+      if (entry.type === 'play') {
+        const words = entry.words.join(', ');
+        this.toast(
+          entry.bingo
+            ? `Scrabble de ${this.opponentName} ! ${words} — ${entry.score} points`
+            : `${this.opponentName} : ${words} — ${entry.score} points`,
+        );
+        if (entry.bingo) this.replay(this.boardEl, 'bingo');
+      } else if (entry.type === 'exchange') {
+        this.toast(`${this.opponentName} a échangé des jetons.`);
+      } else {
+        this.toast(`${this.opponentName} passe son tour.`);
+      }
+    }
+
+    $('mp-dialog').close();
+    this.render();
+    if (this.game.finished) this.showEnd();
+  }
+
+  /* --- Assainissement des messages reçus ---------------------------- */
+
+  cleanName(raw) {
+    const name = String(raw ?? '').trim().slice(0, 18);
+    return name || 'Adversaire';
+  }
+
+  safePlacements(raw) {
+    if (!Array.isArray(raw)) return [];
+    return raw
+      .slice(0, 7)
+      .map((p) => ({
+        row: Math.trunc(Number(p?.row)),
+        col: Math.trunc(Number(p?.col)),
+        letter: Math.trunc(Number(p?.letter)),
+        blank: Boolean(p?.blank),
+      }))
+      .filter(
+        (p) =>
+          Number.isInteger(p.row) &&
+          Number.isInteger(p.col) &&
+          Number.isInteger(p.letter) &&
+          p.row >= 0 &&
+          p.row < SIZE &&
+          p.col >= 0 &&
+          p.col < SIZE &&
+          p.letter >= 0 &&
+          p.letter <= 25,
+      );
+  }
+
+  safeTiles(raw) {
+    if (!Array.isArray(raw)) return [];
+    return raw
+      .slice(0, 7)
+      .map((t) => Math.trunc(Number(t)))
+      .filter((t) => Number.isInteger(t) && t >= 0 && t <= BLANK);
+  }
+
+  /* --- Rupture et sortie -------------------------------------------- */
+
+  onPeerLost(reason) {
+    this.busy = false;
+    this.toast(reason, 'error');
+    this.setNetStatus(reason, 'error');
+    $('mp-choice').hidden = true;
+    $('mp-leave').hidden = false;
+    this.render();
+  }
+
+  onPeerError(message) {
+    this.busy = false;
+    this.setNetStatus(message, 'error');
+    $('mp-choice').hidden = false;
+    $('mp-invite').hidden = true;
+    this.mode = 'solo';
+    this.renderNetChip();
+  }
+
+  leaveMultiplayer() {
+    this.teardownSession();
+    this.mode = 'solo';
+    this.opponentName = 'Adversaire';
+    clearLocationCode();
+    this.setNetStatus('');
+    $('mp-choice').hidden = false;
+    $('mp-invite').hidden = true;
+    $('mp-leave').hidden = true;
+
+    // La partie solo laissée en plan a été préservée pendant la partie en
+    // ligne : on la reprend plutôt que d'en démarrer une autre.
+    this.game = this.restore() ?? new Game({ level: this.level });
+    this.level = this.game.level;
+    this.pending.clear();
+    this.selected = null;
+    this.cursor = null;
+    this.cancelExchange();
+    this.shownScores = this.game.players.map((p) => p.score);
+
+    this.render();
+    this.toast('Retour à la partie solo.');
+    if (this.game.current === COMPUTER && !this.game.finished) this.runComputerTurn();
+  }
+
+  teardownSession() {
+    this.session?.destroy();
+    this.session = null;
+  }
+
+  setNetStatus(text, kind = '') {
+    const status = $('mp-status');
+    status.textContent = text;
+    status.className = `mp-status ${kind}`.trim();
+  }
+
+  renderNetChip() {
+    const chip = $('netchip');
+    if (this.mode === 'solo') {
+      chip.hidden = true;
+      return;
+    }
+    chip.hidden = false;
+    const live = Boolean(this.session?.connected);
+    chip.className = `netchip ${live ? 'live' : 'lost'}`;
+    chip.textContent = live ? this.opponentName : 'Hors ligne';
   }
 
   /* ---------------------------------------------------------------- */

@@ -5,7 +5,7 @@
  *
  *   node tools/check-dict.mjs
  */
-import { readFileSync } from 'node:fs';
+import { readFileSync, existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import { Dawg } from '../src/core/dawg.js';
@@ -41,10 +41,10 @@ console.log(`Énumérés  : ${enumerated.size} mots`);
 const source = JSON.parse(
   readFileSync(join(ROOT, 'node_modules', 'an-array-of-french-words', 'index.json'), 'utf8'),
 );
-const expected = new Set();
-for (const entry of source) {
-  const word = entry.trim();
-  if (!word || word[0] !== word[0].toLocaleLowerCase('fr')) continue;
+/** Même normalisation que `tools/build-dict.mjs`. */
+function fold(raw) {
+  const word = String(raw).trim();
+  if (!word || word[0] !== word[0].toLocaleLowerCase('fr')) return null;
   const folded = word
     .toLocaleLowerCase('fr')
     .replace(/œ/g, 'oe')
@@ -52,7 +52,32 @@ for (const entry of source) {
     .normalize('NFD')
     .replace(/[̀-ͯ]/g, '')
     .toUpperCase();
-  if (/^[A-Z]{2,15}$/.test(folded)) expected.add(folded);
+  return /^[A-Z]{2,15}$/.test(folded) ? folded : null;
+}
+
+const expected = new Set();
+for (const entry of source) {
+  const word = fold(entry);
+  if (word) expected.add(word);
+}
+
+// Le générateur applique supplément et exclusions : le jeu de référence doit
+// subir exactement le même traitement, sinon la comparaison est faussée.
+const supplement = join(ROOT, 'data', 'supplement.txt');
+if (existsSync(supplement)) {
+  for (const line of readFileSync(supplement, 'utf8').split(/\r?\n/)) {
+    if (line.startsWith('#')) continue;
+    const word = fold(line);
+    if (word) expected.add(word);
+  }
+}
+const exclusions = join(ROOT, 'data', 'exclusions.txt');
+if (existsSync(exclusions)) {
+  for (const line of readFileSync(exclusions, 'utf8').split(/\r?\n/)) {
+    if (line.startsWith('#')) continue;
+    const word = fold(line);
+    if (word) expected.delete(word);
+  }
 }
 
 let missing = 0;
