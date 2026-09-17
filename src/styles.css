@@ -711,8 +711,19 @@ svg {
 }
 
 .level-text { min-width: 0; }
-.level-name { font-weight: 600; font-size: 0.92rem; }
-.level-blurb { font-size: 0.76rem; color: var(--text-dim); }
+
+.level-name {
+  display: block;
+  font-weight: 600;
+  font-size: 0.92rem;
+}
+
+.level-blurb {
+  display: block;
+  font-size: 0.76rem;
+  line-height: 1.35;
+  color: var(--text-dim);
+}
 
 .dict-note {
   margin: 0 0 14px;
@@ -744,9 +755,11 @@ svg {
 /* ------------------------------------------------------------------ */
 
 .toast {
+  /* Au-dessus du chevalet : une notification ne doit jamais masquer le
+     bouton « Jouer » ni les jetons. */
   position: fixed;
   left: 50%;
-  bottom: calc(18px + var(--safe-bottom));
+  bottom: calc(172px + var(--safe-bottom));
   transform: translateX(-50%);
   z-index: 70;
   max-width: calc(100vw - 32px);
