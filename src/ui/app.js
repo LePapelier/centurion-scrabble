@@ -7,6 +7,7 @@ import {
   CELLS,
   CENTER,
   BLANK,
+  RACK_SIZE,
   PREMIUMS,
   VALUES,
   DIFFICULTIES,
@@ -50,6 +51,22 @@ const MIN_THINKING_MS = 450;
 /** Décalage entre deux jetons lors de la révélation d'un coup. */
 const REVEAL_STEP_MS = 60;
 const SCORE_COUNT_MS = 520;
+
+/**
+ * Insigne de chaque niveau : un à trois galons, l'étoile de l'expert, puis la
+ * couronne du Centurion. L'échelle se lit d'un coup d'œil, et chaque forme
+ * reste distincte à la taille d'une pastille.
+ */
+const LEVEL_ICONS = {
+  1: '<path d="M5 16l7-6 7 6"/>',
+  2: '<path d="M5 13l7-6 7 6"/><path d="M5 19l7-6 7 6"/>',
+  3: '<path d="M5 10l7-6 7 6"/><path d="M5 15l7-6 7 6"/><path d="M5 20l7-6 7 6"/>',
+  4: '<path d="m12 3 2.5 5.4 5.9.8-4.3 4.1 1.1 5.9L12 16.3 6.8 19.2l1.1-5.9L3.6 9.2l5.9-.8z"/>',
+  5: '<path d="M4 19h16"/><path d="m4 19-1.2-11L8 12l4-7.5 4 7.5 5.2-4L20 19z"/>',
+};
+
+const levelIcon = (level) =>
+  `<svg viewBox="0 0 24 24" aria-hidden="true">${LEVEL_ICONS[level] ?? LEVEL_ICONS[3]}</svg>`;
 
 const $ = (id) => document.getElementById(id);
 
@@ -196,8 +213,9 @@ export class App {
       option.className = 'level-option';
       option.dataset.level = String(difficulty.level);
       option.innerHTML =
-        `<span class="level-badge">${difficulty.level}</span>` +
-        `<span class="level-text"><span class="level-name">${difficulty.name}</span>` +
+        `<span class="level-badge">${levelIcon(difficulty.level)}</span>` +
+        `<span class="level-text"><span class="level-name">${difficulty.name}` +
+        `<span class="level-rank">niveau ${difficulty.level}</span></span>` +
         `<span class="level-blurb">${difficulty.blurb}</span></span>`;
       option.addEventListener('click', () => {
         this.level = difficulty.level;
@@ -205,6 +223,7 @@ export class App {
         this.save();
         this.renderLevels();
         this.renderScores();
+        $('rules-dialog').close();
         this.toast(`Niveau ${difficulty.level} — ${difficulty.name}`);
       });
       container.append(option);
@@ -373,8 +392,21 @@ export class App {
     const [human, ai] = this.game.players;
     this.updateScore($('score-human-value'), $('score-human'), 0, human.score);
     this.updateScore($('score-ai-value'), $('score-ai'), 1, ai.score);
-    $('ai-name').textContent =
-      this.mode === 'solo' ? `${difficultyByLevel(this.level).name} · niv. ${this.level}` : this.opponentName;
+    const label = $('ai-name');
+    if (this.mode === 'solo') {
+      const difficulty = difficultyByLevel(this.level);
+      // Contenu entièrement issu de nos constantes : pas de texte distant ici.
+      label.innerHTML = `${levelIcon(difficulty.level)}<span>${difficulty.name}</span>`;
+      label.disabled = false;
+      label.title = `Niveau ${difficulty.level} — ${difficulty.blurb}`;
+      label.setAttribute('aria-label', `Niveau ${difficulty.level}, ${difficulty.name}. Changer de niveau.`);
+    } else {
+      // Nom venu du réseau : jamais interprété comme du balisage.
+      label.textContent = this.opponentName;
+      label.disabled = true;
+      label.removeAttribute('title');
+      label.removeAttribute('aria-label');
+    }
     $('bag-count').textContent = String(this.game.bagCount);
 
     const active = this.game.finished ? -1 : this.game.current;
@@ -474,6 +506,9 @@ export class App {
     $('btn-shuffle').disabled = !myTurn;
     $('btn-hint').disabled = !myTurn;
     $('btn-more').disabled = !myTurn;
+    $('btn-exchange-wide').disabled = !myTurn || this.game.bagCount < RACK_SIZE;
+    $('btn-pass-wide').disabled = !myTurn;
+    $('btn-resign-wide').disabled = this.game.finished;
 
     // Le halo et la pastille de score ne s'allument que sur un coup jouable :
     // le score annoncé est toujours un score réellement encaissable.
@@ -757,6 +792,15 @@ export class App {
     $('btn-recall').onclick = () => this.recall();
     $('btn-shuffle').onclick = () => this.shuffleRack();
     $('btn-hint').onclick = () => this.askHint();
+
+    $('ai-name').onclick = () => {
+      if (this.mode === 'solo') $('rules-dialog').showModal();
+    };
+
+    // Mêmes actions que le menu « ⋯ », présentées en clair sur grand écran.
+    $('btn-exchange-wide').onclick = () => this.startExchange();
+    $('btn-pass-wide').onclick = () => this.passTurn();
+    $('btn-resign-wide').onclick = () => this.resign();
 
     $('btn-more').onclick = () => $('more-dialog').showModal();
     $('more-cancel').onclick = () => $('more-dialog').close();

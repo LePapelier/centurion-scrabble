@@ -15,7 +15,29 @@
   <body>
     <div class="app">
       <header class="topbar">
-        <h1 class="brand"><span class="brand-mark">C</span>Centurion</h1>
+        <h1 class="brand" aria-label="Centurion Scrabble">
+          <span class="brand-word">
+            <span class="brand-tile" data-v="3">C</span>
+            <span class="brand-tile" data-v="1">E</span>
+            <span class="brand-tile" data-v="1">N</span>
+            <span class="brand-tile" data-v="1">T</span>
+            <span class="brand-tile" data-v="1">U</span>
+            <span class="brand-tile" data-v="1">R</span>
+            <span class="brand-tile" data-v="1">I</span>
+            <span class="brand-tile" data-v="1">O</span>
+            <span class="brand-tile" data-v="1">N</span>
+          </span>
+          <span class="brand-word">
+            <span class="brand-tile" data-v="1">S</span>
+            <span class="brand-tile" data-v="3">C</span>
+            <span class="brand-tile" data-v="1">R</span>
+            <span class="brand-tile" data-v="1">A</span>
+            <span class="brand-tile" data-v="3">B</span>
+            <span class="brand-tile" data-v="3">B</span>
+            <span class="brand-tile" data-v="1">L</span>
+            <span class="brand-tile" data-v="1">E</span>
+          </span>
+        </h1>
         <span class="netchip" id="netchip" hidden></span>
         <div class="topbar-actions">
           <button type="button" class="icon-button" id="btn-multi" aria-label="Jouer à deux">
@@ -40,7 +62,7 @@
           <span id="bag-count">86</span>
         </div>
         <div class="score-card" id="score-ai">
-          <span class="score-name" id="ai-name">Centurion</span>
+          <button type="button" class="score-name level-chip" id="ai-name">Centurion</button>
           <span class="score-value" id="score-ai-value">0</span>
         </div>
       </section>
@@ -71,15 +93,18 @@
         <div class="actions" id="actions">
           <button type="button" class="btn btn-ghost" id="btn-shuffle" aria-label="Mélanger le chevalet">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M16 3h5v5" /><path d="M4 20 21 3" /><path d="M21 16v5h-5" /><path d="m15 15 6 6" /><path d="M4 4l5 5" /></svg>
+          <span class="btn-label">Mélanger</span>
           </button>
           <button type="button" class="btn btn-ghost" id="btn-recall" aria-label="Reprendre mes jetons">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14 4 9l5-5" /><path d="M4 9h11a5 5 0 0 1 0 10H9" /></svg>
+          <span class="btn-label">Reprendre</span>
           </button>
           <button type="button" class="btn btn-primary" id="btn-play">
             Jouer <span class="preview" id="preview" hidden>0</span>
           </button>
           <button type="button" class="btn btn-ghost" id="btn-hint" aria-label="Indice">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 18h6" /><path d="M10 22h4" /><path d="M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2Z" /></svg>
+          <span class="btn-label">Indice</span>
           </button>
           <button type="button" class="btn btn-ghost" id="btn-more" aria-label="Autres actions">
             <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="1.6" /><circle cx="12" cy="12" r="1.6" /><circle cx="19" cy="12" r="1.6" /></svg>
@@ -98,6 +123,19 @@
           Historique <span class="chevron" aria-hidden="true">▾</span>
         </button>
         <ol class="log" id="log" hidden></ol>
+        <div class="side-actions wide-only">
+          <button type="button" class="btn btn-ghost" id="btn-exchange-wide">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17 2l4 4-4 4" /><path d="M3 6h18" /><path d="M7 22l-4-4 4-4" /><path d="M21 18H3" /></svg>
+            <span class="btn-label">Échanger</span>
+          </button>
+          <button type="button" class="btn btn-ghost" id="btn-pass-wide">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4l10 8-10 8z" /><path d="M19 4v16" /></svg>
+            <span class="btn-label">Passer</span>
+          </button>
+        </div>
+        <button type="button" class="side-resign wide-only" id="btn-resign-wide">
+          Abandonner la partie
+        </button>
       </section>
     </div>
 

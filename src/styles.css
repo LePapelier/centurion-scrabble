@@ -103,27 +103,64 @@ svg {
   flex: none;
 }
 
+/* La marque est composée en jetons, repris des couleurs du plateau. Elle se
+   lit comme un logo : la taille suit la largeur disponible et les valeurs
+   disparaissent quand les jetons deviennent trop petits. */
 .brand {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: calc(var(--brand-tile) * 0.5);
   margin: 0;
-  font-size: 1.05rem;
-  font-weight: 650;
-  letter-spacing: 0.01em;
+  --brand-tile: clamp(13px, 3.3vw, 23px);
 }
 
-.brand-mark {
+.brand-word {
+  display: flex;
+  gap: 2px;
+}
+
+.brand-tile {
+  position: relative;
   display: grid;
   place-items: center;
-  width: 28px;
-  height: 28px;
-  border-radius: 7px;
-  background: linear-gradient(160deg, var(--tile) 0%, var(--tile-edge) 100%);
-  color: var(--tile-text);
+  width: var(--brand-tile);
+  height: var(--brand-tile);
+  border-radius: calc(var(--brand-tile) * 0.2);
+  font-size: calc(var(--brand-tile) * 0.6);
   font-weight: 800;
-  font-size: 0.95rem;
-  box-shadow: 0 2px 0 rgb(0 0 0 / 0.4);
+  line-height: 1;
+  color: #fff;
+  box-shadow: 0 1px 0 rgb(0 0 0 / 0.45), inset 0 1px 0 rgb(255 255 255 / 0.18);
+}
+
+.brand-tile::after {
+  content: attr(data-v);
+  position: absolute;
+  right: 7%;
+  bottom: 2%;
+  font-size: calc(var(--brand-tile) * 0.3);
+  font-weight: 600;
+  opacity: 0.7;
+}
+
+/* Quatre teintes du plateau, en rotation. */
+.brand-tile:nth-child(4n + 1) { background: var(--tw); }
+.brand-tile:nth-child(4n + 2) { background: var(--dl); }
+.brand-tile:nth-child(4n + 3) { background: var(--dw); }
+.brand-tile:nth-child(4n + 4) { background: var(--tl); }
+
+/* Sous cette largeur, la marque sur une seule ligne obligerait à des jetons
+   minuscules : on empile les deux mots, ce qui tient dans la hauteur de
+   l'en-tête tout en gardant des lettres lisibles. */
+@media (max-width: 560px) {
+  .brand {
+    --brand-tile: clamp(13px, 4vw, 18px);
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+  }
+
+  .brand-tile::after { display: none; }
 }
 
 .topbar-actions {
@@ -185,6 +222,39 @@ svg {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+/* Le niveau de l'adversaire se règle sans quitter la partie : la mention
+   devient un bouton. En partie à deux elle redevient un simple libellé. */
+.level-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+  padding: 3px 7px;
+  margin: -3px -7px;
+  border-radius: 999px;
+  text-align: left;
+  transition: background 0.15s, color 0.15s;
+}
+
+.level-chip svg {
+  flex: none;
+  width: 1.05em;
+  height: 1.05em;
+  stroke-width: 2.1;
+}
+
+.level-chip:not(:disabled):hover,
+.level-chip:not(:disabled):focus-visible {
+  background: rgb(255 255 255 / 0.07);
+  color: var(--text);
+}
+
+.level-chip:disabled {
+  cursor: default;
+  padding: 0;
+  margin: 0;
 }
 
 .score-card.active .score-name {
@@ -258,7 +328,20 @@ svg {
   align-items: center;
 }
 
+/* Le plateau est traité comme un objet posé sur l'écran : cadre biseauté
+   (arête claire en haut, ombre portée en bas), surface de jeu en creux, et
+   ombre au sol qui le décolle du fond. */
 .board {
+  --frame: clamp(9px, 2cqw, 17px);
+  --board-shadow:
+    inset 0 1.5px 0 rgb(255 255 255 / 0.2),
+    inset 1.5px 0 0 rgb(255 255 255 / 0.07),
+    inset -1.5px 0 0 rgb(0 0 0 / 0.35),
+    inset 0 -3px 0 rgb(0 0 0 / 0.55),
+    0 2px 3px rgb(0 0 0 / 0.4),
+    0 14px 26px -8px rgb(0 0 0 / 0.6),
+    0 34px 60px -24px rgb(0 0 0 / 0.55);
+
   position: relative;
   display: grid;
   grid-template-columns: repeat(15, 1fr);
@@ -266,13 +349,28 @@ svg {
   width: var(--board-max);
   max-width: 100%;
   aspect-ratio: 1;
-  padding: 5px;
-  border-radius: 12px;
-  background: var(--surface-2);
-  box-shadow: var(--shadow);
+  padding: var(--frame);
+  border-radius: calc(var(--frame) + 5px);
+  background: linear-gradient(158deg, #3c4a59 0%, #2b3642 38%, #1f2831 100%);
+  box-shadow: var(--board-shadow);
   container-type: inline-size;
   touch-action: manipulation;
   user-select: none;
+}
+
+/* Le creux dans lequel repose la grille : il dépasse des cases de quelques
+   pixels, ce qui dessine la gorge intérieure du cadre. */
+.board::before {
+  content: '';
+  position: absolute;
+  inset: calc(var(--frame) - 4px);
+  border-radius: 6px;
+  background: #151c24;
+  box-shadow:
+    inset 0 3px 7px rgb(0 0 0 / 0.65),
+    inset 0 -1px 0 rgb(255 255 255 / 0.04),
+    0 1px 0 rgb(255 255 255 / 0.06);
+  pointer-events: none;
 }
 
 .board.bingo {
@@ -280,9 +378,9 @@ svg {
 }
 
 @keyframes bingo-flash {
-  0% { box-shadow: var(--shadow), 0 0 0 0 rgb(240 200 100 / 0.9); }
-  70% { box-shadow: var(--shadow), 0 0 44px 8px rgb(240 200 100 / 0.35); }
-  100% { box-shadow: var(--shadow), 0 0 0 0 rgb(240 200 100 / 0); }
+  0% { box-shadow: var(--board-shadow), 0 0 0 0 rgb(240 200 100 / 0.9); }
+  70% { box-shadow: var(--board-shadow), 0 0 44px 8px rgb(240 200 100 / 0.35); }
+  100% { box-shadow: var(--board-shadow), 0 0 0 0 rgb(240 200 100 / 0); }
 }
 
 .cell {
@@ -871,6 +969,16 @@ svg {
   background: color-mix(in srgb, var(--accent) 12%, var(--surface-2));
 }
 
+/* L'insigne remplace le chiffre ; le rang reste écrit à côté du nom. */
+.level-rank {
+  margin-left: 7px;
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: var(--text-dim);
+}
+
+.level-option.selected .level-rank { color: inherit; opacity: 0.75; }
+
 .level-badge {
   display: grid;
   place-items: center;
@@ -998,42 +1106,6 @@ svg {
 /* Écrans larges                                                       */
 /* ------------------------------------------------------------------ */
 
-@media (min-width: 900px) and (min-height: 700px) {
-  .app {
-    --board-max: min(100%, calc(100dvh - 350px));
-    max-width: 1000px;
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) 300px;
-    grid-template-rows: auto auto 1fr auto;
-    grid-template-areas:
-      'top     side'
-      'scores  side'
-      'board   side'
-      'tray    side';
-    column-gap: 20px;
-    padding: 16px;
-  }
-
-  .topbar { grid-area: top; }
-  .scoreboard { grid-area: scores; }
-  .board-wrap { grid-area: board; }
-  .tray { grid-area: tray; }
-
-  .log-panel {
-    grid-area: side;
-    align-self: start;
-    padding: 12px;
-    border-radius: var(--radius);
-    background: var(--surface);
-  }
-
-  .log { max-height: calc(100dvh - 140px); }
-  .log[hidden] { display: block !important; }
-  .log-toggle { pointer-events: none; }
-  .log-toggle .chevron { display: none; }
-
-}
-
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -1041,6 +1113,33 @@ svg {
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
   }
+}
+
+/* Libellés et commandes qui n'apparaissent qu'au-delà d'une certaine
+   largeur : sur mobile ces actions restent dans le menu « ⋯ ». */
+.btn-label { display: none; }
+.wide-only { display: none; }
+
+.side-resign {
+  width: 100%;
+  margin-top: 10px;
+  padding: 9px;
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+  font-size: 0.82rem;
+  color: var(--danger);
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.side-resign:hover:not(:disabled),
+.side-resign:focus-visible:not(:disabled) {
+  background: color-mix(in srgb, var(--danger) 12%, transparent);
+  border-color: color-mix(in srgb, var(--danger) 45%, var(--line));
+}
+
+.side-resign:disabled {
+  opacity: 0.4;
+  cursor: default;
 }
 
 /* ------------------------------------------------------------------ */
@@ -1186,5 +1285,126 @@ svg {
 @media (max-width: 380px) {
   .netchip {
     display: none;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Grand écran — placé en dernier pour surcharger toutes les règles     */
+/* de base, quel que soit l'ordre dans lequel elles ont été ajoutées.   */
+/* ------------------------------------------------------------------ */
+
+@media (min-width: 900px) and (min-height: 700px) {
+  .app {
+    /* Le plateau prend toute la hauteur utile, ce qui supprime le vide
+       au-dessus et au-dessous. La constante retranchée correspond au reste
+       de la colonne : en-tête, scores, ligne d'état, chevalet, commandes,
+       gouttières et marges.
+       `--board-h` ne dépend que de la fenêtre : il sert aussi à borner la
+       largeur totale, pour que la mise en page épouse le plateau au lieu de
+       le laisser flotter au milieu d'une colonne trop large. */
+    --board-h: calc(100dvh - 352px);
+    --board-max: min(100%, var(--board-h));
+    max-width: min(1400px, calc(var(--board-h) + 420px));
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) clamp(260px, 24vw, 340px);
+    grid-template-rows: auto auto 1fr auto;
+    grid-template-areas:
+      'top     side'
+      'scores  side'
+      'board   side'
+      'tray    side';
+    column-gap: 22px;
+    row-gap: 10px;
+    padding: 16px;
+  }
+
+  .topbar { grid-area: top; }
+  .scoreboard { grid-area: scores; }
+  .board-wrap { grid-area: board; }
+  .tray { grid-area: tray; }
+
+  /* Le panneau latéral occupe toute la hauteur : l'historique défile en son
+     sein, l'abandon reste ancré en pied. */
+  .log-panel {
+    grid-area: side;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    height: 100%;
+    padding: 14px;
+    border-radius: var(--radius);
+    background: var(--surface);
+  }
+
+  .log-toggle {
+    flex: none;
+    padding: 0 0 8px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    pointer-events: none;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .log-toggle .chevron { display: none; }
+
+  .log {
+    flex: 1 1 auto;
+    min-height: 0;
+    max-height: none;
+  }
+
+  /* L'historique reste ouvert : le bouton n'est plus qu'un titre. */
+  .log[hidden] { display: block !important; }
+
+  .side-resign { flex: none; margin-top: 8px; }
+
+  /* Le panneau est assez large pour afficher les noms en entier. */
+  .log .who { width: 5.6em; }
+
+  /* Les commandes secondaires sortent du menu « ⋯ », qui disparaît. */
+  .btn-label { display: inline; }
+  .wide-only { display: inline-flex; }
+  .side-actions.wide-only { display: grid; }
+  .side-resign.wide-only { display: block; }
+  #btn-more { display: none; }
+
+  /* Quatre commandes principales sous le chevalet ; le reste du tour est
+     regroupé dans le panneau latéral. */
+  .actions {
+    grid-template-columns: auto auto minmax(140px, 1fr) auto;
+  }
+
+  .side-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    flex: none;
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid var(--line);
+  }
+
+  .side-actions .btn {
+    justify-content: center;
+    gap: 7px;
+    padding: 9px 6px;
+    font-size: 0.85rem;
+  }
+
+  /* Sur un plateau de 650 px, un chevalet de même largeur donnerait des
+     jetons démesurés : on le resserre sous le plateau. */
+  .tray {
+    width: min(var(--board-max), 540px);
+  }
+
+  .rack-tile {
+    font-size: clamp(20px, 2vw, 26px);
+  }
+
+  .actions .btn {
+    gap: 7px;
+    padding-inline: 14px;
   }
 }
