@@ -25,6 +25,12 @@
   --dw: #8d4a63;
   --tw: #b04b3f;
 
+  /* Police d'affichage des scores : empattements classiques, qui évoquent le
+     carnet de score. Uniquement des familles présentes sur le système — le
+     jeu ne doit dépendre d'aucun téléchargement. */
+  --display: 'Iowan Old Style', 'Palatino Linotype', Palatino, 'Book Antiqua',
+    'Hoefler Text', Georgia, 'Times New Roman', serif;
+
   --radius: 14px;
   --shadow: 0 8px 24px rgb(0 0 0 / 0.35);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
@@ -262,9 +268,11 @@ svg {
 
 .score-value {
   display: inline-block;
-  font-size: 1.3rem;
+  font-family: var(--display);
+  font-size: 1.5rem;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
+  letter-spacing: 0.01em;
 }
 
 .score-value.bump {
@@ -298,15 +306,33 @@ svg {
 }
 
 .bag {
-  display: flex;
-  align-items: center;
-  gap: 5px;
+  /* Libellé et compteur alignés sur leur ligne de base, l'ensemble centré
+     verticalement entre les deux cartes de score. */
+  display: grid;
+  grid-auto-flow: column;
+  align-items: baseline;
+  place-content: center;
+  gap: 6px;
   padding: 0 11px;
   border-radius: var(--radius);
   background: var(--surface);
   color: var(--text-dim);
   font-size: 0.85rem;
   font-variant-numeric: tabular-nums;
+}
+
+.bag-label {
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.75;
+}
+
+#bag-count {
+  font-family: var(--display);
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text);
 }
 
 /* --- Plateau ------------------------------------------------------ */
@@ -1032,7 +1058,12 @@ svg {
 }
 
 .end-scores .n { font-size: 0.76rem; color: var(--text-dim); }
-.end-scores .v { font-size: 1.5rem; font-weight: 700; }
+.end-scores .v {
+  font-family: var(--display);
+  font-size: 1.9rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
 .end-scores .won { border: 1px solid var(--accent); }
 
 /* ------------------------------------------------------------------ */
