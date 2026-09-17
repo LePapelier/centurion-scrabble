@@ -19,6 +19,7 @@ import {
   TRIPLE_WORD,
 } from '../core/constants.js';
 import { Game, HUMAN, COMPUTER } from '../core/game.js';
+import { validateMove } from '../core/board.js';
 
 const PREMIUM_CLASS = {
   [DOUBLE_LETTER]: 'dl',
@@ -38,7 +39,13 @@ const STORAGE_KEY = 'centurion-scrabble/partie';
 const LEVEL_KEY = 'centurion-scrabble/niveau';
 const MIN_THINKING_MS = 450;
 
+/** Décalage entre deux jetons lors de la révélation d'un coup. */
+const REVEAL_STEP_MS = 60;
+const SCORE_COUNT_MS = 520;
+
 const $ = (id) => document.getElementById(id);
+
+const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 
 export class App {
   /**
@@ -59,6 +66,16 @@ export class App {
     this.requestId = 0;
     this.pendingRequests = new Map();
     this.toastTimer = null;
+
+    /** Cases à animer au prochain rendu, dans l'ordre de la pose. */
+    this.revealCells = [];
+    this.revealKind = 'settle';
+    /** Index du chevalet déjà affichés, pour n'animer que les nouveaux. */
+    this.rackShown = new Set();
+    this.forceRackPop = false;
+    this.shownScores = [0, 0];
+    this.scoreFrames = [0, 0];
+    this.haloScore = null;
 
     this.level = Number(localStorage.getItem(LEVEL_KEY)) || 3;
     this.game = this.restore() ?? new Game({ level: this.level });
@@ -102,6 +119,10 @@ export class App {
     this.bindActions();
     this.bindKeyboard();
 
+    // Une partie reprise affiche ses scores tels quels, sans les recompter.
+    this.shownScores = this.game.players.map((p) => p.score);
+    window.addEventListener('resize', () => this.updateHalo());
+
     $('dict-note').textContent =
       `Dictionnaire : ${this.meta.words.toLocaleString('fr-FR')} mots, conforme à l’orthographe du Scrabble ` +
       `(accents ignorés, 2 à 15 lettres). Source : ${this.meta.source}.`;
@@ -112,6 +133,7 @@ export class App {
 
   buildBoard() {
     const board = $('board');
+    this.boardEl = board;
     const fragment = document.createDocumentFragment();
     this.cells = [];
 
@@ -208,13 +230,71 @@ export class App {
       if (pending) {
         cell.append(this.tileElement(pending.letter, pending.blank, 'tile pending fresh'));
       } else if (letter >= 0) {
-        cell.append(this.tileElement(letter, Boolean(blanks[i]), 'tile'));
+        const tile = this.tileElement(letter, Boolean(blanks[i]), 'tile');
+        const rank = this.revealCells.indexOf(i);
+        if (rank >= 0 && !reducedMotion.matches) {
+          tile.classList.add(this.revealKind);
+          tile.style.animationDelay = `${rank * REVEAL_STEP_MS}ms`;
+        }
+        cell.append(tile);
       } else if (i === CENTER) {
         cell.textContent = '★';
       } else if (PREMIUM_LABEL[PREMIUMS[i]]) {
         cell.textContent = PREMIUM_LABEL[PREMIUMS[i]];
       }
     }
+
+    this.revealCells = [];
+  }
+
+  /**
+   * Cerne le mot en cours s'il est jouable, et renvoie le verdict complet.
+   * @returns {object|null}
+   */
+  updateHalo() {
+    const halo = $('halo');
+    const badge = $('halo-score');
+
+    const active = this.pending.size > 0 && this.game.current === HUMAN && !this.game.finished;
+    const verdict = active ? validateMove(this.game.board, this.placements(), this.dawg) : null;
+
+    if (!verdict?.ok) {
+      halo.hidden = true;
+      this.haloScore = null;
+      return verdict;
+    }
+
+    // L'emprise suit le mot le plus long ; le score affiché est celui du coup
+    // entier, mots croisés et prime de scrabble compris.
+    const main = verdict.words.reduce((a, b) => (b.cells.length > a.cells.length ? b : a));
+    const board = this.boardEl.getBoundingClientRect();
+    const first = this.cells[main.cells[0]].getBoundingClientRect();
+    const last = this.cells[main.cells[main.cells.length - 1]].getBoundingClientRect();
+    const pad = Math.max(2, board.width * 0.006);
+
+    const wasHidden = halo.hidden;
+    // Les dimensions sont posées avant l'affichage : une apparition ne doit
+    // pas déclencher la transition de déplacement.
+    halo.style.left = `${first.left - board.left - pad}px`;
+    halo.style.top = `${first.top - board.top - pad}px`;
+    halo.style.width = `${last.right - first.left + pad * 2}px`;
+    halo.style.height = `${last.bottom - first.top + pad * 2}px`;
+    halo.hidden = false;
+
+    if (verdict.score !== this.haloScore) {
+      badge.textContent = String(verdict.score);
+      if (!wasHidden) this.replay(badge, 'bump');
+      this.haloScore = verdict.score;
+    }
+    return verdict;
+  }
+
+  /** Rejoue une animation déjà posée sur un élément. */
+  replay(element, className) {
+    if (reducedMotion.matches) return;
+    element.classList.remove(className);
+    void element.offsetWidth; // force le recalcul pour relancer l'animation
+    element.classList.add(className);
   }
 
   tileElement(letter, blank, className) {
@@ -232,6 +312,8 @@ export class App {
     const rack = $('rack');
     const tiles = this.game.players[HUMAN].rack;
     const used = new Set([...this.pending.values()].map((p) => p.rackIndex));
+    const shown = new Set();
+    let entering = 0;
 
     rack.textContent = '';
     for (let i = 0; i < 7; i++) {
@@ -252,23 +334,69 @@ export class App {
         value.textContent = String(VALUES[letter]);
         tile.append(value);
 
+        shown.add(i);
+        if ((this.forceRackPop || !this.rackShown.has(i)) && !reducedMotion.matches) {
+          tile.classList.add('pop');
+          tile.style.animationDelay = `${entering++ * 45}ms`;
+        }
+
         this.attachDrag(tile, i);
         slot.append(tile);
       }
       rack.append(slot);
     }
+
+    this.rackShown = shown;
+    this.forceRackPop = false;
   }
 
   renderScores() {
     const [human, ai] = this.game.players;
-    $('score-human-value').textContent = String(human.score);
-    $('score-ai-value').textContent = String(ai.score);
+    this.updateScore($('score-human-value'), $('score-human'), 0, human.score);
+    this.updateScore($('score-ai-value'), $('score-ai'), 1, ai.score);
     $('ai-name').textContent = `${difficultyByLevel(this.level).name} · niv. ${this.level}`;
     $('bag-count').textContent = String(this.game.bagCount);
 
     const active = this.game.finished ? -1 : this.game.current;
     $('score-human').classList.toggle('active', active === HUMAN);
     $('score-ai').classList.toggle('active', active === COMPUTER);
+  }
+
+  /** Fait défiler un score jusqu'à sa nouvelle valeur. */
+  updateScore(valueEl, cardEl, slot, target) {
+    const from = this.shownScores[slot];
+    if (from === target) {
+      valueEl.textContent = String(target);
+      return;
+    }
+    this.shownScores[slot] = target;
+
+    if (reducedMotion.matches) {
+      valueEl.textContent = String(target);
+      return;
+    }
+
+    if (target > from) this.floatGain(cardEl, target - from);
+    this.replay(valueEl, 'bump');
+
+    cancelAnimationFrame(this.scoreFrames[slot]);
+    const started = performance.now();
+    const step = (now) => {
+      const t = Math.min(1, (now - started) / SCORE_COUNT_MS);
+      const eased = 1 - (1 - t) ** 3;
+      valueEl.textContent = String(Math.round(from + (target - from) * eased));
+      if (t < 1) this.scoreFrames[slot] = requestAnimationFrame(step);
+    };
+    this.scoreFrames[slot] = requestAnimationFrame(step);
+  }
+
+  /** Petit « +N » qui s'élève au-dessus du score. */
+  floatGain(cardEl, amount) {
+    const gain = document.createElement('span');
+    gain.className = 'score-gain';
+    gain.textContent = `+${amount}`;
+    cardEl.append(gain);
+    setTimeout(() => gain.remove(), 1300);
   }
 
   renderLog() {
@@ -326,10 +454,13 @@ export class App {
     $('btn-hint').disabled = !myTurn;
     $('btn-more').disabled = !myTurn;
 
+    // Le halo et la pastille de score ne s'allument que sur un coup jouable :
+    // le score annoncé est toujours un score réellement encaissable.
+    const verdict = this.updateHalo();
     const preview = $('preview');
-    if (hasPending) {
+    if (verdict?.ok) {
       preview.hidden = false;
-      preview.textContent = String(this.game.previewScore(this.placements()));
+      preview.textContent = String(verdict.score);
     } else {
       preview.hidden = true;
     }
@@ -661,6 +792,7 @@ export class App {
       [rack[i], rack[j]] = [rack[j], rack[i]];
     }
     this.selected = null;
+    this.forceRackPop = true;
     this.refresh();
   }
 
@@ -676,12 +808,15 @@ export class App {
     this.pending.clear();
     this.selected = null;
     this.cursor = null;
+    this.revealCells = [...this.game.lastMoveCells];
+    this.revealKind = 'settle';
 
     const words = result.words.map((w) => w.word).join(', ');
     this.toast(
       result.bingo ? `Scrabble ! ${words} — ${result.score} points` : `${words} — ${result.score} points`,
       'good',
     );
+    if (result.bingo) this.replay(this.boardEl, 'bingo');
 
     this.save();
     this.render();
@@ -841,8 +976,11 @@ export class App {
     if (decision.type === 'play') {
       const result = this.game.play(decision.move.placements, this.dawg);
       if (result.ok) {
+        this.revealCells = [...this.game.lastMoveCells];
+        this.revealKind = 'land';
         const words = result.words.map((w) => w.word).join(', ');
         this.toast(result.bingo ? `${name} scrabble : ${words} (+${result.score})` : `${name} : ${words} (+${result.score})`);
+        if (result.bingo) this.replay(this.boardEl, 'bingo');
       } else {
         // Garde-fou : plutôt passer que bloquer la partie sur un coup rejeté.
         this.game.pass();

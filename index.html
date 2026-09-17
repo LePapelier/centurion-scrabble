@@ -43,7 +43,12 @@
 
       <div class="board-wrap">
         <div class="board-stack">
-          <div class="board" id="board" role="grid" aria-label="Plateau de jeu"></div>
+          <div class="board" id="board" role="grid" aria-label="Plateau de jeu">
+            <!-- Cerne le mot en cours dès qu'il est jouable, avec son score. -->
+            <div class="halo" id="halo" hidden>
+              <span class="halo-score" id="halo-score">0</span>
+            </div>
+          </div>
           <div class="board-foot">
             <div class="status" id="status" role="status" aria-live="polite">
               Posez votre premier mot sur la case centrale.

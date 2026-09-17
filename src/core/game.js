@@ -5,7 +5,7 @@
  * stockage local du navigateur et repris après fermeture de l'onglet.
  */
 import { DISTRIBUTION, RACK_SIZE, VALUES, BLANK, SIZE } from './constants.js';
-import { createBoard, applyPlacements, scorePlacements, validateMove } from './board.js';
+import { createBoard, applyPlacements, validateMove } from './board.js';
 
 export const HUMAN = 0;
 export const COMPUTER = 1;
@@ -190,12 +190,6 @@ export class Game {
   }
 
   /* ---------------------------------------------------------------- */
-
-  /** Score qu'obtiendrait une pose, sans l'appliquer. */
-  previewScore(placements) {
-    if (placements.length === 0) return 0;
-    return scorePlacements(this.board, placements).total;
-  }
 
   toJSON() {
     return {
