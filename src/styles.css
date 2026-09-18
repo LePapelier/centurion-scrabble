@@ -29,6 +29,7 @@
   --danger: #e8874a;
 
   --tile: #f0e2c4;
+  --tile-blank: #e7d9ff;
   --tile-edge: #cdb98f;
   --tile-text: #2a2118;
 
@@ -721,13 +722,19 @@ svg {
   box-shadow: inset 0 -1.5px 0 rgb(0 0 0 / 0.18);
 }
 
-/* Le joker est un jeton comme les autres : même matière, aucune gravure.
-   Ce qui le distingue est l'absence de valeur en coin — un vrai joker n'en
-   porte pas. Posé, il montre la lettre qu'il représente, toujours sans
-   chiffre : on le reconnaît donc encore d'une lettre ordinaire. */
+/* Le joker ne porte jamais de valeur : un vrai jeton vierge n'en a pas de
+   gravée, et un « 0 » se lirait comme un score. */
 .tile.blank .value,
 .rack-tile.blank .value {
   display: none;
+}
+
+/* Au chevalet il reste un jeton comme les autres, simplement vierge. Posé,
+   il prend une teinte propre : la lettre qu'il représente est alors écrite,
+   et rien ne le distinguerait plus d'une lettre ordinaire — sinon le chiffre
+   manquant, trop discret au milieu d'un mot. */
+.tile.blank {
+  background: linear-gradient(165deg, #f6efff 0%, var(--tile-blank) 100%);
 }
 
 /* La lettre est centrée dans la zone qui exclut le coin de la valeur : les
@@ -1280,7 +1287,8 @@ svg {
   aspect-ratio: 1;
   padding: 0 9% 7% 0;
   border-radius: 4px;
-  background: linear-gradient(165deg, #fdf3dd 0%, var(--tile) 100%);
+  /* La fenêtre montre le jeton tel qu'il sera posé : teinte de joker comprise. */
+  background: linear-gradient(165deg, #f6efff 0%, var(--tile-blank) 100%);
   color: var(--tile-text);
   font-weight: 700;
   font-size: 1.15rem;
