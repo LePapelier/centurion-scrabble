@@ -115,9 +115,38 @@ svg {
 .brand {
   display: flex;
   align-items: center;
-  gap: calc(var(--brand-tile) * 0.5);
+  gap: 8px;
   margin: 0;
   --brand-tile: clamp(13px, 3.3vw, 23px);
+}
+
+.brand-words {
+  display: flex;
+  align-items: center;
+  gap: calc(var(--brand-tile) * 0.5);
+}
+
+/* Mascotte. Ses marges négatives la laissent déborder de l'en-tête sans en
+   changer la hauteur, dont dépend la place laissée au plateau. */
+.brand-mascot {
+  flex: none;
+  width: auto;
+  height: 52px;
+  margin-block: -7px;
+  transform-origin: 50% 100%;
+  filter: drop-shadow(0 2px 2px rgb(0 0 0 / 0.45));
+}
+
+.brand-mascot.hop {
+  animation: mascot-hop 0.55s cubic-bezier(0.3, 0.8, 0.4, 1.1);
+}
+
+@keyframes mascot-hop {
+  0% { transform: translateY(0) rotate(0deg) scale(1, 1); }
+  18% { transform: translateY(0) rotate(0deg) scale(1.08, 0.9); }
+  45% { transform: translateY(-8px) rotate(-7deg) scale(0.96, 1.05); }
+  70% { transform: translateY(0) rotate(4deg) scale(1.05, 0.94); }
+  100% { transform: translateY(0) rotate(0deg) scale(1, 1); }
 }
 
 .brand {
@@ -179,9 +208,18 @@ svg {
 @media (max-width: 560px) {
   .brand {
     --brand-tile: clamp(13px, 4vw, 18px);
+    gap: 6px;
+  }
+
+  .brand-words {
     flex-direction: column;
     align-items: flex-start;
     gap: 2px;
+  }
+
+  .brand-mascot {
+    height: 46px;
+    margin-block: -4px;
   }
 
   .brand-tile::after { display: none; }

@@ -1424,8 +1424,13 @@ export class App {
     });
     // Recalcul forcé : sans lui, retirer puis remettre la classe dans la même
     // image ne relance pas l'animation.
+    const mascot = document.querySelector('.brand-mascot');
+    for (const animation of mascot?.getAnimations() ?? []) animation.cancel();
+    mascot?.classList.remove('hop');
+
     void tiles[0]?.offsetWidth;
     for (const tile of tiles) tile.classList.add('wiggle');
+    mascot?.classList.add('hop');
   }
 
   openMultiplayer() {
