@@ -112,6 +112,8 @@ export class App {
     /** 'solo' face à l'IA, 'host' ou 'guest' en partie à deux. */
     this.mode = 'solo';
     this.session = null;
+    /** Une partie en réseau a été lancée : un « hello » vaut alors retour. */
+    this.netStarted = false;
     this.myName = localStorage.getItem(NAME_KEY) || 'Joueur';
     this.opponentName = 'Adversaire';
 
@@ -1541,6 +1543,15 @@ export class App {
       this.leaveMultiplayer();
     };
 
+    // Un onglet passé en arrière-plan peut voir sa liaison coupée par le
+    // téléphone. Au retour, on la rétablit tout de suite plutôt que
+    // d'attendre le prochain essai programmé.
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState !== 'visible') return;
+      if (this.mode === 'solo' || !this.session) return;
+      if (!this.session.connected) this.session.resumeNow();
+    });
+
     // Un lien d'invitation ouvre directement la fenêtre de connexion.
     const invited = codeFromLocation();
     if (invited) {
@@ -1602,6 +1613,8 @@ export class App {
       },
       onConnected: () => this.setNetStatus('Adversaire connecté, préparation…', 'live'),
       onData: (message) => this.onPeerData(message),
+      onDropped: (reason) => this.onPeerDropped(reason),
+      onResumed: () => this.onPeerResumed(),
       onClosed: (reason) => this.onPeerLost(reason),
       onError: (message) => this.onPeerError(message),
     });
@@ -1627,6 +1640,8 @@ export class App {
         this.session.send({ t: 'hello', name: this.myName });
       },
       onData: (message) => this.onPeerData(message),
+      onDropped: (reason) => this.onPeerDropped(reason),
+      onResumed: () => this.onPeerResumed(),
       onClosed: (reason) => this.onPeerLost(reason),
       onError: (message) => this.onPeerError(message),
     });
@@ -1637,6 +1652,7 @@ export class App {
 
   /** Nouvelle partie en ligne : seul l'hôte la crée, puis la diffuse. */
   startNetworkGame() {
+    this.netStarted = true;
     const first = Math.random() < 0.5 ? HUMAN : COMPUTER;
     this.game = new Game({
       firstPlayer: first,
@@ -1682,6 +1698,17 @@ export class App {
       case 'hello':
         if (this.mode !== 'host') return;
         this.opponentName = this.cleanName(message.name);
+        // L'adversaire revient d'une coupure : on lui rend la partie en cours
+        // plutôt que d'en ouvrir une autre sous ses pieds.
+        if (this.netStarted) {
+          this.session.send({ t: 'welcome', name: this.myName });
+          this.broadcast();
+          $('mp-dialog').close();
+          this.setNetStatus('Adversaire revenu. Partie reprise.', 'live');
+          this.toast(`${this.opponentName} a repris la partie.`);
+          this.render();
+          return;
+        }
         this.startNetworkGame();
         return;
 
@@ -1874,6 +1901,23 @@ export class App {
     this.render();
   }
 
+  /**
+   * Liaison rompue mais pas perdue : la partie reste entière, la session
+   * rappelle d'elle-même. Rien n'est démonté — c'est tout l'intérêt.
+   */
+  onPeerDropped(reason) {
+    this.busy = false;
+    this.setNetStatus(reason, 'error');
+    this.toast(reason, 'error');
+    this.render();
+  }
+
+  onPeerResumed() {
+    this.setNetStatus('Liaison rétablie.', 'live');
+    this.toast('Liaison rétablie.');
+    this.render();
+  }
+
   onPeerError(message) {
     this.busy = false;
     this.setNetStatus(message, 'error');
@@ -1886,6 +1930,7 @@ export class App {
   leaveMultiplayer() {
     this.teardownSession();
     this.mode = 'solo';
+    this.netStarted = false;
     this.opponentName = 'Adversaire';
     clearLocationCode();
     this.setNetStatus('');
@@ -1927,8 +1972,9 @@ export class App {
     }
     chip.hidden = false;
     const live = Boolean(this.session?.connected);
+    const reprise = !live && Boolean(this.session?.reconnecting);
     chip.className = `netchip ${live ? 'live' : 'lost'}`;
-    chip.textContent = live ? this.opponentName : 'Hors ligne';
+    chip.textContent = live ? this.opponentName : reprise ? 'Reconnexion…' : 'Hors ligne';
   }
 
   /* ---------------------------------------------------------------- */
