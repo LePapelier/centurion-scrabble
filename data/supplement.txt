@@ -8,3 +8,6 @@
 
 # Rencontrés en partie
 daw
+
+# Présents dans le lexique précédent, absents de Morphalou.
+xi

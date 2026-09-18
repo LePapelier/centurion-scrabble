@@ -21,3 +21,15 @@ ms
 
 # Abréviation
 etc
+
+# Symboles et sigles restés dans Morphalou, écartés du jeu : gray, yard,
+# once, unité astronomique, Union européenne, et une forme sans emploi.
+gy
+yd
+oz
+ua
+ue
+qu
+
+# Écarté sur avis du joueur : absent de l'ODS.
+ja
