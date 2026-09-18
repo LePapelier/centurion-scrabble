@@ -397,7 +397,7 @@ svg {
 
 @keyframes score-pop {
   40% {
-    transform: scale(1.28);
+    transform: var(--pose) scale(1.28);
     color: var(--gold);
   }
 }
@@ -662,7 +662,10 @@ svg {
   top: 0;
   right: 0;
   z-index: 6;
-  transform: translate(28%, -42%);
+  /* Le décalage est nommé : l'animation du score doit le reprendre, faute de
+     quoi son `transform` l'écrase et la pastille saute le temps du sursaut. */
+  --pose: translate(28%, -42%);
+  transform: var(--pose);
   min-width: 1.5em;
   padding: 0.1em 0.3em;
   border-radius: 0.8cqw;
