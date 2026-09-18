@@ -1,0 +1,10 @@
+# Mots ajoutés au lexique de base : une entrée par ligne ; « # » commence un
+# commentaire.
+#
+# Le lexique source est un lexique de langue, pas une liste de Scrabble : il
+# ignore des formes pourtant admises en compétition. Ce fichier les rattrape
+# au fil des parties. Il ne prétend pas à la conformité ODS — celle-ci exige
+# une licence auprès de Larousse.
+
+# Rencontrés en partie
+daw
