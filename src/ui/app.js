@@ -848,12 +848,22 @@ export class App {
       return;
     }
 
+    // Position de départ de chaque jeton, relevée avant le remaniement : elle
+    // sert à les faire glisser jusqu'à leur nouvelle place plutôt que de les
+    // y téléporter.
+    const departs = new Map();
+    for (const tile of $('rack').querySelectorAll('.rack-tile')) {
+      departs.set(Number(tile.dataset.rackIndex), tile.getBoundingClientRect().left);
+    }
+
     const order = rack.map((_, i) => i);
     const [moved] = order.splice(from, 1);
     order.splice(to, 0, moved);
 
     const remap = new Map();
     order.forEach((oldIndex, newIndex) => remap.set(oldIndex, newIndex));
+    const provenance = new Map();
+    remap.forEach((newIndex, oldIndex) => provenance.set(newIndex, oldIndex));
 
     this.game.players[HUMAN].rack = order.map((i) => rack[i]);
     for (const tile of this.pending.values()) {
@@ -866,6 +876,39 @@ export class App {
 
     this.save();
     this.refresh();
+    this.slideRackTiles(departs, provenance, to);
+  }
+
+  /**
+   * Fait glisser les jetons du chevalet de leur ancienne position vers la
+   * nouvelle. Le rendu vient de les recréer : on les anime depuis l'écart
+   * mesuré, ce qui donne le mouvement sans dupliquer la mise en page.
+   *
+   * Le jeton déplacé en est exclu : il vient d'être lâché à destination, le
+   * faire repartir de son ancienne place donnerait un aller-retour.
+   *
+   * @param {Map<number, number>} departs ancien index → abscisse d'origine
+   * @param {Map<number, number>} provenance nouvel index → ancien index
+   * @param {number} deplace nouvel index du jeton que l'on vient de lâcher
+   */
+  slideRackTiles(departs, provenance, deplace) {
+    if (reducedMotion.matches) return;
+
+    for (const tile of $('rack').querySelectorAll('.rack-tile')) {
+      const index = Number(tile.dataset.rackIndex);
+      if (index === deplace) continue;
+
+      const depart = departs.get(provenance.get(index));
+      if (depart === undefined) continue;
+
+      const ecart = depart - tile.getBoundingClientRect().left;
+      if (Math.abs(ecart) < 1) continue;
+
+      tile.animate(
+        [{ transform: `translateX(${ecart}px)` }, { transform: 'translateX(0)' }],
+        { duration: 220, easing: 'cubic-bezier(0.2, 0.85, 0.3, 1)' },
+      );
+    }
   }
 
   askBlankLetter() {
