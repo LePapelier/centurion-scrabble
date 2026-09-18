@@ -2,24 +2,39 @@
 /* Socle                                                               */
 /* ------------------------------------------------------------------ */
 
+/* Cinzel (licence OFL, voir public/fonts/OFL-Cinzel.txt), réduite à
+   l'alphabet français et servie avec le site : aucun appel extérieur. */
+@font-face {
+  font-family: 'Cinzel';
+  src: url('/fonts/cinzel.woff') format('woff');
+  font-weight: 400 900;
+  font-display: swap;
+}
+
 :root {
-  --bg: #0d1116;
-  --surface: #161d26;
-  --surface-2: #1e2732;
-  --line: #2b3643;
-  --text: #e8edf3;
-  --text-dim: #93a1b1;
-  --accent: #46b98a;
-  --accent-dark: #2f8b66;
-  --danger: #d6604a;
+  /* Feutre de table de jeu. L'accent d'identité est le rouge des mots comptes
+     triple ; le vert est réservé au signal « coup jouable ». */
+  --bg: #0b2419;
+  --felt: #16432f;
+  --surface: rgb(3 16 10 / 0.45);
+  --surface-2: rgb(3 16 10 / 0.62);
+  --line: rgb(233 223 196 / 0.14);
+  --text: #f2ecdc;
+  --text-dim: #a9bfb1;
+  --accent: #c8412f;
+  --accent-dark: #8f2b1f;
+  --valid: #5fd08f;
+  --valid-dark: #2c7650;
+  --gold: #d8b35c;
+  --danger: #e8874a;
 
   --tile: #f0e2c4;
   --tile-edge: #cdb98f;
   --tile-text: #2a2118;
   --tile-blank: #e7d9ff;
 
-  --cell: #223040;
-  --cell-line: #2d3d4f;
+  --cell: #183a2c;
+  --cell-line: #22493a;
   --dl: #2f6d92;
   --tl: #234f78;
   --dw: #8d4a63;
@@ -28,10 +43,9 @@
   /* Police d'affichage des scores : empattements classiques, qui évoquent le
      carnet de score. Uniquement des familles présentes sur le système — le
      jeu ne doit dépendre d'aucun téléchargement. */
-  --display: 'Iowan Old Style', 'Palatino Linotype', Palatino, 'Book Antiqua',
-    'Hoefler Text', Georgia, 'Times New Roman', serif;
+  --display: 'Cinzel', 'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, serif;
 
-  --radius: 14px;
+  --radius: 8px;
   --shadow: 0 8px 24px rgb(0 0 0 / 0.35);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
 
@@ -57,7 +71,12 @@ body {
 }
 
 body {
-  background: radial-gradient(120% 90% at 50% 0%, #17202b 0%, var(--bg) 60%);
+  /* Feutre : grain léger par-dessus un éclairage de lampe au centre. */
+  background-color: var(--bg);
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .55 0 0 0 -.2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"),
+    radial-gradient(110% 80% at 50% 30%, var(--felt) 0%, #0f3122 55%, var(--bg) 100%);
+  background-attachment: fixed;
   color: var(--text);
   font-family: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   font-size: 16px;
@@ -107,6 +126,7 @@ svg {
   align-items: center;
   justify-content: space-between;
   flex: none;
+  container: entete / inline-size;
 }
 
 /* La marque est composée en jetons, repris des couleurs du plateau. Elle se
@@ -202,10 +222,11 @@ svg {
 .brand-word:first-child .brand-tile { background: var(--tw); }
 .brand-word:last-child .brand-tile { background: var(--dl); }
 
-/* Sous cette largeur, la marque sur une seule ligne obligerait à des jetons
-   minuscules : on empile les deux mots, ce qui tient dans la hauteur de
-   l'en-tête tout en gardant des lettres lisibles. */
-@media (max-width: 560px) {
+/* Quand l'en-tête manque de place, la marque sur une seule ligne obligerait
+   à des jetons minuscules ou déborderait sur les boutons : on empile les deux
+   mots. Le critère est la largeur de l'en-tête, pas celle de la fenêtre — sur
+   grand écran, le panneau latéral lui en prend une bonne part. */
+@container entete (max-width: 620px) {
   .brand {
     --brand-tile: clamp(13px, 4vw, 18px);
     gap: 6px;
@@ -339,7 +360,7 @@ svg {
 @keyframes score-pop {
   40% {
     transform: scale(1.28);
-    color: var(--accent);
+    color: var(--gold);
   }
 }
 
@@ -350,7 +371,7 @@ svg {
   top: 2px;
   font-size: 0.9rem;
   font-weight: 700;
-  color: var(--accent);
+  color: var(--valid);
   pointer-events: none;
   animation: gain-rise 1.25s ease-out forwards;
 }
@@ -371,18 +392,14 @@ svg {
   place-content: center;
   gap: 6px;
   padding: 0 11px;
-  border-radius: var(--radius);
-  background: var(--surface);
   color: var(--text-dim);
   font-size: 0.85rem;
   font-variant-numeric: tabular-nums;
 }
 
 .bag-label {
-  font-size: 0.7rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  opacity: 0.75;
+  font-size: 0.78rem;
+  opacity: 0.8;
 }
 
 #bag-count {
@@ -440,7 +457,7 @@ svg {
   aspect-ratio: 1;
   padding: var(--frame);
   border-radius: calc(var(--frame) + 5px);
-  background: linear-gradient(158deg, #3c4a59 0%, #2b3642 38%, #1f2831 100%);
+  background: linear-gradient(158deg, #9a7350 0%, #7c5a37 40%, #5a3f24 100%);
   box-shadow: var(--board-shadow);
   container-type: inline-size;
   touch-action: manipulation;
@@ -453,8 +470,8 @@ svg {
   content: '';
   position: absolute;
   inset: calc(var(--frame) - 4px);
-  border-radius: 6px;
-  background: #151c24;
+  border-radius: 4px;
+  background: #0c1f16;
   box-shadow:
     inset 0 3px 7px rgb(0 0 0 / 0.65),
     inset 0 -1px 0 rgb(255 255 255 / 0.04),
@@ -499,9 +516,9 @@ svg {
 /* Destination survolée pendant qu'un jeton est déplacé : vert si la case
    accueille la lettre, rouge si elle est déjà prise. */
 .cell.drop-target {
-  outline: 0.5cqw solid var(--accent);
+  outline: 0.5cqw solid var(--valid);
   outline-offset: -0.25cqw;
-  background-image: linear-gradient(color-mix(in srgb, var(--accent) 28%, transparent) 0 0);
+  background-image: linear-gradient(color-mix(in srgb, var(--valid) 28%, transparent) 0 0);
 }
 
 .cell.drop-blocked {
@@ -523,12 +540,12 @@ svg {
 .halo {
   position: absolute;
   z-index: 3;
-  border: 0.42cqw solid var(--accent);
+  border: 0.42cqw solid var(--valid);
   border-radius: 1cqw;
   pointer-events: none;
   box-shadow:
-    0 0 0 0.4cqw color-mix(in srgb, var(--accent) 22%, transparent),
-    0 0 3.5cqw color-mix(in srgb, var(--accent) 50%, transparent);
+    0 0 0 0.4cqw color-mix(in srgb, var(--valid) 22%, transparent),
+    0 0 3.5cqw color-mix(in srgb, var(--valid) 50%, transparent);
   transition:
     left 0.16s cubic-bezier(0.3, 0.8, 0.4, 1),
     top 0.16s cubic-bezier(0.3, 0.8, 0.4, 1),
@@ -549,7 +566,7 @@ svg {
   min-width: 1.5em;
   padding: 0.1em 0.3em;
   border-radius: 0.8cqw;
-  background: var(--accent);
+  background: var(--valid);
   color: #07130d;
   font-size: 3.1cqw;
   font-weight: 800;
@@ -566,7 +583,7 @@ svg {
   content: '';
   position: absolute;
   inset: 0;
-  border: 2px solid var(--accent);
+  border: 2px solid var(--gold);
   border-radius: 2.5px;
   animation: pulse 1.4s ease-in-out infinite;
 }
@@ -719,7 +736,7 @@ svg {
   white-space: nowrap;
 }
 
-.status.win { color: var(--accent); }
+.status.win { color: var(--gold); }
 .status.warn { color: var(--danger); }
 .status.warn { color: var(--danger); }
 
@@ -809,7 +826,7 @@ svg {
 
 .rack-tile.selected {
   transform: translateY(-7px);
-  box-shadow: 0 8px 14px rgb(0 0 0 / 0.4), 0 0 0 2px var(--accent);
+  box-shadow: 0 8px 14px rgb(0 0 0 / 0.4), 0 0 0 2px var(--gold);
 }
 
 .rack-tile.marked {
@@ -889,7 +906,7 @@ svg {
   gap: 7px;
   min-height: 46px;
   padding: 0 14px;
-  border-radius: 12px;
+  border-radius: 10px;
   font-weight: 600;
   font-size: 0.94rem;
   transition: transform 0.1s, background 0.15s, opacity 0.15s;
@@ -913,10 +930,10 @@ svg {
 
 .btn-primary {
   background: var(--accent);
-  color: #08110c;
+  color: #fff6e6;
 }
 
-.btn-primary:hover:not(:disabled) { background: #55c898; }
+.btn-primary:hover:not(:disabled) { background: #d9533f; }
 
 .btn-small {
   min-height: 38px;
@@ -1006,22 +1023,51 @@ svg {
 
 .log .what { flex: 1; font-weight: 600; letter-spacing: 0.02em; }
 .log .what.muted { font-weight: 400; color: var(--text-dim); }
-.log .pts { flex: none; font-variant-numeric: tabular-nums; color: var(--accent); }
+.log .tag {
+  margin-left: 4px;
+  padding: 1px 6px;
+  border-radius: 3px;
+  background: var(--accent);
+  color: #fff6e6;
+  font-family: var(--display);
+  font-size: 0.66rem;
+  font-weight: 700;
+  vertical-align: 1px;
+}
+
+.log .pts { flex: none; font-variant-numeric: tabular-nums; color: var(--gold); }
 .log .pts.zero { color: var(--text-dim); }
 
 /* ------------------------------------------------------------------ */
 /* Feuilles modales                                                    */
 /* ------------------------------------------------------------------ */
 
+/* Les fenêtres sont des feuilles de parchemin. Les couleurs de base y sont
+   redéfinies (encre brune sur papier) : tout ce qui s'appuie dessus bascule
+   sans règle dédiée. */
 .sheet {
+  --surface: rgb(90 60 25 / 0.07);
+  --surface-2: rgb(90 60 25 / 0.1);
+  --line: rgb(90 60 25 / 0.28);
+  --text: #2b1f12;
+  --text-dim: #6e5b42;
+  --valid: #2f7d55;
+  --gold: #9a7424;
+  --danger: #a8331f;
+
   width: min(420px, calc(100vw - 24px));
   margin: auto;
-  padding: 20px;
-  border: 1px solid var(--line);
-  border-radius: 20px;
-  background: var(--surface);
+  padding: 24px 22px 16px;
+  border: 0;
+  border-radius: 3px;
+  background: linear-gradient(172deg, #f5ecd3 0%, #eee0bd 60%, #e6d4a8 100%);
   color: var(--text);
-  box-shadow: 0 24px 60px rgb(0 0 0 / 0.6);
+  /* Double filet d'encadrement, puis ombre portée sur la table. */
+  box-shadow:
+    inset 0 0 0 6px #f3e8cc,
+    inset 0 0 0 7px #b99a5b,
+    inset 0 0 40px rgb(120 80 30 / 0.18),
+    0 24px 60px rgb(0 0 0 / 0.6);
 }
 
 .sheet[open] {
@@ -1057,9 +1103,12 @@ svg {
 }
 
 .sheet h2 {
-  margin: 0 0 14px;
-  font-size: 1.05rem;
-  font-weight: 650;
+  margin: 0 0 16px;
+  font-family: var(--display);
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #7a2418;
+  text-align: center;
 }
 
 .sheet-text {
@@ -1074,7 +1123,7 @@ svg {
   min-height: 48px;
   margin-bottom: 8px;
   padding: 0 16px;
-  border-radius: 12px;
+  border-radius: 5px;
   background: var(--surface-2);
   text-align: left;
   font-size: 0.94rem;
@@ -1122,7 +1171,7 @@ svg {
   align-items: center;
   gap: 12px;
   padding: 11px 13px;
-  border-radius: 12px;
+  border-radius: 5px;
   background: var(--surface-2);
   border: 1px solid transparent;
   text-align: left;
@@ -1150,15 +1199,15 @@ svg {
   flex: none;
   width: 30px;
   height: 30px;
-  border-radius: 9px;
-  background: rgb(0 0 0 / 0.3);
+  border-radius: 50%;
+  background: var(--surface-2);
   font-weight: 700;
   font-size: 0.9rem;
 }
 
 .level-option.selected .level-badge {
   background: var(--accent);
-  color: #08110c;
+  color: #fff6e6;
 }
 
 .level-text { min-width: 0; }
@@ -1176,12 +1225,6 @@ svg {
   color: var(--text-dim);
 }
 
-.dict-note {
-  margin: 0 0 14px;
-  font-size: 0.72rem;
-  color: var(--text-dim);
-  line-height: 1.5;
-}
 
 .end-scores {
   display: grid;
@@ -1192,7 +1235,7 @@ svg {
 
 .end-scores div {
   padding: 12px;
-  border-radius: 12px;
+  border-radius: 5px;
   background: var(--surface-2);
   text-align: center;
 }
@@ -1204,7 +1247,7 @@ svg {
   font-weight: 700;
   font-variant-numeric: tabular-nums;
 }
-.end-scores .won { border: 1px solid var(--accent); }
+.end-scores .won { border: 1px solid var(--gold); }
 
 /* ------------------------------------------------------------------ */
 /* Toast et chargement                                                 */
@@ -1220,8 +1263,9 @@ svg {
   z-index: 70;
   max-width: calc(100vw - 32px);
   padding: 11px 18px;
-  border-radius: 12px;
-  background: #2a3340;
+  border-radius: 6px;
+  background: #0f2a1e;
+  border: 1px solid var(--line);
   box-shadow: var(--shadow);
   font-size: 0.86rem;
   text-align: center;
@@ -1229,7 +1273,7 @@ svg {
 }
 
 .toast.error { background: #6e2b23; }
-.toast.good { background: var(--accent-dark); }
+.toast.good { background: var(--valid-dark); }
 
 @keyframes rise {
   from { opacity: 0; transform: translate(-50%, 10px); }
@@ -1354,8 +1398,8 @@ svg {
 }
 
 .netchip.live {
-  color: var(--accent);
-  border-color: color-mix(in srgb, var(--accent) 45%, transparent);
+  color: var(--valid);
+  border-color: color-mix(in srgb, var(--valid) 45%, transparent);
 }
 
 .netchip.live::before {
@@ -1463,7 +1507,7 @@ svg {
 }
 
 .mp-status.live {
-  color: var(--accent);
+  color: var(--valid);
 }
 
 @media (max-width: 380px) {
@@ -1527,10 +1571,10 @@ svg {
   .log-toggle {
     flex: none;
     padding: 0 0 8px;
-    font-size: 0.72rem;
+    font-family: var(--display);
+    font-size: 0.9rem;
     font-weight: 700;
-    letter-spacing: 0.09em;
-    text-transform: uppercase;
+    color: var(--text);
     pointer-events: none;
     border-bottom: 1px solid var(--line);
   }

@@ -140,7 +140,7 @@ export const DIFFICULTIES = [
   {
     level: 1,
     name: 'Novice',
-    blurb: 'Mots courts et vocabulaire réduit, rate les bonnes cases.',
+    blurb: 'Mots courts, coups timides.',
     maxWordLength: 5,
     maxTilesPlaced: 4,
     quality: 0.30,
@@ -152,7 +152,7 @@ export const DIFFICULTIES = [
   {
     level: 2,
     name: 'Amateur',
-    blurb: 'Joue correctement mais laisse passer les grosses occasions.',
+    blurb: 'Joue juste, rate les gros coups.',
     maxWordLength: 7,
     maxTilesPlaced: 5,
     quality: 0.44,
@@ -165,7 +165,7 @@ export const DIFFICULTIES = [
   {
     level: 3,
     name: 'Confirmé',
-    blurb: 'Tout le lexique, cherche le bon score sans l’optimiser.',
+    blurb: 'Connaît tous les mots, calcule peu.',
     maxWordLength: 15,
     maxTilesPlaced: 7,
     quality: 0.60,
@@ -178,7 +178,7 @@ export const DIFFICULTIES = [
   {
     level: 4,
     name: 'Expert',
-    blurb: 'Joue près du maximum et soigne son reliquat.',
+    blurb: 'Vise le maximum, garde ses bonnes lettres.',
     maxWordLength: 15,
     maxTilesPlaced: 7,
     quality: 0.80,
@@ -191,7 +191,7 @@ export const DIFFICULTIES = [
   {
     level: 5,
     name: 'Centurion',
-    blurb: 'Meilleur coup, reliquat pesé, jokers gardés pour les scrabbles.',
+    blurb: 'Ne laisse rien passer.',
     maxWordLength: 15,
     maxTilesPlaced: 7,
     quality: 1,

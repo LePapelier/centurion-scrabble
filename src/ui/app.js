@@ -163,10 +163,6 @@ export class App {
 
     this.bindNetwork();
 
-    $('dict-note').textContent =
-      `Dictionnaire : ${this.meta.words.toLocaleString('fr-FR')} mots, conforme à l’orthographe du Scrabble ` +
-      `(accents ignorés, 2 à 15 lettres). Source : ${this.meta.source}.`;
-
     this.render();
     if (this.game.current === COMPUTER && !this.game.finished) this.runComputerTurn();
   }
@@ -231,7 +227,7 @@ export class App {
         this.renderLevels();
         this.renderScores();
         $('rules-dialog').close();
-        this.toast(`Niveau ${difficulty.level} — ${difficulty.name}`);
+        this.toast(`Adversaire : ${difficulty.name}`);
       });
       container.append(option);
     }
@@ -407,7 +403,7 @@ export class App {
       // Contenu entièrement issu de nos constantes : pas de texte distant ici.
       label.innerHTML = `${levelIcon(difficulty.level)}<span>${difficulty.name}</span>`;
       label.disabled = false;
-      label.title = `Niveau ${difficulty.level} — ${difficulty.blurb}`;
+      label.title = `${difficulty.name}, niveau ${difficulty.level}. ${difficulty.blurb}`;
       label.setAttribute('aria-label', `Niveau ${difficulty.level}, ${difficulty.name}. Changer de niveau.`);
     } else {
       // Nom venu du réseau : jamais interprété comme du balisage.
@@ -475,7 +471,13 @@ export class App {
       const what = document.createElement('span');
       what.className = 'what';
       if (entry.type === 'play') {
-        what.textContent = entry.words.join(' · ') + (entry.bingo ? '  ⚡' : '');
+        what.textContent = entry.words.join(' · ');
+        if (entry.bingo) {
+          const tag = document.createElement('span');
+          tag.className = 'tag';
+          tag.textContent = 'scrabble';
+          what.append(' ', tag);
+        }
       } else if (entry.type === 'exchange') {
         what.className = 'what muted';
         what.textContent = `échange ${entry.count} jeton${entry.count > 1 ? 's' : ''}`;
@@ -486,7 +488,7 @@ export class App {
 
       const points = document.createElement('span');
       points.className = entry.score > 0 ? 'pts' : 'pts zero';
-      points.textContent = entry.score > 0 ? `+${entry.score}` : '—';
+      points.textContent = entry.score > 0 ? `+${entry.score}` : '0';
 
       item.append(who, what, points);
       log.append(item);
@@ -1095,7 +1097,7 @@ export class App {
 
     const words = result.words.map((w) => w.word).join(', ');
     this.toast(
-      result.bingo ? `Scrabble ! ${words} — ${result.score} points` : `${words} — ${result.score} points`,
+      result.bingo ? `Scrabble ! ${words} +${result.score}` : `${words} +${result.score}`,
       'good',
     );
     if (result.bingo) this.replay(this.boardEl, 'bingo');
@@ -1203,7 +1205,7 @@ export class App {
     this.cancelExchange();
     this.save();
     this.render();
-    this.toast('Nouvelle partie. À vous l’honneur.');
+    this.toast('Nouvelle partie. À vous de jouer.');
   }
 
   askHint() {
@@ -1270,7 +1272,7 @@ export class App {
       if (!move) this.toast('Aucun coup possible avec ce chevalet.', 'error');
       else {
         const main = move.words.reduce((a, b) => (a.word.length >= b.word.length ? a : b));
-        this.toast(`${main.word} en ${coordName(move.placements[0].row * SIZE + move.placements[0].col)} — ${move.score} points`);
+        this.toast(`Essayez ${main.word} en ${coordName(move.placements[0].row * SIZE + move.placements[0].col)} (+${move.score})`);
       }
       this.renderControls();
       return;
@@ -1512,7 +1514,7 @@ export class App {
     this.broadcast();
     $('mp-dialog').close();
     this.toast(
-      first === HUMAN ? 'Partie lancée : à vous l’honneur.' : `Partie lancée : ${this.opponentName} commence.`,
+      first === HUMAN ? 'Partie lancée. Vous commencez.' : `Partie lancée. ${this.opponentName} commence.`,
     );
   }
 
@@ -1624,8 +1626,8 @@ export class App {
       const words = result.words.map((w) => w.word).join(', ');
       this.toast(
         result.bingo
-          ? `Scrabble de ${this.opponentName} ! ${words} — ${result.score} points`
-          : `${this.opponentName} : ${words} — ${result.score} points`,
+          ? `Scrabble de ${this.opponentName} ! ${words} +${result.score}`
+          : `${this.opponentName} : ${words} +${result.score}`,
       );
       if (result.bingo) this.replay(this.boardEl, 'bingo');
     } else if (message.t === 'exchange') {
@@ -1659,8 +1661,8 @@ export class App {
         const words = entry.words.join(', ');
         this.toast(
           entry.bingo
-            ? `Scrabble de ${this.opponentName} ! ${words} — ${entry.score} points`
-            : `${this.opponentName} : ${words} — ${entry.score} points`,
+            ? `Scrabble de ${this.opponentName} ! ${words} +${entry.score}`
+            : `${this.opponentName} : ${words} +${entry.score}`,
         );
         if (entry.bingo) this.replay(this.boardEl, 'bingo');
       } else if (entry.type === 'exchange') {
