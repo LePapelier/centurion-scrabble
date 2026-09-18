@@ -937,6 +937,13 @@ svg {
   opacity: 0.6;
 }
 
+/* Le joker se reconnaît à sa matière, la même au chevalet, sur le plateau et
+   dans le choix de lettre : violet pâle, et rien d'écrit tant qu'on ne l'a
+   pas posé. */
+.rack-tile.blank {
+  background: linear-gradient(165deg, #f6efff 0%, var(--tile-blank) 100%);
+}
+
 .rack-tile.selected {
   transform: translateY(-7px);
   box-shadow: 0 8px 14px rgb(0 0 0 / 0.4), 0 0 0 2px var(--gold);

@@ -4,7 +4,7 @@
  * L'état est volontairement sérialisable en JSON pour être conservé dans le
  * stockage local du navigateur et repris après fermeture de l'onglet.
  */
-import { DISTRIBUTION, RACK_SIZE, VALUES, BLANK, SIZE } from './constants.js';
+import { DISTRIBUTION, RACK_SIZE, VALUES, BLANK, SIZE, difficultyByLevel } from './constants.js';
 import { createBoard, applyPlacements, validateMove } from './board.js';
 
 export const HUMAN = 0;
@@ -40,7 +40,15 @@ export class Game {
     this.bag = freshBag();
     this.players = [
       { name: options.humanName ?? 'Vous', rack: [], score: 0, isAI: false },
-      { name: options.computerName ?? 'Centurion', rack: [], score: 0, isAI: true },
+      // L'adversaire porte le nom de sa difficulté. « Centurion » désignait à
+      // la fois le jeu, le niveau le plus fort et tout adversaire calculé :
+      // on lisait « Centurion joue » en affrontant un Novice.
+      {
+        name: options.computerName ?? difficultyByLevel(this.level).name,
+        rack: [],
+        score: 0,
+        isAI: true,
+      },
     ];
     this.current = options.firstPlayer ?? HUMAN;
     this.history = [];

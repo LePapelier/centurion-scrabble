@@ -249,6 +249,8 @@ export class App {
       option.addEventListener('click', () => {
         this.level = difficulty.level;
         this.game.level = difficulty.level;
+        // La partie en cours change d'adversaire : son nom doit suivre.
+        this.game.players[COMPUTER].name = difficulty.name;
         this.save();
         this.renderLevels();
         this.renderScores();
@@ -431,11 +433,16 @@ export class App {
         tile.dataset.rackIndex = String(i);
         if (this.selected === i) tile.classList.add('selected');
         if (this.marked.has(i)) tile.classList.add('marked');
-        tile.append(document.createTextNode(letterChar(letter)));
+        // Un joker est un jeton vierge : il ne porte aucune lettre tant qu'on
+        // ne l'a pas posé, et ne vaut rien. Le « ? » d'avant se lisait comme
+        // une lettre, et sa valeur comme un score à faire.
+        const joker = letter === BLANK;
+        if (joker) tile.classList.add('blank');
+        if (!joker) tile.append(document.createTextNode(letterChar(letter)));
 
         const value = document.createElement('span');
         value.className = 'value';
-        value.textContent = String(VALUES[letter]);
+        value.textContent = String(joker ? 0 : VALUES[letter]);
         tile.append(value);
 
         shown.add(i);
@@ -646,7 +653,7 @@ export class App {
   endSentence() {
     if (this.game.winner === null) return 'Égalité parfaite.';
     if (this.game.winner === HUMAN) return 'Vous gagnez !';
-    return this.mode === 'solo' ? 'Centurion l’emporte.' : `${this.opponentName} l’emporte.`;
+    return `${this.game.players[COMPUTER].name} l’emporte.`;
   }
 
   /* ---------------------------------------------------------------- */
@@ -1403,6 +1410,8 @@ export class App {
 
   runComputerTurn() {
     this.busy = true;
+    document.querySelector('.thinking-label').textContent =
+      `${this.game.players[COMPUTER].name} réfléchit`;
     $('thinking').hidden = false;
     this.renderControls();
     this.renderScores();
