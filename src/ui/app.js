@@ -2001,7 +2001,15 @@ export class App {
     const live = Boolean(this.session?.connected);
     const reprise = !live && Boolean(this.session?.reconnecting);
     chip.className = `netchip ${live ? 'live' : 'lost'}`;
-    chip.textContent = live ? this.opponentName : reprise ? 'Reconnexion…' : 'Hors ligne';
+    // Le libellé vit dans son propre élément : c'est lui qui se tronque quand
+    // l'en-tête manque de place, la pastille de couleur restant visible.
+    chip.textContent = '';
+    const label = document.createElement('span');
+    label.className = 'netchip-label';
+    // « Reprise… » plutôt que « Reconnexion… » : à 390 px de large, le mot
+    // entier ne tient pas et se ferait tronquer.
+    label.textContent = live ? this.opponentName : reprise ? 'Reprise…' : 'Hors ligne';
+    chip.append(label);
   }
 
   /* ---------------------------------------------------------------- */

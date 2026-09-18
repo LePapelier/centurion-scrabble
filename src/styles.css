@@ -125,6 +125,7 @@ svg {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 8px;
   flex: none;
   container: entete / inline-size;
 }
@@ -244,10 +245,25 @@ svg {
   }
 
   .brand-tile::after { display: none; }
+
+  /* En partie à deux, l'état de la liaison prime sur le décor : la marque
+     cède la place qu'il faut à la pastille plutôt que de la pousser hors de
+     l'écran, et la mascotte se fait plus discrète. */
+  .topbar:has(.netchip:not([hidden])) .brand {
+    --brand-tile: clamp(10px, 2.9vw, 14px);
+    gap: 4px;
+  }
+
+  .topbar:has(.netchip:not([hidden])) .brand-mascot {
+    height: 38px;
+    margin-block: -2px;
+  }
 }
 
+/* Les boutons ne cèdent jamais de place : c'est la pastille qui se resserre. */
 .topbar-actions {
   display: flex;
+  flex: none;
   gap: 4px;
 }
 
@@ -1444,14 +1460,29 @@ svg {
   font-weight: 600;
   color: var(--text-dim);
   white-space: nowrap;
+  /* La pastille absorbe le manque de place au lieu de le répercuter : sans
+     quoi un libellé long — « Reconnexion… », un pseudo de dix-huit lettres —
+     pousse les boutons hors de l'écran. */
+  min-width: 0;
+  flex: 0 1 auto;
+  overflow: hidden;
 }
 
 .netchip::before {
   content: '';
+  flex: none;
   width: 7px;
   height: 7px;
   border-radius: 50%;
   background: currentColor;
+}
+
+/* Le libellé se tronque, la pastille garde sa forme et sa pastille de
+   couleur : on voit toujours l'état, même sans lire le mot en entier. */
+.netchip-label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .netchip.live {
