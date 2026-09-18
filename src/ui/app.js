@@ -215,8 +215,21 @@ export class App {
     for (let letter = 0; letter < 26; letter++) {
       const button = document.createElement('button');
       button.type = 'button';
-      button.textContent = letterChar(letter);
-      button.addEventListener('click', () => this.resolveBlank?.(letter));
+      button.append(document.createTextNode(letterChar(letter)));
+      // Le joker vaut zéro quelle que soit la lettre choisie : le bouton
+      // montre donc le jeton tel qu'il se posera, valeur comprise.
+      const value = document.createElement('span');
+      value.className = 'value';
+      value.textContent = '0';
+      button.append(value);
+
+      // Le choix se prend au premier contact. `pointerup` devance le clic sur
+      // mobile, où celui-ci peut se perdre après l'ouverture de la fenêtre ;
+      // `click` reste pour le clavier. Le second à survenir ne fait rien,
+      // `resolveBlank` étant vidé par le premier.
+      const choisir = () => this.resolveBlank?.(letter);
+      button.addEventListener('pointerup', choisir);
+      button.addEventListener('click', choisir);
       grid.append(button);
     }
   }
@@ -1067,7 +1080,6 @@ export class App {
 
   askBlankLetter() {
     const dialog = $('blank-dialog');
-    dialog.showModal();
     return new Promise((resolve) => {
       const finish = (value) => {
         this.resolveBlank = null;
@@ -1077,6 +1089,11 @@ export class App {
       this.resolveBlank = finish;
       $('blank-cancel').onclick = () => finish(null);
       dialog.onclose = () => this.resolveBlank && finish(null);
+
+      // La fenêtre s'ouvre à la frame suivante. Ouverte au milieu du geste qui
+      // vient de lâcher le jeton, elle reçoit le clic que le téléphone
+      // synthétise derrière le toucher, et le premier appui se perd.
+      requestAnimationFrame(() => dialog.showModal());
     });
   }
 
