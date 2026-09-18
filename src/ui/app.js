@@ -103,6 +103,8 @@ export class App {
     this.shownScores = [0, 0];
     this.scoreFrames = [0, 0];
     this.haloScore = null;
+    /** Halos de mot, du plus long au plus court ; le premier vient du balisage. */
+    this.halos = [];
     this.dragEndedAt = 0;
     this.dropCell = null;
     this.dropSource = null;
@@ -171,6 +173,7 @@ export class App {
   buildBoard() {
     const board = $('board');
     this.boardEl = board;
+    this.halos = [$('halo')];
     const fragment = document.createDocumentFragment();
     this.cells = [];
 
@@ -292,38 +295,50 @@ export class App {
   }
 
   /**
-   * Cerne le mot en cours s'il est jouable, et renvoie le verdict complet.
+   * Cerne les mots en cours dès que le coup est jouable, et renvoie le
+   * verdict complet.
+   *
+   * Tous les mots formés sont cernés, pas seulement le plus long : un coup
+   * qui achève un mot croisé le compte dans son score, il doit donc le
+   * montrer. Le plus long porte la pastille, qui annonce le total du coup.
+   *
    * @returns {object|null}
    */
   updateHalo() {
-    const halo = $('halo');
     const badge = $('halo-score');
 
     const active = this.pending.size > 0 && this.game.current === HUMAN && !this.game.finished;
     const verdict = active ? validateMove(this.game.board, this.placements(), this.dawg) : null;
 
     if (!verdict?.ok) {
-      halo.hidden = true;
+      this.hideHalos();
       this.haloScore = null;
       return verdict;
     }
 
-    // L'emprise suit le mot le plus long ; le score affiché est celui du coup
-    // entier, mots croisés et prime de scrabble compris.
-    const main = verdict.words.reduce((a, b) => (b.cells.length > a.cells.length ? b : a));
+    // Le plus long d'abord : il reçoit le halo qui porte la pastille, et
+    // l'ordre reste stable pendant que le joueur complète son mot, ce qui
+    // laisse les déplacements se faire en transition plutôt qu'en saut.
+    const words = [...verdict.words].sort((a, b) => b.cells.length - a.cells.length);
     const board = this.boardEl.getBoundingClientRect();
-    const first = this.cells[main.cells[0]].getBoundingClientRect();
-    const last = this.cells[main.cells[main.cells.length - 1]].getBoundingClientRect();
     const pad = Math.max(2, board.width * 0.006);
 
-    const wasHidden = halo.hidden;
-    // Les dimensions sont posées avant l'affichage : une apparition ne doit
-    // pas déclencher la transition de déplacement.
-    halo.style.left = `${first.left - board.left - pad}px`;
-    halo.style.top = `${first.top - board.top - pad}px`;
-    halo.style.width = `${last.right - first.left + pad * 2}px`;
-    halo.style.height = `${last.bottom - first.top + pad * 2}px`;
-    halo.hidden = false;
+    const wasHidden = this.halos[0].hidden;
+    words.forEach((word, rank) => {
+      const halo = this.haloAt(rank);
+      const first = this.cells[word.cells[0]].getBoundingClientRect();
+      const last = this.cells[word.cells[word.cells.length - 1]].getBoundingClientRect();
+      // Les dimensions sont posées avant l'affichage : une apparition ne doit
+      // pas déclencher la transition de déplacement.
+      halo.style.left = `${first.left - board.left - pad}px`;
+      halo.style.top = `${first.top - board.top - pad}px`;
+      halo.style.width = `${last.right - first.left + pad * 2}px`;
+      halo.style.height = `${last.bottom - first.top + pad * 2}px`;
+      halo.hidden = false;
+    });
+    for (let rank = words.length; rank < this.halos.length; rank++) {
+      this.halos[rank].hidden = true;
+    }
 
     if (verdict.score !== this.haloScore) {
       badge.textContent = String(verdict.score);
@@ -331,6 +346,27 @@ export class App {
       this.haloScore = verdict.score;
     }
     return verdict;
+  }
+
+  /**
+   * Le halo de rang donné, créé au besoin. Le rang 0 est celui du balisage,
+   * qui porte la pastille de score ; les suivants cernent les mots croisés,
+   * d'un trait plus discret pour ne pas noyer le plateau quand un coup en
+   * forme plusieurs.
+   */
+  haloAt(rank) {
+    while (this.halos.length <= rank) {
+      const extra = document.createElement('div');
+      extra.className = 'halo halo-crossing';
+      extra.hidden = true;
+      this.boardEl.append(extra);
+      this.halos.push(extra);
+    }
+    return this.halos[rank];
+  }
+
+  hideHalos() {
+    for (const halo of this.halos) halo.hidden = true;
   }
 
   /** Rejoue une animation déjà posée sur un élément. */

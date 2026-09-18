@@ -603,6 +603,15 @@ svg {
   from { opacity: 0; transform: scale(1.09); }
 }
 
+/* Mot croisé achevé par le coup : cerné lui aussi, mais d'une lueur plus
+   sourde. Un coup peut en former cinq — au même éclat que le mot principal,
+   le plateau deviendrait illisible. */
+.halo.halo-crossing {
+  box-shadow:
+    0 0 0 0.3cqw color-mix(in srgb, var(--valid) 14%, transparent),
+    0 0 2cqw color-mix(in srgb, var(--valid) 28%, transparent);
+}
+
 .halo-score {
   position: absolute;
   top: 0;
