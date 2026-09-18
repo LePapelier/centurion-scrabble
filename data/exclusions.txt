@@ -104,3 +104,44 @@ resu
 zebi
 zobi
 
+# Conjugaison entière d'un verbe « avuer » qui n'existe pas, héritée de
+# Morphalou — Dicollecte ne la connaît pas. AVULSION, AVUNCULAIRE et leurs
+# voisins sont de vrais mots : ils restent.
+avua
+avuai
+avuaient
+avuais
+avuait
+avuames
+avuant
+avuas
+avuasse
+avuassent
+avuasses
+avuassiez
+avuassions
+avuat
+avuates
+avue
+avuee
+avuees
+avuent
+avuer
+avuera
+avuerai
+avueraient
+avuerais
+avuerait
+avueras
+avuerent
+avuerez
+avueriez
+avuerions
+avuerons
+avueront
+avues
+avuez
+avuiez
+avuions
+avuons
+

@@ -28,3 +28,12 @@ lats
 pho
 vat
 
+# Signalés en partie, vérifiés valides, absents des deux lexiques.
+bobun
+bobuns
+bun
+buns
+qi
+qing
+qings
+
