@@ -2,3 +2,6 @@ node_modules/
 dist/
 .DS_Store
 *.log
+
+# Lexique source récupéré par `npm run dict:fetch` (8,9 Mo, LGPL-LR).
+data/morphalou-strict.txt
