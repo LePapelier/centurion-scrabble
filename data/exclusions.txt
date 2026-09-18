@@ -31,5 +31,14 @@ ua
 ue
 qu
 
-# Écarté sur avis du joueur : absent de l'ODS.
+# Écartés sur avis du joueur : absents de l'ODS. Morphalou est un lexique de
+# langue, il accueille des interjections et des abréviations que la
+# compétition ne reconnaît pas. WU reste en place, à vérifier.
 ja
+ok
+ud
+hm
+id
+vo
+bo
+po

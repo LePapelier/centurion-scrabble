@@ -49,7 +49,7 @@ certains réseaux d'entreprise bloquent WebRTC.
 
 ## Dictionnaire
 
-Le lexique compte 641 246 formes, filtré aux mots jouables : 2 à 15 lettres,
+Le lexique compte 641 239 formes, filtré aux mots jouables : 2 à 15 lettres,
 accents retirés, noms propres exclus.
 
 Sa source est **Morphalou 3.1** (ATILF/CNRS), sous licence **LGPL-LR**, dans
