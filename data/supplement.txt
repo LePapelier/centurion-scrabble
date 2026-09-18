@@ -60,3 +60,9 @@ leds
 eyeliner
 eyeliners
 
+# Mots de deux lettres manquants — la liste la plus sollicitée en jeu. L'ODS
+# en compte 81 ; nous en avions 79, ceux-ci complétaient le compte. OMS,
+# YE, ZE et ZO ont été vérifiés dans la foulée : invalides, malgré OM.
+om
+vs
+
