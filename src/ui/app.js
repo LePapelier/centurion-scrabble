@@ -550,7 +550,7 @@ export class App {
     const hasPending = this.pending.size > 0;
 
     $('btn-recall').disabled = !hasPending;
-    $('btn-shuffle').disabled = !myTurn;
+    $('btn-shuffle').disabled = !this.canArrange();
     $('btn-hint').disabled = !myTurn;
     $('btn-more').disabled = !myTurn;
     $('btn-exchange-wide').disabled = !myTurn || this.game.bagCount < RACK_SIZE;
@@ -597,8 +597,9 @@ export class App {
       return;
     }
     if (this.game.current !== HUMAN) {
-      status.textContent =
+      const tour =
         this.mode === 'solo' ? 'Au tour de votre adversaire.' : `Au tour de ${this.opponentName}.`;
+      status.textContent = this.pending.size > 0 ? `Coup préparé. ${tour}` : tour;
       return;
     }
     if (this.pending.size > 0) {
@@ -637,8 +638,42 @@ export class App {
     }));
   }
 
+  /**
+   * Manipuler ses jetons ne dépend pas du tour : on prépare son coup pendant
+   * que l'adversaire réfléchit, comme on avance une pièce en pensée aux
+   * échecs. Seul l'envoi du coup reste réservé à son tour.
+   */
+  canArrange() {
+    return !this.game.finished;
+  }
+
+  /**
+   * Retire les poses préparées que le plateau a rattrapées : l'adversaire a
+   * pu jouer sur une case qu'on se réservait. Les jetons retournent au
+   * chevalet, leur référence n'étant plus tenue par personne.
+   * @returns {number} nombre de poses reprises
+   */
+  prunePending() {
+    let reprises = 0;
+    for (const index of [...this.pending.keys()]) {
+      if (this.game.board.letters[index] >= 0) {
+        this.pending.delete(index);
+        reprises++;
+      }
+    }
+    if (reprises > 0) {
+      this.cursor = null;
+      this.toast(
+        reprises === 1
+          ? 'Une lettre préparée est revenue : sa case a été prise.'
+          : `${reprises} lettres préparées sont revenues : leurs cases ont été prises.`,
+      );
+    }
+    return reprises;
+  }
+
   onCellTap(index) {
-    if (this.game.finished || this.busy || this.game.current !== HUMAN) return;
+    if (!this.canArrange()) return;
     if (this.exchangeMode) return;
 
     if (this.pending.has(index)) {
@@ -788,7 +823,7 @@ export class App {
     };
 
     element.addEventListener('pointerdown', (event) => {
-      if (this.game.finished || this.busy || this.game.current !== HUMAN) return;
+      if (!this.canArrange()) return;
       startX = event.clientX;
       startY = event.clientY;
       dragging = false;
@@ -1037,7 +1072,7 @@ export class App {
   bindKeyboard() {
     window.addEventListener('keydown', (event) => {
       if (event.target.closest('dialog')) return;
-      if (this.game.finished || this.busy || this.game.current !== HUMAN) return;
+      if (!this.canArrange()) return;
 
       if (event.key === 'Enter') {
         event.preventDefault();
@@ -1417,6 +1452,7 @@ export class App {
 
     this.busy = false;
     $('thinking').hidden = true;
+    this.prunePending();
     this.save();
     this.render();
 
@@ -1752,13 +1788,19 @@ export class App {
     this.game = Game.fromSnapshot(snap);
     this.opponentName = snap.names[1];
 
-    this.pending.clear();
+    const entry = snap.history.length > before ? snap.history.at(-1) : null;
+
+    // Un coup préparé survit au coup de l'adversaire : mon chevalet n'a pas
+    // bougé, mes poses restent les miennes — seules tombent celles dont la
+    // case vient d'être prise. Mon propre coup validé, lui, renouvelle le
+    // chevalet : les poses y référeraient les mauvaises lettres.
+    if (entry?.player === COMPUTER) this.prunePending();
+    else this.pending.clear();
+
     this.selected = null;
-    this.cursor = null;
     this.busy = false;
     this.cancelExchange();
-
-    const entry = snap.history.length > before ? snap.history.at(-1) : null;
+    if (this.pending.size === 0) this.cursor = null;
     if (entry && entry.player === COMPUTER) {
       this.revealCells = [...(snap.lastMoveCells ?? [])];
       this.revealKind = 'land';
