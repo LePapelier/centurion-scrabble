@@ -414,6 +414,10 @@ svg {
 .board-wrap {
   flex: 1 1 auto;
   min-height: 0;
+  /* Conteneur de taille : le plateau s'y ajuste, au lieu de supposer une
+     hauteur fixe pour tout le reste de l'écran, hypothèse fausse sur les
+     petits écrans (barres du navigateur mobile). */
+  container-type: size;
   display: grid;
   /* Ancré en bas : la place excédentaire se reporte au-dessus du plateau
      plutôt que de séparer la ligne d'état du chevalet. */
@@ -452,7 +456,8 @@ svg {
   grid-template-columns: repeat(15, minmax(0, 1fr));
   grid-template-rows: repeat(15, minmax(0, 1fr));
   gap: 2px;
-  width: var(--board-max);
+  /* 42 px : ligne d'état (26), écart qui la précède (12), marge sous elle (4). */
+  width: min(var(--board-max), 100cqw, calc(100cqh - 42px));
   max-width: 100%;
   aspect-ratio: 1;
   padding: var(--frame);
@@ -610,6 +615,20 @@ svg {
 
 .tile.blank {
   background: linear-gradient(165deg, #f6efff 0%, var(--tile-blank) 100%);
+}
+
+/* La lettre est centrée dans la zone qui exclut le coin de la valeur : les
+   lettres larges (K, W, X, M) ne mordent plus sur un « 10 ». */
+.tile,
+.rack-tile,
+.drag-ghost {
+  padding: 0 9% 7% 0;
+}
+
+.tile .value,
+.rack-tile .value,
+.drag-ghost .value {
+  letter-spacing: -0.05em;
 }
 
 .tile .value {
