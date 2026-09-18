@@ -681,7 +681,7 @@ export class App {
         element.classList.add('dragging');
         const box = element.getBoundingClientRect();
         ghost = element.cloneNode(true);
-        ghost.className = 'drag-ghost';
+        ghost.className = element.classList.contains('blank') ? 'drag-ghost blank' : 'drag-ghost';
         ghost.style.width = `${box.width}px`;
         ghost.style.height = `${box.height}px`;
         ghost.style.fontSize = getComputedStyle(element).fontSize;
@@ -752,14 +752,11 @@ export class App {
       cell.classList.toggle('drop-blocked', !free);
     }
 
-    const overRack = Boolean(under?.closest('.rack')) && !cell;
-    $('rack').classList.toggle('drop-active', overRack);
   }
 
   clearDropHighlight() {
     this.dropCell?.classList.remove('drop-target', 'drop-blocked');
     this.dropCell = null;
-    $('rack').classList.remove('drop-active');
   }
 
   /** Applique le lâcher d'un jeton à la position du pointeur. */

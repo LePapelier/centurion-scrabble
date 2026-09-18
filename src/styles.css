@@ -91,7 +91,7 @@ svg {
   /* Le plateau est carré : sa taille est bornée par la largeur disponible et
      par la hauteur restante une fois l'en-tête et le chevalet déduits. Le
      chevalet reprend la même largeur pour rester aligné sous le plateau. */
-  --board-max: min(100%, calc(100dvh - 300px));
+  --board-max: min(100%, calc(100dvh - 310px));
 
   display: flex;
   flex-direction: column;
@@ -468,10 +468,6 @@ svg {
   outline-offset: -0.25cqw;
 }
 
-.rack.drop-active {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
-}
 
 /* Retour tactile sur les cases encore libres seulement : une case occupée
    ne réagit pas au toucher, elle ne doit donc pas bouger. */
@@ -698,23 +694,49 @@ svg {
   container-type: inline-size;
 }
 
+/* Porte-lettres en bois : une gorge sombre où reposent les jetons et, en
+   contrebas, la lèvre qui les retient. L'ensemble n'ajoute que quelques
+   pixels de hauteur. */
 .rack {
+  position: relative;
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   gap: 5px;
-  padding: 6px;
-  border-radius: var(--radius);
-  background: linear-gradient(180deg, #2a343f 0%, #1b232c 100%);
-  box-shadow: var(--shadow);
+  padding: 7px 8px 15px;
+  border-radius: 7px 7px 10px 10px;
+  background: linear-gradient(180deg, #8d6844 0%, #7c5a37 38%, #6a4b2c 62%, #553b21 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.3),
+    inset 0 -1px 0 rgb(0 0 0 / 0.45),
+    0 2px 3px rgb(0 0 0 / 0.4),
+    0 10px 20px -6px rgb(0 0 0 / 0.55);
   touch-action: manipulation;
   user-select: none;
 }
 
+/* La lèvre avant, légèrement plus claire, éclairée par le haut. */
+.rack::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 12px;
+  border-radius: 0 0 10px 10px;
+  background: linear-gradient(180deg, #9a7350 0%, #82603a 55%, #5e4224 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.32),
+    inset 0 -2px 3px rgb(0 0 0 / 0.3);
+  pointer-events: none;
+}
+
 .rack-slot {
   position: relative;
+  z-index: 1;
   aspect-ratio: 1;
-  border-radius: 6px;
-  background: rgb(0 0 0 / 0.22);
+  border-radius: 5px;
+  background: rgb(38 24 12 / 0.55);
+  box-shadow: inset 0 2px 4px rgb(0 0 0 / 0.5), inset 0 -1px 0 rgb(255 255 255 / 0.06);
 }
 
 .rack-tile {
@@ -772,8 +794,12 @@ svg {
   }
 }
 
+/* Jeton suivi par le pointeur. Il ne conserve pas les classes de sa source :
+   sa valeur doit donc être replacée en coin ici, faute de quoi elle
+   redevient un simple élément centré à pleine taille. */
 .drag-ghost {
   position: fixed;
+  inset: auto;
   z-index: 60;
   display: grid;
   place-items: center;
@@ -782,9 +808,23 @@ svg {
   color: var(--tile-text);
   font-weight: 700;
   line-height: 1;
-  box-shadow: 0 12px 22px rgb(0 0 0 / 0.5);
+  box-shadow: 0 14px 26px rgb(0 0 0 / 0.55);
   pointer-events: none;
-  transform: translate(-50%, -50%) scale(1.08);
+  transform: translate(-50%, -50%) scale(1.06) rotate(-3deg);
+  animation: none;
+}
+
+.drag-ghost.blank {
+  background: linear-gradient(165deg, #f6efff 0%, var(--tile-blank) 100%);
+}
+
+.drag-ghost .value {
+  position: absolute;
+  right: 7%;
+  bottom: 2%;
+  font-size: 0.4em;
+  font-weight: 600;
+  opacity: 0.6;
 }
 
 /* --- Actions ------------------------------------------------------ */
@@ -1208,7 +1248,7 @@ svg {
    commandes. La requête porte sur `.tray`, déclaré conteneur en ligne.
    À spécificité égale, seule cette position après la règle ci-dessus lui
    permet de la surcharger. */
-@container (min-width: 500px) {
+@container (min-width: 520px) {
   .btn-label { display: inline; }
 
   .actions .btn {
@@ -1399,7 +1439,7 @@ svg {
        `--board-h` ne dépend que de la fenêtre : il sert aussi à borner la
        largeur totale, pour que la mise en page épouse le plateau au lieu de
        le laisser flotter au milieu d'une colonne trop large. */
-    --board-h: calc(100dvh - 352px);
+    --board-h: calc(100dvh - 362px);
     --board-max: min(100%, var(--board-h));
     max-width: min(1400px, calc(var(--board-h) + 420px));
     display: grid;
@@ -1494,6 +1534,11 @@ svg {
     padding: 9px 6px;
     font-size: 0.85rem;
   }
+
+  /* Ces commandes vivent hors du chevalet : la requête de conteneur qui
+     pilote les libellés ne les atteint pas. Sélecteur plus spécifique que
+     la règle de masquage, donc indépendant de l'ordre. */
+  .side-actions .btn-label { display: inline; }
 
   /* Sur un plateau de 650 px, un chevalet de même largeur donnerait des
      jetons démesurés : on le resserre sous le plateau. */
