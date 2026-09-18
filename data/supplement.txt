@@ -47,3 +47,11 @@ phos
 qis
 xis
 
+# Sigles lexicalisés en noms communs — « une led », « une del » — que les
+# deux lexiques ignorent. Les autres du même genre (BD, SMS, OGM, VTT) sont
+# bien invalides et déjà absents : vérifiés aussi.
+del
+dels
+led
+leds
+
