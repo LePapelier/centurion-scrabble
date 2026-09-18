@@ -27,6 +27,11 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      # Le lexique source est hors dépôt : sans lui, la vérification
+      # comparerait le dictionnaire livré au lexique de repli et le
+      # déclarerait faux. Le récupérer donne au passage un vrai contrôle
+      # d'intégrité — le DAWG publié doit correspondre à sa source épinglée.
+      - run: npm run dict:fetch
       - run: node tools/check-dict.mjs
       - run: npm run build
       - uses: actions/upload-pages-artifact@v3
