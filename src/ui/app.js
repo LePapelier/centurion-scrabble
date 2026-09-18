@@ -1413,8 +1413,21 @@ export class App {
       const move = message.move;
       if (!move) this.toast('Aucun coup possible avec ce chevalet.', 'error');
       else {
-        const main = move.words.reduce((a, b) => (a.word.length >= b.word.length ? a : b));
-        this.toast(`Essayez ${main.word} en ${coordName(move.placements[0].row * SIZE + move.placements[0].col)} (+${move.score})`);
+        // Le mot annoncé est celui que le joueur doit composer, c'est-à-dire
+        // celui qui compte le plus de lettres à poser — et non le plus long.
+        // Un coup qui ajoute un S à un mot déjà sur le plateau forme un mot
+        // plus long que celui qu'on pose : l'indice envoyait alors « terminer »
+        // un mot déjà écrit, en taisant les sept lettres du vrai coup.
+        const posees = new Set(move.placements.map((p) => p.row * SIZE + p.col));
+        const aPoser = (word) => word.cells.filter((i) => posees.has(i)).length;
+        const main = move.words.reduce((a, b) => {
+          if (aPoser(b) !== aPoser(a)) return aPoser(b) > aPoser(a) ? b : a;
+          if (b.word.length !== a.word.length) return b.word.length > a.word.length ? b : a;
+          return b.score > a.score ? b : a;
+        });
+        // La case annoncée est le début du mot nommé, non la première lettre
+        // posée : c'est là que le joueur va poser les yeux.
+        this.toast(`Essayez ${main.word} en ${coordName(main.cells[0])} (+${move.score})`);
       }
       this.renderControls();
       return;
