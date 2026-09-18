@@ -31,12 +31,11 @@ ua
 ue
 qu
 
-# Écartés sur avis du joueur : absents de l'ODS. Morphalou est un lexique de
-# langue, il accueille des interjections et des abréviations que la
-# compétition ne reconnaît pas. WU reste en place, à vérifier.
+# Écartés après vérification sur 1mot.net : absents de l'ODS. Morphalou est
+# un lexique de langue, il accueille des interjections et des abréviations
+# que la compétition ne reconnaît pas. WU et UD, eux, sont bien valides.
 ja
 ok
-ud
 hm
 id
 vo
@@ -76,4 +75,32 @@ zyva
 # Symbole de chimie, unité
 ph
 kbit
+
+# --- Vérifiés un par un sur 1mot.net ---------------------------------
+# Les interjections ne se trient pas à la forme : PFF, PFFT, MMM, BRRR,
+# GRRR, PSST et PST sont valides, leurs voisines non. D'où cette liste
+# nominative plutôt qu'une règle.
+
+# Interjections refusées
+beee
+brr
+eee
+kss
+pfff
+pft
+reee
+tss
+zzz
+
+# Sigles et abréviations refusés
+abc
+atm
+deg
+gafa
+
+# Argot refusé
+prem
+resu
+zebi
+zobi
 

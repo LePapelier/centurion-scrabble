@@ -11,3 +11,20 @@ daw
 
 # Présents dans le lexique précédent, absents de Morphalou.
 xi
+
+# --- Vérifiés valides sur 1mot.net, absents des deux lexiques ---------
+# Les lexiques de langue ignorent des mots que la compétition admet :
+# emprunts, monnaies, argot lexicalisé, troncations.
+aids
+doc
+docs
+jab
+jaja
+jajas
+jam
+keuf
+koi
+lats
+pho
+vat
+
