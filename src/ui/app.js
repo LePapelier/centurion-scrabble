@@ -105,6 +105,7 @@ export class App {
     this.haloScore = null;
     this.dragEndedAt = 0;
     this.dropCell = null;
+    this.dropSource = null;
 
     /** 'solo' face à l'IA, 'host' ou 'guest' en partie à deux. */
     this.mode = 'solo';
@@ -775,25 +776,60 @@ export class App {
     const cell = under?.closest('.cell') ?? null;
 
     if (cell !== this.dropCell) {
-      this.dropCell?.classList.remove('drop-target', 'drop-blocked');
+      this.dropCell?.classList.remove('drop-target', 'drop-swap', 'drop-blocked');
       this.dropCell = cell;
     }
 
+    let swapping = false;
     if (cell) {
       const index = Number(cell.dataset.index);
-      // La case de départ d'un jeton déplacé reste une destination valable.
-      const free =
-        index === origin.index ||
-        (this.game.board.letters[index] < 0 && !this.pending.has(index));
+      const { free, swap } = this.dropKind(origin, index);
+      swapping = swap;
       cell.classList.toggle('drop-target', free);
-      cell.classList.toggle('drop-blocked', !free);
+      cell.classList.toggle('drop-swap', swap);
+      cell.classList.toggle('drop-blocked', !free && !swap);
     }
 
+    // Le jeton suivi par le pointeur recouvre la case qu'il survole, et le
+    // doigt par-dessus : un jalon posé là ne se verrait pas. C'est donc la
+    // place libérée, à l'autre bout de l'échange, qui s'allume.
+    const source = swapping ? this.dragOriginElement(origin) : null;
+    if (source !== this.dropSource) {
+      this.dropSource?.classList.remove('drop-swap-origin');
+      source?.classList.add('drop-swap-origin');
+      this.dropSource = source;
+    }
+  }
+
+  /** La case ou l'emplacement de chevalet d'où part le jeton déplacé. */
+  dragOriginElement(origin) {
+    return origin.from === 'board'
+      ? this.cells[origin.index] ?? null
+      : $('rack').children[origin.rackIndex] ?? null;
+  }
+
+  /**
+   * Ce que vaut un lâcher sur une case donnée.
+   *
+   * `free` : la case est vide, le jeton s'y pose. La case de départ d'un
+   * jeton déplacé en fait partie — l'y reposer doit rester sans effet.
+   *
+   * `swap` : la case porte une pose en attente, que le jeton lâché prend en
+   * remplaçant. Les deux échangent alors leur place, l'autre repartant vers
+   * le plateau ou vers le chevalet selon d'où vient celui qu'on tient. Un
+   * jeton déjà validé, lui, n'est plus déplaçable : la case reste refusée.
+   */
+  dropKind(origin, index) {
+    if (index === origin.index) return { free: true, swap: false };
+    if (this.game.board.letters[index] >= 0) return { free: false, swap: false };
+    return { free: !this.pending.has(index), swap: this.pending.has(index) };
   }
 
   clearDropHighlight() {
-    this.dropCell?.classList.remove('drop-target', 'drop-blocked');
+    this.dropCell?.classList.remove('drop-target', 'drop-swap', 'drop-blocked');
     this.dropCell = null;
+    this.dropSource?.classList.remove('drop-swap-origin');
+    this.dropSource = null;
   }
 
   /** Applique le lâcher d'un jeton à la position du pointeur. */
@@ -809,10 +845,12 @@ export class App {
 
     if (cell) {
       const index = Number(cell.dataset.index);
-      const free = this.game.board.letters[index] < 0 && !this.pending.has(index);
+      const { free, swap } = this.dropKind(origin, index);
 
       if (origin.from === 'rack') {
-        if (free) {
+        if (free || swap) {
+          // Sur une case occupée, poser écrase la pose en attente : son jeton
+          // n'est plus référencé, et le chevalet le reprend de lui-même.
           this.placeTile(index, origin.rackIndex);
           return;
         }
@@ -824,6 +862,14 @@ export class App {
         const tile = this.pending.get(origin.index);
         this.pending.delete(origin.index);
         this.pending.set(index, tile);
+        this.cursor = null;
+        this.refresh();
+        return;
+      } else if (swap) {
+        // Deux poses en attente échangent leur case.
+        const moved = this.pending.get(origin.index);
+        this.pending.set(origin.index, this.pending.get(index));
+        this.pending.set(index, moved);
         this.cursor = null;
         this.refresh();
         return;

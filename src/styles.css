@@ -519,16 +519,56 @@ svg {
 }
 
 /* Destination survolée pendant qu'un jeton est déplacé : vert si la case
-   accueille la lettre, rouge si elle est déjà prise. */
-.cell.drop-target {
-  outline: 0.5cqw solid var(--valid);
-  outline-offset: -0.25cqw;
-  background-image: linear-gradient(color-mix(in srgb, var(--valid) 28%, transparent) 0 0);
+   accueille la lettre, or si elle en porte une déjà et que les deux vont
+   échanger leur place, rouge si le lâcher est refusé.
+
+   Le jalon est porté par un calque au-dessus du jeton : une case occupée en
+   masquerait autrement le pourtour, et c'est justement sur une case occupée
+   que la distinction compte. */
+.cell.drop-target::after,
+.cell.drop-swap::after,
+.cell.drop-blocked::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  border-radius: 2.5px;
+  pointer-events: none;
 }
 
-.cell.drop-blocked {
-  outline: 0.5cqw solid var(--danger);
-  outline-offset: -0.25cqw;
+.cell.drop-target::after {
+  box-shadow: inset 0 0 0 0.5cqw var(--valid);
+  background: color-mix(in srgb, var(--valid) 28%, transparent);
+}
+
+/* L'or teinte aussi le jeton qu'on va déloger : on voit lequel part. */
+.cell.drop-swap::after {
+  box-shadow: inset 0 0 0 0.5cqw var(--gold);
+  background: color-mix(in srgb, var(--gold) 30%, transparent);
+}
+
+.cell.drop-blocked::after {
+  box-shadow: inset 0 0 0 0.5cqw var(--danger);
+}
+
+/* L'autre bout de l'échange : la place que le jeton tenu va libérer, et où
+   celui qu'on déloge va venir. Creux, pour se lire comme une place en
+   attente plutôt que comme une cible. */
+.cell.drop-swap-origin::after,
+.rack-slot.drop-swap-origin::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  border-radius: 2.5px;
+  pointer-events: none;
+  box-shadow: inset 0 0 0 0.5cqw var(--gold);
+  animation: pulse 1.4s ease-in-out infinite;
+}
+
+.rack-slot.drop-swap-origin::after {
+  border-radius: 6px;
+  box-shadow: inset 0 0 0 2px var(--gold);
 }
 
 
