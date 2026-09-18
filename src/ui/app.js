@@ -321,6 +321,7 @@ export class App {
 
     if (!verdict?.ok) {
       this.hideHalos();
+      badge.hidden = true;
       this.haloScore = null;
       return verdict;
     }
@@ -349,6 +350,7 @@ export class App {
       this.halos[rank].hidden = true;
     }
 
+    badge.hidden = false;
     if (verdict.score !== this.haloScore) {
       badge.textContent = String(verdict.score);
       if (!wasHidden) this.replay(badge, 'bump');
