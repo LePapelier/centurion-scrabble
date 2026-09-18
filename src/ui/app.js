@@ -614,7 +614,16 @@ export class App {
     this.refresh();
   }
 
-  async placeTile(index, rackIndex) {
+  /**
+   * Pose un jeton du chevalet sur une case.
+   *
+   * @param {number} index case visée
+   * @param {number} rackIndex jeton du chevalet
+   * @param {{advance?: boolean}} [options] `advance` fait glisser le point de
+   *   saisie clavier sur la case suivante. Réservé à la frappe : après une
+   *   pose à la souris ou au doigt, rien n'indique où ira la lettre d'après.
+   */
+  async placeTile(index, rackIndex, { advance = false } = {}) {
     const letter = this.game.players[HUMAN].rack[rackIndex];
     if (letter === undefined) return;
 
@@ -630,7 +639,9 @@ export class App {
 
     this.pending.set(index, { letter: placed, blank, rackIndex });
     this.selected = null;
-    this.cursor = { index: this.nextCell(index), direction: this.cursor?.direction ?? 0 };
+    this.cursor = advance
+      ? { index: this.nextCell(index), direction: this.cursor?.direction ?? 0 }
+      : null;
     this.refresh();
   }
 
@@ -787,7 +798,7 @@ export class App {
         const tile = this.pending.get(origin.index);
         this.pending.delete(origin.index);
         this.pending.set(index, tile);
-        this.cursor = { index: this.nextCell(index), direction: this.cursor?.direction ?? 0 };
+        this.cursor = null;
         this.refresh();
         return;
       }
@@ -919,7 +930,7 @@ export class App {
         this.cursor = { index: this.nextCell(target), direction: this.cursor.direction };
         this.refresh();
       } else {
-        this.placeTile(target, index);
+        this.placeTile(target, index, { advance: true });
       }
     });
   }
