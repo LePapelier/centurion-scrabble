@@ -46,6 +46,8 @@ const PREMIUM_LABEL = {
 const STORAGE_KEY = 'centurion-scrabble/partie';
 const LEVEL_KEY = 'centurion-scrabble/niveau';
 const NAME_KEY = 'centurion-scrabble/nom';
+/** Nom montré à l'adversaire quand le joueur n'en a choisi aucun. */
+const DEFAULT_NAME = 'Joueur';
 const MIN_THINKING_MS = 450;
 
 /** Décalage entre deux jetons lors de la révélation d'un coup. */
@@ -114,7 +116,12 @@ export class App {
     this.session = null;
     /** Une partie en réseau a été lancée : un « hello » vaut alors retour. */
     this.netStarted = false;
-    this.myName = localStorage.getItem(NAME_KEY) || 'Joueur';
+    // Vide tant que le joueur n'a rien choisi : le champ doit s'offrir libre,
+    // et non demander qu'on efface un nom qu'on n'a pas mis. Les versions
+    // précédentes enregistraient le nom par défaut dès la première ouverture :
+    // on ne le prend pas pour un choix.
+    const enregistre = localStorage.getItem(NAME_KEY) ?? '';
+    this.myName = enregistre === DEFAULT_NAME ? '' : enregistre;
     this.opponentName = 'Adversaire';
 
     this.level = Number(localStorage.getItem(LEVEL_KEY)) || 3;
@@ -1323,7 +1330,7 @@ export class App {
     this.game.endReason =
       this.mode === 'solo'
         ? 'Vous avez abandonné la partie.'
-        : `${this.myName} a abandonné la partie.`;
+        : `${this.playerName()} a abandonné la partie.`;
     this.save();
     this.render();
     this.broadcast();
@@ -1516,7 +1523,9 @@ export class App {
     const nameField = $('mp-name');
     nameField.value = this.myName;
     nameField.onchange = () => {
-      this.myName = nameField.value.trim().slice(0, 18) || 'Joueur';
+      // Le champ n'est jamais repeuplé d'un nom par défaut : le laisser vide
+      // est un choix valable, et y réécrire obligerait à l'effacer encore.
+      this.myName = nameField.value.trim().slice(0, 18);
       nameField.value = this.myName;
       try {
         localStorage.setItem(NAME_KEY, this.myName);
@@ -1650,7 +1659,7 @@ export class App {
         // Le code a rempli son office : on le retire de l'adresse pour qu'un
         // rechargement ne relance pas une connexion vers une partie close.
         clearLocationCode();
-        this.session.send({ t: 'hello', name: this.myName });
+        this.session.send({ t: 'hello', name: this.playerName() });
       },
       onData: (message) => this.onPeerData(message),
       onDropped: (reason) => this.onPeerDropped(reason),
@@ -1669,7 +1678,7 @@ export class App {
     const first = Math.random() < 0.5 ? HUMAN : COMPUTER;
     this.game = new Game({
       firstPlayer: first,
-      humanName: this.myName,
+      humanName: this.playerName(),
       computerName: this.opponentName,
     });
 
@@ -1679,7 +1688,7 @@ export class App {
     this.cancelExchange();
     this.shownScores = [0, 0];
 
-    this.session.send({ t: 'welcome', name: this.myName });
+    this.session.send({ t: 'welcome', name: this.playerName() });
     this.render();
     this.broadcast();
     $('mp-dialog').close();
@@ -1714,7 +1723,7 @@ export class App {
         // L'adversaire revient d'une coupure : on lui rend la partie en cours
         // plutôt que d'en ouvrir une autre sous ses pieds.
         if (this.netStarted) {
-          this.session.send({ t: 'welcome', name: this.myName });
+          this.session.send({ t: 'welcome', name: this.playerName() });
           this.broadcast();
           $('mp-dialog').close();
           this.setNetStatus('Adversaire revenu. Partie reprise.', 'live');
@@ -1865,6 +1874,11 @@ export class App {
   }
 
   /* --- Assainissement des messages reçus ---------------------------- */
+
+  /** Nom à transmettre : celui du joueur, ou un nom neutre s'il n'en a pas mis. */
+  playerName() {
+    return this.myName.trim() || DEFAULT_NAME;
+  }
 
   cleanName(raw) {
     const name = String(raw ?? '').trim().slice(0, 18);
