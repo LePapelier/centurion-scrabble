@@ -699,14 +699,30 @@ export class App {
 
       if (!dragging) {
         dragging = true;
-        element.classList.add('dragging');
         const box = element.getBoundingClientRect();
-        ghost = element.cloneNode(true);
-        ghost.className = element.classList.contains('blank') ? 'drag-ghost blank' : 'drag-ghost';
+
+        // Le jeton suivi par le pointeur est la tuile elle-même, clonée avec
+        // ses classes : elle doit être identique à celle qu'on a saisie. Le
+        // clone est pris avant « dragging », qui rend l'original invisible.
+        const face = element.cloneNode(true);
+        // Les tailles de la tuile sont en « cqw », résolues contre le plateau
+        // ou le chevalet que le fantôme quitte. Tout en dérive par `em` : il
+        // suffit de figer la taille de police pour que le reste suive.
+        face.style.fontSize = getComputedStyle(element).fontSize;
+
+        // L'enveloppe porte la position et la taille ; la tuile s'y tend par
+        // `inset: 0`, comme dans sa case d'origine. Les marges internes de la
+        // tuile sont en pourcentage : il leur faut ce bloc conteneur à la
+        // bonne taille, sans quoi elles se résolvent contre la fenêtre et
+        // chassent la lettre dans le coin.
+        ghost = document.createElement('div');
+        ghost.className = 'drag-ghost';
         ghost.style.width = `${box.width}px`;
         ghost.style.height = `${box.height}px`;
-        ghost.style.fontSize = getComputedStyle(element).fontSize;
+        ghost.append(face);
         document.body.append(ghost);
+
+        element.classList.add('dragging');
       }
       ghost.style.left = `${event.clientX}px`;
       ghost.style.top = `${event.clientY}px`;

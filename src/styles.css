@@ -620,14 +620,12 @@ svg {
 /* La lettre est centrée dans la zone qui exclut le coin de la valeur : les
    lettres larges (K, W, X, M) ne mordent plus sur un « 10 ». */
 .tile,
-.rack-tile,
-.drag-ghost {
+.rack-tile {
   padding: 0 9% 7% 0;
 }
 
 .tile .value,
-.rack-tile .value,
-.drag-ghost .value {
+.rack-tile .value {
   letter-spacing: -0.05em;
 }
 
@@ -635,7 +633,9 @@ svg {
   position: absolute;
   right: 4%;
   bottom: 2%;
-  font-size: 1.9cqw;
+  /* 1.9cqw rapporté aux 4cqw de la tuile : même rendu, mais la mesure suit
+     la tuile au lieu du plateau, et survit donc au clone du glissement. */
+  font-size: 0.475em;
   font-weight: 600;
   opacity: 0.65;
 }
@@ -644,8 +644,8 @@ svg {
    halo, qui signale que le mot est jouable. */
 .tile.pending {
   box-shadow:
-    0 0 0 0.3cqw rgb(255 255 255 / 0.55),
-    0 0.6cqw 1.2cqw rgb(0 0 0 / 0.45),
+    0 0 0 0.075em rgb(255 255 255 / 0.55),
+    0 0.15em 0.3em rgb(0 0 0 / 0.45),
     inset 0 -1.5px 0 rgb(0 0 0 / 0.18);
 }
 
@@ -876,37 +876,27 @@ svg {
   }
 }
 
-/* Jeton suivi par le pointeur. Il ne conserve pas les classes de sa source :
-   sa valeur doit donc être replacée en coin ici, faute de quoi elle
-   redevient un simple élément centré à pleine taille. */
+/* Jeton suivi par le pointeur. L'enveloppe ne porte que la position, la
+   taille et l'élan ; la tuile qu'elle contient est le clone de celle qu'on a
+   saisie, avec ses propres classes. Elle garde donc son apparence sans que
+   rien n'ait à être redéfini ici — et sa taille donne aux marges internes de
+   la tuile, exprimées en pourcentage, le bloc conteneur qu'elles attendent. */
 .drag-ghost {
   position: fixed;
   inset: auto;
   z-index: 60;
-  display: grid;
-  place-items: center;
-  border-radius: 6px;
-  background: linear-gradient(165deg, #fdf3dd 0%, var(--tile) 55%, var(--tile-edge) 100%);
-  color: var(--tile-text);
-  font-weight: 700;
-  line-height: 1;
-  box-shadow: 0 14px 26px rgb(0 0 0 / 0.55);
   pointer-events: none;
   transform: translate(-50%, -50%) scale(1.06) rotate(-3deg);
+  /* `drop-shadow` épouse les coins arrondis de la tuile, là où `box-shadow`
+     dessinerait l'ombre du rectangle de l'enveloppe. */
+  filter: drop-shadow(0 14px 26px rgb(0 0 0 / 0.55));
+}
+
+/* Le jeton est saisi, pas en train d'arriver : ni animation d'entrée, ni
+   transition de survol ne doivent se rejouer sous le pointeur. */
+.drag-ghost > * {
   animation: none;
-}
-
-.drag-ghost.blank {
-  background: linear-gradient(165deg, #f6efff 0%, var(--tile-blank) 100%);
-}
-
-.drag-ghost .value {
-  position: absolute;
-  right: 4%;
-  bottom: 2%;
-  font-size: 0.476em;
-  font-weight: 600;
-  opacity: 0.6;
+  transition: none;
 }
 
 /* --- Actions ------------------------------------------------------ */
