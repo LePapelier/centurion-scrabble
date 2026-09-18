@@ -215,13 +215,9 @@ export class App {
     for (let letter = 0; letter < 26; letter++) {
       const button = document.createElement('button');
       button.type = 'button';
+      // Le bouton montre le jeton tel qu'il se posera : la lettre seule, sans
+      // valeur en coin, un joker n'en portant pas.
       button.append(document.createTextNode(letterChar(letter)));
-      // Le joker vaut zéro quelle que soit la lettre choisie : le bouton
-      // montre donc le jeton tel qu'il se posera, valeur comprise.
-      const value = document.createElement('span');
-      value.className = 'value';
-      value.textContent = '0';
-      button.append(value);
 
       // Le choix se prend au premier contact. `pointerup` devance le clic sur
       // mobile, où celui-ci peut se perdre après l'ouverture de la fenêtre ;

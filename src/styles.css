@@ -31,7 +31,6 @@
   --tile: #f0e2c4;
   --tile-edge: #cdb98f;
   --tile-text: #2a2118;
-  --tile-blank: #e7d9ff;
 
   --cell: #183a2c;
   --cell-line: #22493a;
@@ -722,8 +721,13 @@ svg {
   box-shadow: inset 0 -1.5px 0 rgb(0 0 0 / 0.18);
 }
 
-.tile.blank {
-  background: linear-gradient(165deg, #f6efff 0%, var(--tile-blank) 100%);
+/* Le joker est un jeton comme les autres : même matière, aucune gravure.
+   Ce qui le distingue est l'absence de valeur en coin — un vrai joker n'en
+   porte pas. Posé, il montre la lettre qu'il représente, toujours sans
+   chiffre : on le reconnaît donc encore d'une lettre ordinaire. */
+.tile.blank .value,
+.rack-tile.blank .value {
+  display: none;
 }
 
 /* La lettre est centrée dans la zone qui exclut le coin de la valeur : les
@@ -954,10 +958,6 @@ svg {
 /* Le joker se reconnaît à sa matière, la même au chevalet, sur le plateau et
    dans le choix de lettre : violet pâle, et rien d'écrit tant qu'on ne l'a
    pas posé. */
-.rack-tile.blank {
-  background: linear-gradient(165deg, #f6efff 0%, var(--tile-blank) 100%);
-}
-
 .rack-tile.selected {
   transform: translateY(-7px);
   box-shadow: 0 8px 14px rgb(0 0 0 / 0.4), 0 0 0 2px var(--gold);
@@ -1280,7 +1280,7 @@ svg {
   aspect-ratio: 1;
   padding: 0 9% 7% 0;
   border-radius: 4px;
-  background: linear-gradient(165deg, #f6efff 0%, var(--tile-blank) 100%);
+  background: linear-gradient(165deg, #fdf3dd 0%, var(--tile) 100%);
   color: var(--tile-text);
   font-weight: 700;
   font-size: 1.15rem;
