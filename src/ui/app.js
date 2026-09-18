@@ -349,6 +349,13 @@ export class App {
     const pad = Math.max(2, board.width * 0.006);
 
     const wasHidden = this.halos[0].hidden;
+    // Emprise de l'ensemble des mots : c'est elle que le joueur voit comme
+    // « l'encadré », les halos se touchant ou se croisant. Le score s'y pose,
+    // et non au coin d'un mot en particulier — celui-ci peut tomber au milieu
+    // du groupe, comme le coin haut-droit d'un mot du bas.
+    let bordDroit = -Infinity;
+    let sommet = Infinity;
+
     words.forEach((word, rank) => {
       const halo = this.haloAt(rank);
       const first = this.cells[word.cells[0]].getBoundingClientRect();
@@ -361,13 +368,12 @@ export class App {
       halo.style.height = `${last.bottom - first.top + pad * 2}px`;
       halo.hidden = false;
 
-      // Le score se pose au coin haut-droit du mot principal — le premier du
-      // tri, donc le plus long.
-      if (rank === 0) {
-        badge.style.left = `${last.right - board.left + pad}px`;
-        badge.style.top = `${first.top - board.top - pad}px`;
-      }
+      bordDroit = Math.max(bordDroit, last.right - board.left + pad);
+      sommet = Math.min(sommet, first.top - board.top - pad);
     });
+
+    badge.style.left = `${bordDroit}px`;
+    badge.style.top = `${sommet}px`;
     for (let rank = words.length; rank < this.halos.length; rank++) {
       this.halos[rank].hidden = true;
     }
