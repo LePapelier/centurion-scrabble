@@ -392,7 +392,10 @@ svg {
 
   position: relative;
   display: grid;
-  grid-template-columns: repeat(15, 1fr);
+  /* Lignes explicites : dimensionnées sur leur contenu, une ligne dont
+     toutes les cases bonus sont recouvertes n'a plus de texte et s'écrase. */
+  grid-template-columns: repeat(15, minmax(0, 1fr));
+  grid-template-rows: repeat(15, minmax(0, 1fr));
   gap: 2px;
   width: var(--board-max);
   max-width: 100%;
@@ -773,8 +776,11 @@ svg {
   opacity: 0.75;
 }
 
-.rack-tile.dragging {
-  opacity: 0.25;
+/* Le jeton saisi quitte sa place : il n'existe plus que sous le pointeur. */
+.rack-tile.dragging,
+.tile.dragging {
+  opacity: 0;
+  animation: none;
 }
 
 /* Jeton qui (ré)apparaît sur le chevalet : retour d'une lettre reprise,
