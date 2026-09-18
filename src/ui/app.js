@@ -345,12 +345,8 @@ export class App {
     const pad = Math.max(2, board.width * 0.006);
 
     const wasHidden = this.halos[0].hidden;
-    // Emprise de l'ensemble des mots : c'est elle que le joueur voit comme
-    // « l'encadré », les halos se touchant ou se croisant. Le score s'y pose,
-    // et non au coin d'un mot en particulier — celui-ci peut tomber au milieu
-    // du groupe, comme le coin haut-droit d'un mot du bas.
-    let bordDroit = -Infinity;
-    let sommet = Infinity;
+    // Emprises des halos, retenues pour y poser le score ensuite.
+    const emprises = [];
 
     words.forEach((word, rank) => {
       const halo = this.haloAt(rank);
@@ -364,10 +360,20 @@ export class App {
       halo.style.height = `${last.bottom - first.top + pad * 2}px`;
       halo.hidden = false;
 
-      bordDroit = Math.max(bordDroit, last.right - board.left + pad);
-      sommet = Math.min(sommet, first.top - board.top - pad);
+      emprises.push({
+        haut: first.top - board.top - pad,
+        droite: last.right - board.left + pad,
+      });
     });
 
+    // Le score se pose au coin haut-droit de la bande la plus haute de
+    // l'encadré — non du rectangle qui l'englobe. Sur une forme en L, ce
+    // rectangle a un coin dans le vide, loin de tout jeton ; la bande la plus
+    // haute, elle, est occupée par définition.
+    const sommet = Math.min(...emprises.map((e) => e.haut));
+    const bordDroit = Math.max(
+      ...emprises.filter((e) => e.haut <= sommet + 1).map((e) => e.droite),
+    );
     badge.style.left = `${bordDroit}px`;
     badge.style.top = `${sommet}px`;
     for (let rank = words.length; rank < this.halos.length; rank++) {
