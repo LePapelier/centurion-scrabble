@@ -55,3 +55,8 @@ dels
 led
 leds
 
+# Trouvés en vérifiant la famille de EYE : c'est EYELINER qui est valide,
+# quand le dictionnaire ne portait que la graphie EYELINEUR.
+eyeliner
+eyeliners
+

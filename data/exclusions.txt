@@ -237,3 +237,9 @@ rvais
 rvas
 zebis
 
+# Signalé en partie, vérifié invalide : l'anglais « eye », que Morphalou
+# héberge mais que la compétition ne connaît pas. EYRA, en revanche, est bien
+# valide et reste.
+eye
+eyes
+
