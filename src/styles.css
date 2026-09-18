@@ -57,6 +57,28 @@
   -webkit-tap-highlight-color: transparent;
 }
 
+/* Le jeu se manipule au doigt : une pression longue doit saisir un jeton, et
+   jamais sélectionner le plateau comme du texte. Sans quoi le téléphone
+   répond par sa loupe et ses poignées de sélection, et un glissement bleuit
+   la partie entière. Le plateau et le chevalet s'en protégeaient déjà ; la
+   sélection partait d'ailleurs — un score, la ligne d'état — et les traversait. */
+body {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+/* Reste sélectionnable ce qui se saisit ou se recopie : les champs, et la
+   ligne d'état qui affiche le lien d'invitation quand le presse-papiers est
+   refusé. Le code de partie garde son `user-select: all`, défini plus bas. */
+input,
+textarea,
+.mp-status {
+  -webkit-user-select: text;
+  user-select: text;
+  -webkit-touch-callout: default;
+}
+
 /* Plusieurs blocs de cette feuille imposent `display: flex`, qui l'emporterait
    sur la valeur par défaut de l'attribut `hidden`. */
 [hidden] {
