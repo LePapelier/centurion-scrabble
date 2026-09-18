@@ -736,6 +736,7 @@ svg {
 .rack-slot {
   position: relative;
   z-index: 1;
+  container-type: inline-size;
   aspect-ratio: 1;
   border-radius: 5px;
   background: rgb(38 24 12 / 0.55);
@@ -750,7 +751,9 @@ svg {
   border-radius: 6px;
   background: linear-gradient(165deg, #fdf3dd 0%, var(--tile) 55%, var(--tile-edge) 100%);
   color: var(--tile-text);
-  font-size: clamp(18px, 5.5vw, 28px);
+  /* Mêmes proportions que les jetons du plateau (lettre à 65 % du côté,
+     valeur à 31 %), quelle que soit la taille du chevalet. */
+  font-size: 64.7cqw;
   font-weight: 700;
   line-height: 1;
   box-shadow: 0 2px 0 rgb(0 0 0 / 0.35), inset 0 -2px 0 rgb(0 0 0 / 0.12);
@@ -759,9 +762,9 @@ svg {
 
 .rack-tile .value {
   position: absolute;
-  right: 5px;
-  bottom: 2px;
-  font-size: 0.42em;
+  right: 4%;
+  bottom: 2%;
+  font-size: 0.476em;
   font-weight: 600;
   opacity: 0.6;
 }
@@ -826,9 +829,9 @@ svg {
 
 .drag-ghost .value {
   position: absolute;
-  right: 7%;
+  right: 4%;
   bottom: 2%;
-  font-size: 0.4em;
+  font-size: 0.476em;
   font-weight: 600;
   opacity: 0.6;
 }
@@ -1552,9 +1555,7 @@ svg {
     width: min(max(var(--board-max), 520px), 100%);
   }
 
-  .rack-tile {
-    font-size: clamp(20px, 2vw, 26px);
-  }
+
 
   .actions .btn {
     gap: 7px;
