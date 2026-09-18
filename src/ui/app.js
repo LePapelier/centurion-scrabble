@@ -533,11 +533,11 @@ export class App {
       preview.hidden = true;
     }
 
-    this.renderStatus();
+    this.renderStatus(verdict);
     this.renderNetChip();
   }
 
-  renderStatus() {
+  renderStatus(verdict) {
     const status = $('status');
     status.className = 'status';
 
@@ -565,6 +565,13 @@ export class App {
       return;
     }
     if (this.pending.size > 0) {
+      // Jouer s'éteint sur un coup refusé : sans cette ligne, le refus serait
+      // muet, le joueur n'ayant plus le bouton pour en réclamer la raison.
+      if (verdict && !verdict.ok && !verdict.soft) {
+        status.classList.add('warn');
+        status.textContent = verdict.reason;
+        return;
+      }
       status.textContent = 'Validez votre mot ou reprenez vos jetons.';
       return;
     }

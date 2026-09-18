@@ -757,7 +757,6 @@ svg {
 
 .status.win { color: var(--gold); }
 .status.warn { color: var(--danger); }
-.status.warn { color: var(--danger); }
 
 /* --- Chevalet ----------------------------------------------------- */
 

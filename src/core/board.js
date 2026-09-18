@@ -49,7 +49,13 @@ export function applyPlacements(board, placements) {
 
 /**
  * Vérifie la géométrie d'une pose, indépendamment du dictionnaire.
- * @returns {{ok: true, direction: number} | {ok: false, reason: string}}
+ *
+ * `soft` marque un refus qui ne constate qu'un mot encore en cours de
+ * construction : la pose n'est pas fautive, elle est inachevée, et l'interface
+ * peut taire la raison plutôt que d'alarmer le joueur au milieu de son geste.
+ *
+ * @returns {{ok: true, direction: number}
+ *          |{ok: false, reason: string, soft?: boolean}}
  */
 export function checkGeometry(board, placements) {
   if (placements.length === 0) return { ok: false, reason: 'Aucune lettre posée.' };
@@ -74,14 +80,15 @@ export function checkGeometry(board, placements) {
   const indices = [...seen].sort((a, b) => a - b);
   for (let i = indices[0]; i <= indices[indices.length - 1]; i += step) {
     if (!seen.has(i) && board.letters[i] < 0) {
-      return { ok: false, reason: 'Le mot est interrompu par une case vide.' };
+      return { ok: false, reason: 'Le mot est interrompu par une case vide.', soft: true };
     }
   }
 
   const empty = isEmptyBoard(board);
   if (empty) {
     if (!seen.has(CENTER)) return { ok: false, reason: 'Le premier mot doit passer par la case centrale.' };
-    if (placements.length < 2) return { ok: false, reason: 'Le premier mot doit faire au moins deux lettres.' };
+    if (placements.length < 2)
+      return { ok: false, reason: 'Le premier mot doit faire au moins deux lettres.', soft: true };
   } else {
     const touches = placements.some((p) => hasNeighbour(board, p.row, p.col));
     if (!touches) return { ok: false, reason: 'Le mot doit toucher une lettre déjà posée.' };
@@ -187,8 +194,10 @@ export function scorePlacements(board, placements) {
 /**
  * Validation complète d'un coup humain : géométrie, puis dictionnaire.
  *
+ * `soft` distingue le mot encore inachevé du refus ferme : voir checkGeometry.
+ *
  * @returns {{ok: true, score: number, bingo: boolean, words: object[]}
- *          |{ok: false, reason: string, invalid?: string[]}}
+ *          |{ok: false, reason: string, soft?: boolean, invalid?: string[]}}
  */
 export function validateMove(board, placements, dawg) {
   const geometry = checkGeometry(board, placements);
@@ -196,7 +205,7 @@ export function validateMove(board, placements, dawg) {
 
   const scored = scorePlacements(board, placements);
   if (scored.words.length === 0) {
-    return { ok: false, reason: 'Une lettre seule ne forme pas de mot.' };
+    return { ok: false, reason: 'Une lettre seule ne forme pas de mot.', soft: true };
   }
 
   const invalid = scored.words.filter((w) => !dawg.has(w.word)).map((w) => w.word);
