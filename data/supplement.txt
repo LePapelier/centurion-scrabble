@@ -37,3 +37,13 @@ qi
 qing
 qings
 
+# Pluriels des ajouts précédents, vérifiés valides un par un. VATS, lui, ne
+# l'est pas alors que VAT l'est : les familles ne se déduisent pas.
+jabs
+jams
+keufs
+kois
+phos
+qis
+xis
+
