@@ -42,3 +42,38 @@ id
 vo
 bo
 po
+
+# --- Repérés en auditant l'union des deux lexiques -------------------
+# Ce sont des formes que les lexiques de langue embarquent pour la
+# correction orthographique, mais qui ne sont pas des mots : elles
+# s'écrivent avec un point, ou ne s'écrivent pas du tout.
+
+# Abréviations
+aff
+avr
+avt
+cte
+dep
+div
+eme
+fig
+janv
+juill
+lat
+ref
+
+# Sigles
+ena
+kdo
+rva
+tva
+
+# Écritures SMS
+pkoi
+ptit
+zyva
+
+# Symbole de chimie, unité
+ph
+kbit
+
