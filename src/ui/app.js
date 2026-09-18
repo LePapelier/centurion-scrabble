@@ -360,6 +360,13 @@ export class App {
       halo.style.width = `${last.right - first.left + pad * 2}px`;
       halo.style.height = `${last.bottom - first.top + pad * 2}px`;
       halo.hidden = false;
+
+      // Le score se pose au coin haut-droit du mot principal — le premier du
+      // tri, donc le plus long.
+      if (rank === 0) {
+        badge.style.left = `${last.right - board.left + pad}px`;
+        badge.style.top = `${first.top - board.top - pad}px`;
+      }
     });
     for (let rank = words.length; rank < this.halos.length; rank++) {
       this.halos[rank].hidden = true;

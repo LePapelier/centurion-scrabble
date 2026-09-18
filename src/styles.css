@@ -657,15 +657,22 @@ svg {
    plateau, posé sur le feutre. Accroché au mot, il changeait de place à
    chaque coup, se glissait sous le contour d'un mot croisé, et pouvait
    déborder du plateau quand le mot touchait un bord. */
+/* Le score se pose au coin haut-droit du mot principal, où le script le
+   place. Il reste un enfant du plateau, non du halo : il passe ainsi au-dessus
+   de tous les contours, y compris ceux des mots croisés, qui sont créés après
+   lui et le recouvraient. */
 .halo-score {
   position: absolute;
-  top: 0;
-  right: 0;
   z-index: 6;
   /* Le décalage est nommé : l'animation du score doit le reprendre, faute de
      quoi son `transform` l'écrase et la pastille saute le temps du sursaut. */
-  --pose: translate(28%, -42%);
+  /* Le coin est chevauché, non longé : la pastille déborde de 8 % de sa
+     largeur vers l'intérieur, comme elle le faisait à gauche. */
+  --pose: translate(-58%, -46%);
   transform: var(--pose);
+  transition:
+    left 0.16s cubic-bezier(0.3, 0.8, 0.4, 1),
+    top 0.16s cubic-bezier(0.3, 0.8, 0.4, 1);
   min-width: 1.5em;
   padding: 0.1em 0.3em;
   border-radius: 0.8cqw;
