@@ -103,12 +103,17 @@ export class App {
     this.shownScores = [0, 0];
     this.scoreFrames = [0, 0];
     this.haloScore = null;
+    /** Halos de mot, du plus long au plus court ; le premier vient du balisage. */
+    this.halos = [];
     this.dragEndedAt = 0;
     this.dropCell = null;
+    this.dropSource = null;
 
     /** 'solo' face à l'IA, 'host' ou 'guest' en partie à deux. */
     this.mode = 'solo';
     this.session = null;
+    /** Une partie en réseau a été lancée : un « hello » vaut alors retour. */
+    this.netStarted = false;
     this.myName = localStorage.getItem(NAME_KEY) || 'Joueur';
     this.opponentName = 'Adversaire';
 
@@ -170,6 +175,7 @@ export class App {
   buildBoard() {
     const board = $('board');
     this.boardEl = board;
+    this.halos = [$('halo')];
     const fragment = document.createDocumentFragment();
     this.cells = [];
 
@@ -291,38 +297,50 @@ export class App {
   }
 
   /**
-   * Cerne le mot en cours s'il est jouable, et renvoie le verdict complet.
+   * Cerne les mots en cours dès que le coup est jouable, et renvoie le
+   * verdict complet.
+   *
+   * Tous les mots formés sont cernés, pas seulement le plus long : un coup
+   * qui achève un mot croisé le compte dans son score, il doit donc le
+   * montrer. Le plus long porte la pastille, qui annonce le total du coup.
+   *
    * @returns {object|null}
    */
   updateHalo() {
-    const halo = $('halo');
     const badge = $('halo-score');
 
     const active = this.pending.size > 0 && this.game.current === HUMAN && !this.game.finished;
     const verdict = active ? validateMove(this.game.board, this.placements(), this.dawg) : null;
 
     if (!verdict?.ok) {
-      halo.hidden = true;
+      this.hideHalos();
       this.haloScore = null;
       return verdict;
     }
 
-    // L'emprise suit le mot le plus long ; le score affiché est celui du coup
-    // entier, mots croisés et prime de scrabble compris.
-    const main = verdict.words.reduce((a, b) => (b.cells.length > a.cells.length ? b : a));
+    // Le plus long d'abord : il reçoit le halo qui porte la pastille, et
+    // l'ordre reste stable pendant que le joueur complète son mot, ce qui
+    // laisse les déplacements se faire en transition plutôt qu'en saut.
+    const words = [...verdict.words].sort((a, b) => b.cells.length - a.cells.length);
     const board = this.boardEl.getBoundingClientRect();
-    const first = this.cells[main.cells[0]].getBoundingClientRect();
-    const last = this.cells[main.cells[main.cells.length - 1]].getBoundingClientRect();
     const pad = Math.max(2, board.width * 0.006);
 
-    const wasHidden = halo.hidden;
-    // Les dimensions sont posées avant l'affichage : une apparition ne doit
-    // pas déclencher la transition de déplacement.
-    halo.style.left = `${first.left - board.left - pad}px`;
-    halo.style.top = `${first.top - board.top - pad}px`;
-    halo.style.width = `${last.right - first.left + pad * 2}px`;
-    halo.style.height = `${last.bottom - first.top + pad * 2}px`;
-    halo.hidden = false;
+    const wasHidden = this.halos[0].hidden;
+    words.forEach((word, rank) => {
+      const halo = this.haloAt(rank);
+      const first = this.cells[word.cells[0]].getBoundingClientRect();
+      const last = this.cells[word.cells[word.cells.length - 1]].getBoundingClientRect();
+      // Les dimensions sont posées avant l'affichage : une apparition ne doit
+      // pas déclencher la transition de déplacement.
+      halo.style.left = `${first.left - board.left - pad}px`;
+      halo.style.top = `${first.top - board.top - pad}px`;
+      halo.style.width = `${last.right - first.left + pad * 2}px`;
+      halo.style.height = `${last.bottom - first.top + pad * 2}px`;
+      halo.hidden = false;
+    });
+    for (let rank = words.length; rank < this.halos.length; rank++) {
+      this.halos[rank].hidden = true;
+    }
 
     if (verdict.score !== this.haloScore) {
       badge.textContent = String(verdict.score);
@@ -330,6 +348,27 @@ export class App {
       this.haloScore = verdict.score;
     }
     return verdict;
+  }
+
+  /**
+   * Le halo de rang donné, créé au besoin. Le rang 0 est celui du balisage,
+   * qui porte la pastille de score ; les suivants cernent les mots croisés,
+   * d'un trait plus discret pour ne pas noyer le plateau quand un coup en
+   * forme plusieurs.
+   */
+  haloAt(rank) {
+    while (this.halos.length <= rank) {
+      const extra = document.createElement('div');
+      extra.className = 'halo halo-crossing';
+      extra.hidden = true;
+      this.boardEl.append(extra);
+      this.halos.push(extra);
+    }
+    return this.halos[rank];
+  }
+
+  hideHalos() {
+    for (const halo of this.halos) halo.hidden = true;
   }
 
   /** Rejoue une animation déjà posée sur un élément. */
@@ -513,7 +552,7 @@ export class App {
     const hasPending = this.pending.size > 0;
 
     $('btn-recall').disabled = !hasPending;
-    $('btn-shuffle').disabled = !myTurn;
+    $('btn-shuffle').disabled = !this.canArrange();
     $('btn-hint').disabled = !myTurn;
     $('btn-more').disabled = !myTurn;
     $('btn-exchange-wide').disabled = !myTurn || this.game.bagCount < RACK_SIZE;
@@ -533,11 +572,11 @@ export class App {
       preview.hidden = true;
     }
 
-    this.renderStatus();
+    this.renderStatus(verdict);
     this.renderNetChip();
   }
 
-  renderStatus() {
+  renderStatus(verdict) {
     const status = $('status');
     status.className = 'status';
 
@@ -560,11 +599,19 @@ export class App {
       return;
     }
     if (this.game.current !== HUMAN) {
-      status.textContent =
+      const tour =
         this.mode === 'solo' ? 'Au tour de votre adversaire.' : `Au tour de ${this.opponentName}.`;
+      status.textContent = this.pending.size > 0 ? `Coup préparé. ${tour}` : tour;
       return;
     }
     if (this.pending.size > 0) {
+      // Jouer s'éteint sur un coup refusé : sans cette ligne, le refus serait
+      // muet, le joueur n'ayant plus le bouton pour en réclamer la raison.
+      if (verdict && !verdict.ok && !verdict.soft) {
+        status.classList.add('warn');
+        status.textContent = verdict.reason;
+        return;
+      }
       status.textContent = 'Validez votre mot ou reprenez vos jetons.';
       return;
     }
@@ -593,8 +640,42 @@ export class App {
     }));
   }
 
+  /**
+   * Manipuler ses jetons ne dépend pas du tour : on prépare son coup pendant
+   * que l'adversaire réfléchit, comme on avance une pièce en pensée aux
+   * échecs. Seul l'envoi du coup reste réservé à son tour.
+   */
+  canArrange() {
+    return !this.game.finished;
+  }
+
+  /**
+   * Retire les poses préparées que le plateau a rattrapées : l'adversaire a
+   * pu jouer sur une case qu'on se réservait. Les jetons retournent au
+   * chevalet, leur référence n'étant plus tenue par personne.
+   * @returns {number} nombre de poses reprises
+   */
+  prunePending() {
+    let reprises = 0;
+    for (const index of [...this.pending.keys()]) {
+      if (this.game.board.letters[index] >= 0) {
+        this.pending.delete(index);
+        reprises++;
+      }
+    }
+    if (reprises > 0) {
+      this.cursor = null;
+      this.toast(
+        reprises === 1
+          ? 'Une lettre préparée est revenue : sa case a été prise.'
+          : `${reprises} lettres préparées sont revenues : leurs cases ont été prises.`,
+      );
+    }
+    return reprises;
+  }
+
   onCellTap(index) {
-    if (this.game.finished || this.busy || this.game.current !== HUMAN) return;
+    if (!this.canArrange()) return;
     if (this.exchangeMode) return;
 
     if (this.pending.has(index)) {
@@ -692,14 +773,30 @@ export class App {
 
       if (!dragging) {
         dragging = true;
-        element.classList.add('dragging');
         const box = element.getBoundingClientRect();
-        ghost = element.cloneNode(true);
-        ghost.className = element.classList.contains('blank') ? 'drag-ghost blank' : 'drag-ghost';
+
+        // Le jeton suivi par le pointeur est la tuile elle-même, clonée avec
+        // ses classes : elle doit être identique à celle qu'on a saisie. Le
+        // clone est pris avant « dragging », qui rend l'original invisible.
+        const face = element.cloneNode(true);
+        // Les tailles de la tuile sont en « cqw », résolues contre le plateau
+        // ou le chevalet que le fantôme quitte. Tout en dérive par `em` : il
+        // suffit de figer la taille de police pour que le reste suive.
+        face.style.fontSize = getComputedStyle(element).fontSize;
+
+        // L'enveloppe porte la position et la taille ; la tuile s'y tend par
+        // `inset: 0`, comme dans sa case d'origine. Les marges internes de la
+        // tuile sont en pourcentage : il leur faut ce bloc conteneur à la
+        // bonne taille, sans quoi elles se résolvent contre la fenêtre et
+        // chassent la lettre dans le coin.
+        ghost = document.createElement('div');
+        ghost.className = 'drag-ghost';
         ghost.style.width = `${box.width}px`;
         ghost.style.height = `${box.height}px`;
-        ghost.style.fontSize = getComputedStyle(element).fontSize;
+        ghost.append(face);
         document.body.append(ghost);
+
+        element.classList.add('dragging');
       }
       ghost.style.left = `${event.clientX}px`;
       ghost.style.top = `${event.clientY}px`;
@@ -728,7 +825,7 @@ export class App {
     };
 
     element.addEventListener('pointerdown', (event) => {
-      if (this.game.finished || this.busy || this.game.current !== HUMAN) return;
+      if (!this.canArrange()) return;
       startX = event.clientX;
       startY = event.clientY;
       dragging = false;
@@ -752,25 +849,60 @@ export class App {
     const cell = under?.closest('.cell') ?? null;
 
     if (cell !== this.dropCell) {
-      this.dropCell?.classList.remove('drop-target', 'drop-blocked');
+      this.dropCell?.classList.remove('drop-target', 'drop-swap', 'drop-blocked');
       this.dropCell = cell;
     }
 
+    let swapping = false;
     if (cell) {
       const index = Number(cell.dataset.index);
-      // La case de départ d'un jeton déplacé reste une destination valable.
-      const free =
-        index === origin.index ||
-        (this.game.board.letters[index] < 0 && !this.pending.has(index));
+      const { free, swap } = this.dropKind(origin, index);
+      swapping = swap;
       cell.classList.toggle('drop-target', free);
-      cell.classList.toggle('drop-blocked', !free);
+      cell.classList.toggle('drop-swap', swap);
+      cell.classList.toggle('drop-blocked', !free && !swap);
     }
 
+    // Le jeton suivi par le pointeur recouvre la case qu'il survole, et le
+    // doigt par-dessus : un jalon posé là ne se verrait pas. C'est donc la
+    // place libérée, à l'autre bout de l'échange, qui s'allume.
+    const source = swapping ? this.dragOriginElement(origin) : null;
+    if (source !== this.dropSource) {
+      this.dropSource?.classList.remove('drop-swap-origin');
+      source?.classList.add('drop-swap-origin');
+      this.dropSource = source;
+    }
+  }
+
+  /** La case ou l'emplacement de chevalet d'où part le jeton déplacé. */
+  dragOriginElement(origin) {
+    return origin.from === 'board'
+      ? this.cells[origin.index] ?? null
+      : $('rack').children[origin.rackIndex] ?? null;
+  }
+
+  /**
+   * Ce que vaut un lâcher sur une case donnée.
+   *
+   * `free` : la case est vide, le jeton s'y pose. La case de départ d'un
+   * jeton déplacé en fait partie — l'y reposer doit rester sans effet.
+   *
+   * `swap` : la case porte une pose en attente, que le jeton lâché prend en
+   * remplaçant. Les deux échangent alors leur place, l'autre repartant vers
+   * le plateau ou vers le chevalet selon d'où vient celui qu'on tient. Un
+   * jeton déjà validé, lui, n'est plus déplaçable : la case reste refusée.
+   */
+  dropKind(origin, index) {
+    if (index === origin.index) return { free: true, swap: false };
+    if (this.game.board.letters[index] >= 0) return { free: false, swap: false };
+    return { free: !this.pending.has(index), swap: this.pending.has(index) };
   }
 
   clearDropHighlight() {
-    this.dropCell?.classList.remove('drop-target', 'drop-blocked');
+    this.dropCell?.classList.remove('drop-target', 'drop-swap', 'drop-blocked');
     this.dropCell = null;
+    this.dropSource?.classList.remove('drop-swap-origin');
+    this.dropSource = null;
   }
 
   /** Applique le lâcher d'un jeton à la position du pointeur. */
@@ -786,10 +918,12 @@ export class App {
 
     if (cell) {
       const index = Number(cell.dataset.index);
-      const free = this.game.board.letters[index] < 0 && !this.pending.has(index);
+      const { free, swap } = this.dropKind(origin, index);
 
       if (origin.from === 'rack') {
-        if (free) {
+        if (free || swap) {
+          // Sur une case occupée, poser écrase la pose en attente : son jeton
+          // n'est plus référencé, et le chevalet le reprend de lui-même.
           this.placeTile(index, origin.rackIndex);
           return;
         }
@@ -801,6 +935,14 @@ export class App {
         const tile = this.pending.get(origin.index);
         this.pending.delete(origin.index);
         this.pending.set(index, tile);
+        this.cursor = null;
+        this.refresh();
+        return;
+      } else if (swap) {
+        // Deux poses en attente échangent leur case.
+        const moved = this.pending.get(origin.index);
+        this.pending.set(origin.index, this.pending.get(index));
+        this.pending.set(index, moved);
         this.cursor = null;
         this.refresh();
         return;
@@ -932,7 +1074,7 @@ export class App {
   bindKeyboard() {
     window.addEventListener('keydown', (event) => {
       if (event.target.closest('dialog')) return;
-      if (this.game.finished || this.busy || this.game.current !== HUMAN) return;
+      if (!this.canArrange()) return;
 
       if (event.key === 'Enter') {
         event.preventDefault();
@@ -1312,6 +1454,7 @@ export class App {
 
     this.busy = false;
     $('thinking').hidden = true;
+    this.prunePending();
     this.save();
     this.render();
 
@@ -1400,6 +1543,15 @@ export class App {
       this.leaveMultiplayer();
     };
 
+    // Un onglet passé en arrière-plan peut voir sa liaison coupée par le
+    // téléphone. Au retour, on la rétablit tout de suite plutôt que
+    // d'attendre le prochain essai programmé.
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState !== 'visible') return;
+      if (this.mode === 'solo' || !this.session) return;
+      if (!this.session.connected) this.session.resumeNow();
+    });
+
     // Un lien d'invitation ouvre directement la fenêtre de connexion.
     const invited = codeFromLocation();
     if (invited) {
@@ -1461,6 +1613,8 @@ export class App {
       },
       onConnected: () => this.setNetStatus('Adversaire connecté, préparation…', 'live'),
       onData: (message) => this.onPeerData(message),
+      onDropped: (reason) => this.onPeerDropped(reason),
+      onResumed: () => this.onPeerResumed(),
       onClosed: (reason) => this.onPeerLost(reason),
       onError: (message) => this.onPeerError(message),
     });
@@ -1486,6 +1640,8 @@ export class App {
         this.session.send({ t: 'hello', name: this.myName });
       },
       onData: (message) => this.onPeerData(message),
+      onDropped: (reason) => this.onPeerDropped(reason),
+      onResumed: () => this.onPeerResumed(),
       onClosed: (reason) => this.onPeerLost(reason),
       onError: (message) => this.onPeerError(message),
     });
@@ -1496,6 +1652,7 @@ export class App {
 
   /** Nouvelle partie en ligne : seul l'hôte la crée, puis la diffuse. */
   startNetworkGame() {
+    this.netStarted = true;
     const first = Math.random() < 0.5 ? HUMAN : COMPUTER;
     this.game = new Game({
       firstPlayer: first,
@@ -1541,6 +1698,17 @@ export class App {
       case 'hello':
         if (this.mode !== 'host') return;
         this.opponentName = this.cleanName(message.name);
+        // L'adversaire revient d'une coupure : on lui rend la partie en cours
+        // plutôt que d'en ouvrir une autre sous ses pieds.
+        if (this.netStarted) {
+          this.session.send({ t: 'welcome', name: this.myName });
+          this.broadcast();
+          $('mp-dialog').close();
+          this.setNetStatus('Adversaire revenu. Partie reprise.', 'live');
+          this.toast(`${this.opponentName} a repris la partie.`);
+          this.render();
+          return;
+        }
         this.startNetworkGame();
         return;
 
@@ -1647,13 +1815,19 @@ export class App {
     this.game = Game.fromSnapshot(snap);
     this.opponentName = snap.names[1];
 
-    this.pending.clear();
+    const entry = snap.history.length > before ? snap.history.at(-1) : null;
+
+    // Un coup préparé survit au coup de l'adversaire : mon chevalet n'a pas
+    // bougé, mes poses restent les miennes — seules tombent celles dont la
+    // case vient d'être prise. Mon propre coup validé, lui, renouvelle le
+    // chevalet : les poses y référeraient les mauvaises lettres.
+    if (entry?.player === COMPUTER) this.prunePending();
+    else this.pending.clear();
+
     this.selected = null;
-    this.cursor = null;
     this.busy = false;
     this.cancelExchange();
-
-    const entry = snap.history.length > before ? snap.history.at(-1) : null;
+    if (this.pending.size === 0) this.cursor = null;
     if (entry && entry.player === COMPUTER) {
       this.revealCells = [...(snap.lastMoveCells ?? [])];
       this.revealKind = 'land';
@@ -1727,6 +1901,23 @@ export class App {
     this.render();
   }
 
+  /**
+   * Liaison rompue mais pas perdue : la partie reste entière, la session
+   * rappelle d'elle-même. Rien n'est démonté — c'est tout l'intérêt.
+   */
+  onPeerDropped(reason) {
+    this.busy = false;
+    this.setNetStatus(reason, 'error');
+    this.toast(reason, 'error');
+    this.render();
+  }
+
+  onPeerResumed() {
+    this.setNetStatus('Liaison rétablie.', 'live');
+    this.toast('Liaison rétablie.');
+    this.render();
+  }
+
   onPeerError(message) {
     this.busy = false;
     this.setNetStatus(message, 'error');
@@ -1739,6 +1930,7 @@ export class App {
   leaveMultiplayer() {
     this.teardownSession();
     this.mode = 'solo';
+    this.netStarted = false;
     this.opponentName = 'Adversaire';
     clearLocationCode();
     this.setNetStatus('');
@@ -1780,8 +1972,9 @@ export class App {
     }
     chip.hidden = false;
     const live = Boolean(this.session?.connected);
+    const reprise = !live && Boolean(this.session?.reconnecting);
     chip.className = `netchip ${live ? 'live' : 'lost'}`;
-    chip.textContent = live ? this.opponentName : 'Hors ligne';
+    chip.textContent = live ? this.opponentName : reprise ? 'Reconnexion…' : 'Hors ligne';
   }
 
   /* ---------------------------------------------------------------- */

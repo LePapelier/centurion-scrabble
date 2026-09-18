@@ -22,6 +22,16 @@ const CODE_LENGTH = 6;
 /** Délai au-delà duquel on considère la mise en relation perdue. */
 const CONNECT_TIMEOUT_MS = 20000;
 
+/**
+ * Attentes successives avant de retenter une liaison rompue. Un onglet mis
+ * en arrière-plan par le téléphone perd sa liaison sans que la partie soit
+ * finie pour autant : on rappelle, de plus en plus espacé.
+ */
+const RESUME_DELAYS_MS = [800, 1500, 3000, 6000, 10000, 15000];
+
+/** Au-delà, on cesse d'espérer et la partie est déclarée perdue. */
+const MAX_RESUME_ATTEMPTS = 20;
+
 export function makeCode() {
   const values = new Uint32Array(CODE_LENGTH);
   crypto.getRandomValues(values);
@@ -62,7 +72,9 @@ export function clearLocationCode() {
  *   onReady(code)         — l'hôte est joignable
  *   onConnected()         — les deux navigateurs se parlent
  *   onData(message)       — message reçu de l'adversaire
- *   onClosed(raison)      — liaison rompue
+ *   onDropped(raison)     — liaison rompue, reprise en cours
+ *   onResumed()           — liaison rétablie après une coupure
+ *   onClosed(raison)      — liaison rompue sans retour possible
  *   onError(message)      — échec définitif
  */
 export class PeerSession {
@@ -74,10 +86,18 @@ export class PeerSession {
     this.code = null;
     this.closing = false;
     this.timer = null;
+    this.resumeTimer = null;
+    this.attempts = 0;
+    this.resuming = false;
   }
 
   get connected() {
     return Boolean(this.conn?.open);
+  }
+
+  /** Liaison coupée mais pas abandonnée : une reprise est en cours. */
+  get reconnecting() {
+    return Boolean(this.role) && !this.connected && !this.closing;
   }
 
   emit(name, ...args) {
@@ -90,12 +110,17 @@ export class PeerSession {
    * Ouvre une partie et attend un adversaire.
    * @param {number} attempt réservé aux reprises après collision d'identifiant
    */
-  host(attempt = 0) {
+  host(attempt = 0, resume = false) {
+    const previous = this.code;
     this.destroy();
     this.closing = false;
+    this.resuming = resume;
     this.role = 'host';
-    this.code = makeCode();
-    this.emit('onStatus', 'Ouverture de la partie…');
+    // Une reprise garde le code : le lien déjà transmis à l'adversaire doit
+    // continuer de mener à cette partie.
+    this.code = resume && previous ? previous : makeCode();
+    if (!resume) this.attempts = 0;
+    this.emit('onStatus', resume ? 'Rétablissement de la partie…' : 'Ouverture de la partie…');
 
     const peer = new Peer(PREFIX + this.code, { debug: 0 });
     this.peer = peer;
@@ -118,9 +143,20 @@ export class PeerSession {
     });
 
     peer.on('error', (error) => {
-      // Identifiant déjà pris : on retente avec un autre code.
-      if (error.type === 'unavailable-id' && attempt < 4) {
-        this.host(attempt + 1);
+      if (error.type === 'unavailable-id') {
+        // En reprise, l'identifiant occupé est le nôtre : il se libère de
+        // lui-même, il suffit d'attendre. À l'ouverture, on en tire un autre.
+        if (resume) {
+          this.scheduleResume();
+          return;
+        }
+        if (attempt < 4) {
+          this.host(attempt + 1);
+          return;
+        }
+      }
+      if (this.resuming) {
+        this.scheduleResume();
         return;
       }
       this.fail(error);
@@ -129,10 +165,15 @@ export class PeerSession {
     peer.on('disconnected', () => {
       if (!this.closing) peer.reconnect();
     });
+
+    // Le pair a été fermé par le service : on se réinscrit sous le même code.
+    peer.on('close', () => {
+      if (!this.closing) this.scheduleResume();
+    });
   }
 
   /** Rejoint une partie à partir de son code. */
-  join(rawCode) {
+  join(rawCode, resume = false) {
     const code = normalizeCode(rawCode);
     if (code.length !== CODE_LENGTH) {
       this.emit('onError', 'Ce code de partie est incomplet.');
@@ -141,9 +182,11 @@ export class PeerSession {
 
     this.destroy();
     this.closing = false;
+    this.resuming = resume;
     this.role = 'guest';
     this.code = code;
-    this.emit('onStatus', 'Connexion à la partie…');
+    if (!resume) this.attempts = 0;
+    this.emit('onStatus', resume ? 'Reconnexion à la partie…' : 'Connexion à la partie…');
 
     const peer = new Peer({ debug: 0 });
     this.peer = peer;
@@ -153,18 +196,63 @@ export class PeerSession {
       this.attach(conn);
 
       this.timer = setTimeout(() => {
-        if (!this.connected) {
-          this.emit('onError', 'Aucune réponse : la partie est peut-être fermée.');
-          this.destroy();
+        if (this.connected) return;
+        // En reprise, l'hôte absent n'est pas une fin : son onglet peut
+        // revenir, et le code reste valable.
+        if (this.resuming) {
+          this.scheduleResume();
+          return;
         }
+        this.emit('onError', 'Aucune réponse : la partie est peut-être fermée.');
+        this.destroy();
       }, CONNECT_TIMEOUT_MS);
     });
 
-    peer.on('error', (error) => this.fail(error));
+    peer.on('error', (error) => {
+      if (this.resuming) {
+        this.scheduleResume();
+        return;
+      }
+      this.fail(error);
+    });
 
     peer.on('disconnected', () => {
       if (!this.closing) peer.reconnect();
     });
+
+    peer.on('close', () => {
+      if (!this.closing) this.scheduleResume();
+    });
+  }
+
+  /* ---------------------------------------------------------------- */
+
+  /** Retente la liaison, en espaçant les essais. */
+  scheduleResume() {
+    if (this.closing || !this.role) return;
+    if (this.attempts >= MAX_RESUME_ATTEMPTS) {
+      this.emit('onClosed', 'Liaison perdue : la partie n’a pas pu être reprise.');
+      this.destroy();
+      return;
+    }
+    const delay = RESUME_DELAYS_MS[Math.min(this.attempts, RESUME_DELAYS_MS.length - 1)];
+    this.attempts++;
+    clearTimeout(this.resumeTimer);
+    this.resumeTimer = setTimeout(() => this.resumeNow(), delay);
+  }
+
+  /**
+   * Reprend la liaison sans attendre l'essai programmé — au retour dans
+   * l'onglet, par exemple, où l'on sait déjà que le téléphone nous rend la
+   * main.
+   */
+  resumeNow() {
+    if (this.closing || this.connected || !this.role) return;
+    clearTimeout(this.resumeTimer);
+    const role = this.role;
+    const code = this.code;
+    if (role === 'guest') this.join(code, true);
+    else this.host(0, true);
   }
 
   /* ---------------------------------------------------------------- */
@@ -174,7 +262,11 @@ export class PeerSession {
 
     conn.on('open', () => {
       clearTimeout(this.timer);
+      const reprise = this.resuming;
+      this.resuming = false;
+      this.attempts = 0;
       this.emit('onConnected');
+      if (reprise) this.emit('onResumed');
     });
 
     conn.on('data', (message) => {
@@ -184,11 +276,19 @@ export class PeerSession {
     conn.on('close', () => {
       if (this.closing) return;
       this.conn = null;
-      this.emit('onClosed', 'Votre adversaire a quitté la partie.');
+      if (this.role === 'guest') {
+        // L'hôte a pu simplement passer en arrière-plan : on le rappelle.
+        this.emit('onDropped', 'Liaison interrompue. Reprise en cours…');
+        this.scheduleResume();
+      } else {
+        // L'hôte reste inscrit sous le même code : l'invité peut revenir de
+        // lui-même, sans qu'aucun nouveau lien soit à transmettre.
+        this.emit('onDropped', 'Votre adversaire s’est déconnecté. Il peut revenir avec le même code.');
+      }
     });
 
     conn.on('error', () => {
-      if (!this.closing) this.emit('onClosed', 'La liaison a été interrompue.');
+      if (!this.closing) this.emit('onDropped', 'La liaison a été interrompue.');
     });
   }
 
@@ -214,6 +314,7 @@ export class PeerSession {
   destroy() {
     this.closing = true;
     clearTimeout(this.timer);
+    clearTimeout(this.resumeTimer);
     try {
       this.conn?.close();
     } catch {

@@ -519,16 +519,56 @@ svg {
 }
 
 /* Destination survolée pendant qu'un jeton est déplacé : vert si la case
-   accueille la lettre, rouge si elle est déjà prise. */
-.cell.drop-target {
-  outline: 0.5cqw solid var(--valid);
-  outline-offset: -0.25cqw;
-  background-image: linear-gradient(color-mix(in srgb, var(--valid) 28%, transparent) 0 0);
+   accueille la lettre, or si elle en porte une déjà et que les deux vont
+   échanger leur place, rouge si le lâcher est refusé.
+
+   Le jalon est porté par un calque au-dessus du jeton : une case occupée en
+   masquerait autrement le pourtour, et c'est justement sur une case occupée
+   que la distinction compte. */
+.cell.drop-target::after,
+.cell.drop-swap::after,
+.cell.drop-blocked::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  border-radius: 2.5px;
+  pointer-events: none;
 }
 
-.cell.drop-blocked {
-  outline: 0.5cqw solid var(--danger);
-  outline-offset: -0.25cqw;
+.cell.drop-target::after {
+  box-shadow: inset 0 0 0 0.5cqw var(--valid);
+  background: color-mix(in srgb, var(--valid) 28%, transparent);
+}
+
+/* L'or teinte aussi le jeton qu'on va déloger : on voit lequel part. */
+.cell.drop-swap::after {
+  box-shadow: inset 0 0 0 0.5cqw var(--gold);
+  background: color-mix(in srgb, var(--gold) 30%, transparent);
+}
+
+.cell.drop-blocked::after {
+  box-shadow: inset 0 0 0 0.5cqw var(--danger);
+}
+
+/* L'autre bout de l'échange : la place que le jeton tenu va libérer, et où
+   celui qu'on déloge va venir. Creux, pour se lire comme une place en
+   attente plutôt que comme une cible. */
+.cell.drop-swap-origin::after,
+.rack-slot.drop-swap-origin::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  border-radius: 2.5px;
+  pointer-events: none;
+  box-shadow: inset 0 0 0 0.5cqw var(--gold);
+  animation: pulse 1.4s ease-in-out infinite;
+}
+
+.rack-slot.drop-swap-origin::after {
+  border-radius: 6px;
+  box-shadow: inset 0 0 0 2px var(--gold);
 }
 
 
@@ -561,6 +601,15 @@ svg {
 
 @keyframes halo-in {
   from { opacity: 0; transform: scale(1.09); }
+}
+
+/* Mot croisé achevé par le coup : cerné lui aussi, mais d'une lueur plus
+   sourde. Un coup peut en former cinq — au même éclat que le mot principal,
+   le plateau deviendrait illisible. */
+.halo.halo-crossing {
+  box-shadow:
+    0 0 0 0.3cqw color-mix(in srgb, var(--valid) 14%, transparent),
+    0 0 2cqw color-mix(in srgb, var(--valid) 28%, transparent);
 }
 
 .halo-score {
@@ -620,14 +669,12 @@ svg {
 /* La lettre est centrée dans la zone qui exclut le coin de la valeur : les
    lettres larges (K, W, X, M) ne mordent plus sur un « 10 ». */
 .tile,
-.rack-tile,
-.drag-ghost {
+.rack-tile {
   padding: 0 9% 7% 0;
 }
 
 .tile .value,
-.rack-tile .value,
-.drag-ghost .value {
+.rack-tile .value {
   letter-spacing: -0.05em;
 }
 
@@ -635,7 +682,9 @@ svg {
   position: absolute;
   right: 4%;
   bottom: 2%;
-  font-size: 1.9cqw;
+  /* 1.9cqw rapporté aux 4cqw de la tuile : même rendu, mais la mesure suit
+     la tuile au lieu du plateau, et survit donc au clone du glissement. */
+  font-size: 0.475em;
   font-weight: 600;
   opacity: 0.65;
 }
@@ -644,8 +693,8 @@ svg {
    halo, qui signale que le mot est jouable. */
 .tile.pending {
   box-shadow:
-    0 0 0 0.3cqw rgb(255 255 255 / 0.55),
-    0 0.6cqw 1.2cqw rgb(0 0 0 / 0.45),
+    0 0 0 0.075em rgb(255 255 255 / 0.55),
+    0 0.15em 0.3em rgb(0 0 0 / 0.45),
     inset 0 -1.5px 0 rgb(0 0 0 / 0.18);
 }
 
@@ -756,7 +805,6 @@ svg {
 }
 
 .status.win { color: var(--gold); }
-.status.warn { color: var(--danger); }
 .status.warn { color: var(--danger); }
 
 /* --- Chevalet ----------------------------------------------------- */
@@ -877,37 +925,27 @@ svg {
   }
 }
 
-/* Jeton suivi par le pointeur. Il ne conserve pas les classes de sa source :
-   sa valeur doit donc être replacée en coin ici, faute de quoi elle
-   redevient un simple élément centré à pleine taille. */
+/* Jeton suivi par le pointeur. L'enveloppe ne porte que la position, la
+   taille et l'élan ; la tuile qu'elle contient est le clone de celle qu'on a
+   saisie, avec ses propres classes. Elle garde donc son apparence sans que
+   rien n'ait à être redéfini ici — et sa taille donne aux marges internes de
+   la tuile, exprimées en pourcentage, le bloc conteneur qu'elles attendent. */
 .drag-ghost {
   position: fixed;
   inset: auto;
   z-index: 60;
-  display: grid;
-  place-items: center;
-  border-radius: 6px;
-  background: linear-gradient(165deg, #fdf3dd 0%, var(--tile) 55%, var(--tile-edge) 100%);
-  color: var(--tile-text);
-  font-weight: 700;
-  line-height: 1;
-  box-shadow: 0 14px 26px rgb(0 0 0 / 0.55);
   pointer-events: none;
   transform: translate(-50%, -50%) scale(1.06) rotate(-3deg);
+  /* `drop-shadow` épouse les coins arrondis de la tuile, là où `box-shadow`
+     dessinerait l'ombre du rectangle de l'enveloppe. */
+  filter: drop-shadow(0 14px 26px rgb(0 0 0 / 0.55));
+}
+
+/* Le jeton est saisi, pas en train d'arriver : ni animation d'entrée, ni
+   transition de survol ne doivent se rejouer sous le pointeur. */
+.drag-ghost > * {
   animation: none;
-}
-
-.drag-ghost.blank {
-  background: linear-gradient(165deg, #f6efff 0%, var(--tile-blank) 100%);
-}
-
-.drag-ghost .value {
-  position: absolute;
-  right: 4%;
-  bottom: 2%;
-  font-size: 0.476em;
-  font-weight: 600;
-  opacity: 0.6;
+  transition: none;
 }
 
 /* --- Actions ------------------------------------------------------ */

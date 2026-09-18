@@ -10,6 +10,7 @@ fois la page chargée.
 npm install
 npm run dev          # serveur de développement
 npm run build        # bundle de production dans dist/
+npm run dict:fetch   # récupère le lexique source (8,9 Mo, hors dépôt)
 npm run build:dict   # régénère public/dict/fr.dawg
 ```
 
@@ -24,7 +25,7 @@ node tools/simulate.mjs 20  # 140 parties IA contre IA, tous niveaux
 
 `base` vaut `./` : le contenu de `dist/` se copie tel quel dans le
 sous-répertoire voulu, en l’occurrence `paul-laurent.fr/centurion-scrabble/`.
-Un `.htaccess` active la compression (le dictionnaire passe de 304 à ~180 Ko)
+Un `.htaccess` active la compression (le dictionnaire passe de 732 à ~440 Ko)
 et le cache long sur les fichiers empreintés.
 
 Le même bundle convient à GitHub Pages, servi sous `/centurion-scrabble/` —
@@ -48,19 +49,35 @@ certains réseaux d'entreprise bloquent WebRTC.
 
 ## Dictionnaire
 
-Le lexique par défaut compte 311 495 formes, dérivé de Dicollecte via
-`an-array-of-french-words` (MIT), filtré aux mots jouables : 2 à 15 lettres,
-accents retirés, noms propres exclus. Ce n'est pas l'ODS, qui est une base
-protégée et non redistribuable.
+Le lexique compte 641 239 formes, filtré aux mots jouables : 2 à 15 lettres,
+accents retirés, noms propres exclus.
+
+Sa source est **Morphalou 3.1** (ATILF/CNRS), sous licence **LGPL-LR**, dans
+la version déjà dégrossie pour le jeu par
+[`french-fr-fr-morphalou`](https://github.com/FredrikBorgstrom/french-fr-fr-morphalou)
+(LGPL-LR également). Le dictionnaire binaire livré dans `public/dict/` en est
+un dérivé, distribué sous la même licence.
+
+> Source : ATILF/CNRS, *Morphalou 3.1*,
+> <https://hdl.handle.net/11403/morphalou/v3.1>
+
+La liste pèse 8,9 Mo : le dépôt embarque sa provenance plutôt que son
+contenu. `npm run dict:fetch` récupère le commit épinglé, vérifie l'empreinte
+SHA-256 du fichier et refuse tout écart. Sans elle, `build:dict` se replie sur
+le lexique réduit embarqué (`an-array-of-french-words`, MIT, 311 495 formes)
+et le signale.
+
+Ce n'est pas l'ODS, qui est une base protégée : tout produit numérique
+conforme à l'ODS suppose une licence auprès de Larousse. Morphalou est un
+lexique de langue, pas une liste de Scrabble — il diverge dans les deux sens.
+`data/supplement.txt` (ajouts) et `data/exclusions.txt` (retraits) rattrapent
+l'écart au fil des parties ; ils sont appliqués dans tous les cas.
 
 Pour utiliser une liste personnelle — un fichier d'un mot par ligne :
 
 ```bash
 npm run build:dict -- /chemin/vers/liste.txt
 ```
-
-`data/supplement.txt` (ajouts) et `data/exclusions.txt` (retraits) sont
-appliqués en plus, s'ils existent.
 
 ## Organisation
 
@@ -72,4 +89,5 @@ appliqués en plus, s'ils existent.
 | `src/core/game.js` | sac, chevalets, tours, fin de partie, instantanés |
 | `src/net/session.js` | liaison directe entre deux navigateurs |
 | `src/ui/app.js` | rendu et saisie |
+| `tools/fetch-morphalou.mjs` | récupération du lexique source, à empreinte vérifiée |
 | `tools/build-dict.mjs` | construction du DAWG minimal |

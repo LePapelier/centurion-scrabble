@@ -2,7 +2,8 @@
 /**
  * Construit le dictionnaire binaire (DAWG) utilisé par le jeu.
  *
- *   npm run build:dict                  → lexique libre embarqué (par défaut)
+ *   npm run dict:fetch                  → récupère la base Morphalou
+ *   npm run build:dict                  → Morphalou si présent, sinon repli
  *   npm run build:dict -- mon-ods.txt   → fichier perso, un mot par ligne
  *
  * Les fichiers `data/supplement.txt` (mots ajoutés) et `data/exclusions.txt`
@@ -60,6 +61,7 @@ function loadLines(path) {
 
 async function collectWords() {
   const custom = process.argv[2];
+  const morphalou = join(ROOT, 'data', 'morphalou-strict.txt');
   let source;
   let raw;
 
@@ -67,7 +69,15 @@ async function collectWords() {
     const path = resolve(process.cwd(), custom);
     raw = loadLines(path);
     source = `fichier personnalisé (${custom})`;
+  } else if (existsSync(morphalou)) {
+    raw = loadLines(morphalou);
+    source = 'Morphalou 3.1 (ATILF/CNRS, LGPL-LR), filtrage french-fr-fr-morphalou';
   } else {
+    // Repli sur le lexique embarqué. Il couvre deux fois moins de formes
+    // que Morphalou : on le dit, plutôt que de livrer en silence un
+    // dictionnaire différent de celui des autres contributeurs.
+    console.warn('Lexique   : data/morphalou-strict.txt absent — repli sur le lexique réduit.');
+    console.warn('            Lancez `npm run dict:fetch` pour la base complète.\n');
     // Le paquet expose un simple index.json : on le lit tel quel plutôt que
     // de dépendre des attributs d'import JSON.
     const path = join(ROOT, 'node_modules', 'an-array-of-french-words', 'index.json');

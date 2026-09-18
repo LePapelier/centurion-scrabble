@@ -8,6 +8,7 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
+    "dict:fetch": "node tools/fetch-morphalou.mjs",
     "build:dict": "node tools/build-dict.mjs"
   },
   "devDependencies": {

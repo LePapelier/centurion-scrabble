@@ -3,11 +3,12 @@
  * Vérifie que le DAWG sérialisé contient exactement le lexique attendu :
  * énumération complète de l'automate, comparée au jeu de mots d'origine.
  *
- *   node tools/check-dict.mjs
+ *   node tools/check-dict.mjs                  → la source qu'aurait prise le build
+ *   node tools/check-dict.mjs mon-lexique.txt  → une liste précise
  */
 import { readFileSync, existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import { dirname, join } from 'node:path';
+import { dirname, join, resolve } from 'node:path';
 import { Dawg } from '../src/core/dawg.js';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
@@ -37,10 +38,27 @@ function enumerate(dawg) {
 const enumerated = enumerate(dawg);
 console.log(`Énumérés  : ${enumerated.size} mots`);
 
-// Jeu de référence, reconstruit avec la même normalisation que le build.
-const source = JSON.parse(
-  readFileSync(join(ROOT, 'node_modules', 'an-array-of-french-words', 'index.json'), 'utf8'),
-);
+// Jeu de référence, reconstruit avec la même source et la même normalisation
+// que le build : sans cela, basculer de lexique ferait échouer la
+// vérification alors que le dictionnaire est juste.
+const custom = process.argv[2];
+const morphalou = join(ROOT, 'data', 'morphalou-strict.txt');
+let source;
+let origine;
+if (custom) {
+  source = readFileSync(resolve(process.cwd(), custom), 'utf8').split(/\r?\n/);
+  origine = `fichier personnalisé (${custom})`;
+} else if (existsSync(morphalou)) {
+  source = readFileSync(morphalou, 'utf8').split(/\r?\n/);
+  origine = 'Morphalou 3.1';
+} else {
+  source = JSON.parse(
+    readFileSync(join(ROOT, 'node_modules', 'an-array-of-french-words', 'index.json'), 'utf8'),
+  );
+  origine = 'an-array-of-french-words';
+}
+console.log(`Source    : ${origine}`);
+
 /** Même normalisation que `tools/build-dict.mjs`. */
 function fold(raw) {
   const word = String(raw).trim();
@@ -94,7 +112,9 @@ const probes = [...expected].slice(0, 20000);
 let lookupFailures = 0;
 for (const word of probes) if (!dawg.has(word)) lookupFailures++;
 
-const negatives = ['XYZZY', 'BLURP', 'ZZZZ', 'QWERTY', 'AZERTYU', 'MAISONZ', 'A', 'ZZ'];
+// Des suites que nul lexique ne contient : QWERTY et AZERTY, eux, sont bien
+// des entrées de Morphalou et ne peuvent plus servir de témoins négatifs.
+const negatives = ['XYZZY', 'BLURP', 'ZZZZ', 'KLMNOP', 'AZERTYU', 'MAISONZ', 'A', 'ZZ'];
 const falsePositives = negatives.filter((w) => dawg.has(w));
 
 console.log(`Recherche : ${probes.length} sondes, ${lookupFailures} échecs`);
