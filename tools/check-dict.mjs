@@ -49,8 +49,12 @@ if (custom) {
   source = readFileSync(resolve(process.cwd(), custom), 'utf8').split(/\r?\n/);
   origine = `fichier personnalisé (${custom})`;
 } else if (existsSync(morphalou)) {
-  source = readFileSync(morphalou, 'utf8').split(/\r?\n/);
-  origine = 'Morphalou 3.1';
+  // Même union que le build : Morphalou et Dicollecte se comblent l'un
+  // l'autre, la référence doit donc être la réunion des deux.
+  source = readFileSync(morphalou, 'utf8').split(/\r?\n/).concat(
+    JSON.parse(readFileSync(join(ROOT, 'node_modules', 'an-array-of-french-words', 'index.json'), 'utf8')),
+  );
+  origine = 'Morphalou 3.1 réuni à an-array-of-french-words';
 } else {
   source = JSON.parse(
     readFileSync(join(ROOT, 'node_modules', 'an-array-of-french-words', 'index.json'), 'utf8'),

@@ -70,8 +70,17 @@ async function collectWords() {
     raw = loadLines(path);
     source = `fichier personnalisé (${custom})`;
   } else if (existsSync(morphalou)) {
-    raw = loadLines(morphalou);
-    source = 'Morphalou 3.1 (ATILF/CNRS, LGPL-LR), filtrage french-fr-fr-morphalou';
+    // Les deux lexiques sont réunis, car ils se trouent l'un l'autre :
+    // Morphalou apporte les conjugaisons rares, mais son filtrage amont écarte
+    // des formes courantes en les prenant pour des variantes — « clés » tombe
+    // quand « clé » reste, « mafia » quand « maffia » reste. Dicollecte les
+    // rattrape. Ce que l'union laisse passer de trop relève de
+    // `data/exclusions.txt`, qui existe pour ça.
+    raw = loadLines(morphalou).concat(
+      JSON.parse(readFileSync(join(ROOT, 'node_modules', 'an-array-of-french-words', 'index.json'), 'utf8')),
+    );
+    source =
+      'Morphalou 3.1 (ATILF/CNRS, LGPL-LR) réuni à an-array-of-french-words (MIT, Dicollecte)';
   } else {
     // Repli sur le lexique embarqué. Il couvre deux fois moins de formes
     // que Morphalou : on le dit, plutôt que de livrer en silence un
