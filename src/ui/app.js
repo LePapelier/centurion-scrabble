@@ -50,6 +50,8 @@ const MIN_THINKING_MS = 450;
 
 /** Décalage entre deux jetons lors de la révélation d'un coup. */
 const REVEAL_STEP_MS = 60;
+/** Décalage entre deux lettres de la marque quand elle ondule. */
+const BRAND_WAVE_STEP_MS = 18;
 const SCORE_COUNT_MS = 520;
 
 /**
@@ -1353,14 +1355,21 @@ export class App {
     }
   }
 
-  /** Fait onduler les jetons de la marque, de gauche à droite. */
+  /**
+   * Fait onduler les jetons de la marque, de gauche à droite.
+   *
+   * Un nouveau clic reprend la vague depuis le début : les animations en
+   * cours sont annulées explicitement, sans quoi deux clics rapprochés
+   * donnent l'impression de deux vagues qui se suivent.
+   */
   wiggleBrand() {
     if (reducedMotion.matches) return;
     const tiles = [...document.querySelectorAll('.brand-tile')];
 
     tiles.forEach((tile, i) => {
+      for (const animation of tile.getAnimations()) animation.cancel();
       tile.classList.remove('wiggle');
-      tile.style.animationDelay = `${i * 32}ms`;
+      tile.style.animationDelay = `${i * BRAND_WAVE_STEP_MS}ms`;
     });
     // Recalcul forcé : sans lui, retirer puis remettre la classe dans la même
     // image ne relance pas l'animation.

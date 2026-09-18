@@ -133,7 +133,7 @@ svg {
 /* Petite cascade au clic sur la marque : chaque jeton grossit et oscille,
    avec un décalage posé en JavaScript qui fait courir la vague. */
 .brand-tile.wiggle {
-  animation: brand-wiggle 0.5s cubic-bezier(0.3, 0.8, 0.4, 1.2) backwards;
+  animation: brand-wiggle 0.38s cubic-bezier(0.3, 0.8, 0.4, 1.2) backwards;
 }
 
 @keyframes brand-wiggle {
