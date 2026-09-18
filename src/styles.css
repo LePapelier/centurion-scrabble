@@ -554,6 +554,10 @@ svg {
 .cell.center {
   background: var(--dw);
   color: rgb(255 255 255 / 0.8);
+  /* L'étoile n'est pas une étiquette de deux lettres comme « MD » : elle peut
+     occuper la case, à la mesure d'une lettre de jeton. */
+  font-size: 4.4cqw;
+  line-height: 1;
 }
 
 /* Destination survolée pendant qu'un jeton est déplacé : vert si la case
