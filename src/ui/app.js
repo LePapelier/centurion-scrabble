@@ -510,7 +510,6 @@ export class App {
     const myTurn = this.game.current === HUMAN && !this.game.finished && !this.busy && linked;
     const hasPending = this.pending.size > 0;
 
-    $('btn-play').disabled = !myTurn || !hasPending;
     $('btn-recall').disabled = !hasPending;
     $('btn-shuffle').disabled = !myTurn;
     $('btn-hint').disabled = !myTurn;
@@ -522,6 +521,8 @@ export class App {
     // Le halo et la pastille de score ne s'allument que sur un coup jouable :
     // le score annoncé est toujours un score réellement encaissable.
     const verdict = this.updateHalo();
+    // Jouer n'est proposé que pour un coup valide, comme le halo.
+    $('btn-play').disabled = !myTurn || !verdict?.ok;
     const preview = $('preview');
     if (verdict?.ok) {
       preview.hidden = false;
