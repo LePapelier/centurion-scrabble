@@ -60,9 +60,21 @@ leds
 eyeliner
 eyeliners
 
-# Mots de deux lettres manquants — la liste la plus sollicitée en jeu. L'ODS
-# en compte 81 ; nous en avions 79, ceux-ci complétaient le compte. OMS,
+# Mots de deux lettres manquants — la liste la plus sollicitée en jeu. OMS,
 # YE, ZE et ZO ont été vérifiés dans la foulée : invalides, malgré OM.
+#
+# Une source donnait 81 mots de deux lettres dans l'ODS, et nous étions
+# tombés juste sur ce compte : TO, signalé depuis, montre que le total était
+# faux. Un compte rond ne vaut pas vérification.
 om
 vs
 
+# TO, signalé en partie, et son pluriel TOS. Le compte de 81 annoncé plus
+# haut était donc faux : on ne s'y fie plus, seule la vérification mot par
+# mot compte.
+to
+tos
+
+# Croisé en vérifiant la famille d'OVALER : OVALIE, le monde du rugby, est
+# valide et manquait. OVALIES n'a pas été vérifié et reste donc dehors.
+ovalie

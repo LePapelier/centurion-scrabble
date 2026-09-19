@@ -243,3 +243,60 @@ zebis
 eye
 eyes
 
+
+# Repérés en auto-jeu : le bot les jouait, 1mot.net les refuse. Ce sont des
+# formes que Morphalou porte comme lemmes savants ou fragments, pas comme
+# mots français. BEA, UTE, LEM et EON, vérifiés au passage, sont valides.
+dei
+ino
+ise
+one
+ora
+reu
+
+# Signalé en partie : ASFIR, que ni 1mot.net ni aucune source ne connaît.
+asfir
+asfirs
+
+# Signalé en partie : OVALAT. Le verbe « ovaler » n'existe pas — 1mot.net
+# refuse OVALER, OVALA, OVALANT, OVALÉE, OVALS et OVALET. Morphalou lui a
+# pourtant conjugué une famille entière, qu'on retire ici forme par forme.
+#
+# Ce qui reste et doit rester : OVALE et OVALES (l'adjectif et le nom, qui
+# coïncident avec deux formes du faux verbe), OVALAIRE, OVALBUMINE, les
+# OVALOCYTE(S) et toute la famille d'OVALISER, qui est un vrai verbe.
+ovala
+ovalai
+ovalaient
+ovalais
+ovalait
+ovalames
+ovalant
+ovalas
+ovalasse
+ovalassent
+ovalasses
+ovalassiez
+ovalassions
+ovalat
+ovalates
+ovalee
+ovalees
+ovalent
+ovaler
+ovalera
+ovalerai
+ovaleraient
+ovalerais
+ovalerait
+ovaleras
+ovalerent
+ovalerez
+ovaleriez
+ovalerions
+ovalerons
+ovaleront
+ovalez
+ovaliez
+ovalions
+ovalons
