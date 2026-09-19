@@ -99,3 +99,8 @@ loumas
 # l'ignorent, le prenant sans doute pour un nom de lieu. Sans pluriel : un
 # mot en -x est invariable, et 1mot.net refuse GEXE, GEXES et GEXO.
 gex
+
+# Signalé en partie : KET et son pluriel KETS, absents des deux lexiques.
+# KETE, KETES, KETTE et KETH, vérifiés au passage, sont bien invalides.
+ket
+kets
