@@ -48,7 +48,17 @@ const LEVEL_KEY = 'centurion-scrabble/niveau';
 const NAME_KEY = 'centurion-scrabble/nom';
 /** Nom montré à l'adversaire quand le joueur n'en a choisi aucun. */
 const DEFAULT_NAME = 'Joueur';
-const MIN_THINKING_MS = 450;
+/**
+ * Temps de réflexion affiché avant que le coup de l'adversaire n'apparaisse.
+ *
+ * Le moteur répond en quelques dizaines de millisecondes : sans attente, le
+ * coup surgit avant qu'on ait fini de lire le plateau, et on ne voit pas ce
+ * qui a changé. Le plancher laisse le temps de suivre, et la part aléatoire
+ * évite que chaque tour dure exactement pareil — c'est ce battement régulier,
+ * plus que la vitesse, qui trahissait la machine.
+ */
+const THINKING_FLOOR_MS = 900;
+const THINKING_JITTER_MS = 700;
 
 /** Décalage entre deux jetons lors de la révélation d'un coup. */
 const REVEAL_STEP_MS = 60;
@@ -1485,7 +1495,8 @@ export class App {
 
     // Un temps de réflexion minimal évite un coup qui « claque » sans transition.
     const elapsed = performance.now() - this.thinkingSince;
-    if (elapsed < MIN_THINKING_MS) await new Promise((r) => setTimeout(r, MIN_THINKING_MS - elapsed));
+    const attendu = THINKING_FLOOR_MS + Math.random() * THINKING_JITTER_MS;
+    if (elapsed < attendu) await new Promise((r) => setTimeout(r, attendu - elapsed));
 
     this.applyComputerDecision(message.decision);
   }
