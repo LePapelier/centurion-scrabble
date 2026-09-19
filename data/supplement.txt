@@ -78,3 +78,11 @@ tos
 # Croisé en vérifiant la famille d'OVALER : OVALIE, le monde du rugby, est
 # valide et manquait. OVALIES n'a pas été vérifié et reste donc dehors.
 ovalie
+
+# Signalé en partie : EWE, le peuple et la langue du Togo. Les deux lexiques
+# n'en ont aucune forme. L'adjectif s'accorde — EWE, EWES, EWEE, EWEES —
+# et les quatre sont valides, vérifiées une par une.
+ewe
+ewes
+ewee
+ewees
