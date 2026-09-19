@@ -109,3 +109,8 @@ kets
 # FEUJE et FEUJES, vérifiés au passage, sont invalides.
 feuj
 feujs
+
+# AYS, pluriel d'AY. Morphalou porte le singulier mais pas le pluriel : les
+# deux ne se déduisent décidément pas l'un de l'autre. AYES et AYO, vérifiés
+# au passage, sont invalides.
+ays
