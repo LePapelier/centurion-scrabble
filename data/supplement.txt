@@ -86,3 +86,11 @@ ewe
 ewes
 ewee
 ewees
+
+# Trouvés en vérifiant LUMAD : LUMA et LUMAS, valides, manquaient au
+# dictionnaire alors que LUMACHELLE, voisine dans l'ordre alphabétique, y
+# était. LOUMA et LOUMAS, croisés au passage, sont valides eux aussi.
+luma
+lumas
+louma
+loumas

@@ -338,3 +338,8 @@ huiront
 # protège donc pas des emprunts que l'une et l'autre acceptent et que la
 # compétition refuse : seul le signalement en partie les attrape.
 men
+
+# Signalé en partie : LUMAD, peuple de Mindanao. Ni lui ni son pluriel n'ont
+# de page sur 1mot.net.
+lumad
+lumads
