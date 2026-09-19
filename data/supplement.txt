@@ -94,3 +94,8 @@ luma
 lumas
 louma
 loumas
+
+# Signalé en partie : GEX, le bleu du Pays de Gex. Les deux lexiques
+# l'ignorent, le prenant sans doute pour un nom de lieu. Sans pluriel : un
+# mot en -x est invariable, et 1mot.net refuse GEXE, GEXES et GEXO.
+gex
