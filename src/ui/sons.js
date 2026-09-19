@@ -56,8 +56,7 @@ export class Sons {
 
   /**
    * Les navigateurs refusent tout son tant que la personne n'a pas touché la
-   * page : le contexte naît donc au premier geste, et se réveille aux suivants
-   * (revenir d'un autre onglet le suspend).
+   * page : le contexte naît donc au premier geste, et se réveille aux suivants.
    */
   reveiller() {
     if (!this.actifs) return null;
@@ -70,8 +69,44 @@ export class Sons {
       this.maitre.connect(this.ctx.destination);
       this.bruit = this.fabriquerBruit();
     }
-    if (this.ctx.state === 'suspended') this.ctx.resume().catch(() => {});
+    // Tout état autre que « running » demande une reprise. On ne teste pas
+    // « suspended » nommément : iOS emploie « interrupted » quand une autre
+    // application prend la sortie audio ou qu'on repose le téléphone, et ce
+    // cas-là restait muet jusqu'au rechargement de la page.
+    if (this.ctx.state !== 'running') this.reprendre();
     return this.ctx;
+  }
+
+  /** Relance un contexte endormi, et en refait un s'il ne repart pas. */
+  reprendre() {
+    const endormi = this.ctx;
+    endormi.resume().catch(() => {
+      // Un contexte interrompu trop longtemps ne repart parfois jamais.
+      // Plutôt que de rester muet jusqu'à ce qu'on recharge la page, on le
+      // jette : le prochain bruitage en ouvrira un neuf.
+      if (this.ctx !== endormi) return;
+      this.ctx = null;
+      this.maitre = null;
+      this.bruit = null;
+      endormi.close?.().catch(() => {});
+    });
+  }
+
+  /**
+   * Rallume le son au retour sur la page.
+   *
+   * Sans cela, le contexte ne repart qu'au bruitage suivant — et c'est lui
+   * qui se perd, programmé sur une horloge encore à l'arrêt. Le premier geste
+   * sert de session de rattrapage : sur iOS, la reprise n'est parfois
+   * autorisée que là.
+   */
+  surveiller() {
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') this.reveiller();
+    });
+    for (const nom of ['pointerdown', 'keydown']) {
+      document.addEventListener(nom, () => this.reveiller(), { passive: true });
+    }
   }
 
   /** Une seconde de bruit blanc, réutilisée par tous les claquements. */

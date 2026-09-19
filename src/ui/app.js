@@ -138,6 +138,7 @@ export class App {
       /* stockage indisponible : on garde le réglage par défaut */
     }
     this.sons = new Sons(sonActif);
+    this.sons.surveiller();
 
     /** Coup en attente d'un verdict d'optimalité : {id, score}. */
     this.attenteOptimalite = null;
