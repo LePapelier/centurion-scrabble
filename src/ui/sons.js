@@ -7,7 +7,7 @@
  * de leur provenance. Ici le code fait dix fois moins que le seul fichier
  * qu'il remplace.
  *
- * Le parti pris sonore est celui du bois : les jetons de Scrabble claquent,
+ * Le parti pris sonore est celui du bois : les tuiles de Scrabble claquent,
  * ils ne bipent pas. D'où le bruit filtré plutôt que des notes pures pour tout
  * ce qui touche au plateau — les notes sont réservées aux trois moments qui
  * méritent qu'on lève la tête (le scrabble, le coup optimal, la fin).
@@ -124,8 +124,8 @@ export class Sons {
 
   /**
    * Un claquement : bruit blanc passé dans un filtre étroit, étouffé aussitôt.
-   * La fréquence du filtre fait toute la matière — bas, c'est un jeton lourd
-   * sur le plateau ; haut, c'est un jeton qu'on effleure.
+   * La fréquence du filtre fait toute la matière — bas, c'est une tuile lourd
+   * sur le plateau ; haut, c'est une tuile qu'on effleure.
    */
   claquer({ freq = 1400, duree = 0.06, volume = 0.3, retard = 0, q = 1.4 }) {
     const ctx = this.ctx;
@@ -133,7 +133,7 @@ export class Sons {
 
     const source = ctx.createBufferSource();
     source.buffer = this.bruit;
-    source.playbackRate.value = 0.8 + Math.random() * 0.4; // deux jetons ne sonnent jamais pareil
+    source.playbackRate.value = 0.8 + Math.random() * 0.4; // deux tuiles ne sonnent jamais pareil
 
     const filtre = ctx.createBiquadFilter();
     filtre.type = 'bandpass';
@@ -256,12 +256,12 @@ export class Sons {
     if (!this.reveiller()) return;
 
     switch (nom) {
-      // Un jeton qu'on soulève : bref et haut, presque rien.
+      // Une tuile qu'on soulève : bref et haut, presque rien.
       case 'prise':
         this.claquer({ freq: 2600, duree: 0.035, volume: 0.10, retard });
         break;
 
-      // Un jeton qu'on pose sur le plateau. C'est le son le plus entendu de
+      // Une tuile qu'on pose sur le plateau. C'est le son le plus entendu de
       // tout le jeu : il doit rester en dessous de l'attention.
       case 'pose':
         this.claquer({ freq: 1500, duree: 0.055, volume: 0.22, retard });
@@ -287,7 +287,7 @@ export class Sons {
         this.note({ freq: 185, duree: 0.2, volume: 0.12, retard: retard + 0.09, forme: 'sine' });
         break;
 
-      // Scrabble : les sept jetons d'un coup, quatre notes qui montent.
+      // Scrabble : les sept tuiles d'un coup, quatre notes qui montent.
       case 'scrabble':
         [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => {
           this.note({ freq: f, duree: 0.26, volume: 0.15, retard: retard + i * 0.085 });
@@ -344,7 +344,7 @@ export class Sons {
         break;
       }
 
-      // Jetons rendus au sac : un froissement plus long, deux passes.
+      // Tuiles rendues au sac : un froissement plus long, deux passes.
       case 'echange':
         this.claquer({ freq: 3200, duree: 0.13, volume: 0.14, retard, q: 0.7 });
         this.claquer({ freq: 2400, duree: 0.16, volume: 0.12, retard: retard + 0.07, q: 0.7 });
@@ -355,7 +355,7 @@ export class Sons {
     }
   }
 
-  /** Une série de poses, espacées comme les jetons qui se révèlent à l'écran. */
+  /** Une série de poses, espacées comme les tuiles qui se révèlent à l'écran. */
   jouerSerie(nom, nombre, pasMs) {
     for (let i = 0; i < nombre; i++) this.jouer(nom, (i * pasMs) / 1000);
   }

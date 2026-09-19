@@ -9,7 +9,7 @@
  *     vraiment un débutant d'un joueur de club, bien plus que la longueur
  *     des mots ;
  *   — la part du meilleur coup visée (un débutant ne voit pas l'optimum) ;
- *   — l'appétit pour les coups qui posent beaucoup de jetons : un débutant
+ *   — l'appétit pour les coups qui posent beaucoup de tuiles : un débutant
  *     cherche à se débarrasser de ses lettres plutôt qu'à grappiller deux
  *     points dans un coin, et sans ce levier les parties duraient le double
  *     d'une partie réelle ;
@@ -88,7 +88,7 @@ export function evaluateLeave(rest) {
   return value;
 }
 
-/** Retire d'un chevalet les jetons consommés par un coup. */
+/** Retire d'un chevalet les tuiles consommées par un coup. */
 export function remainingRack(rack, placements) {
   const rest = [...rack];
   for (const p of placements) {
@@ -113,7 +113,7 @@ function gaussian() {
 }
 
 /**
- * Partage le chevalet entre jetons rendus au sac et jetons conservés.
+ * Partage le chevalet entre tuiles rendues au sac et tuiles conservées.
  * @returns {{drop: number[], keep: number[], value: number}}
  */
 function chooseDiscard(rack, smart) {

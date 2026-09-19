@@ -77,7 +77,7 @@ export const VALUES = new Uint8Array([
   0, // joker
 ]);
 
-/** Distribution officielle : 102 jetons, dont 2 jokers. */
+/** Distribution officielle : 102 tuiles, dont 2 jokers. */
 export const DISTRIBUTION = new Uint8Array([
   9, // A
   2, // B

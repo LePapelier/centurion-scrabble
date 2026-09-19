@@ -3,7 +3,7 @@
  *
  * Le plateau est stocké à plat : `letters[i]` vaut -1 si la case est vide,
  * sinon l'index de la lettre posée (A=0 … Z=25). `blanks[i]` vaut 1 si le
- * jeton posé est un joker — il compte alors pour 0 point.
+ * tuile posée est un joker — elle compte alors pour 0 point.
  */
 import {
   SIZE,
@@ -64,7 +64,7 @@ export function checkGeometry(board, placements) {
   for (const p of placements) {
     const i = p.row * SIZE + p.col;
     if (board.letters[i] >= 0) return { ok: false, reason: 'Une case est déjà occupée.' };
-    if (seen.has(i)) return { ok: false, reason: 'Deux jetons sur la même case.' };
+    if (seen.has(i)) return { ok: false, reason: 'Deux tuiles sur la même case.' };
     seen.add(i);
   }
 

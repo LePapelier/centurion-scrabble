@@ -72,15 +72,15 @@ const THINKING_JITTER_MS = 700;
 const MIN_COUPS_POUR_FELICITER = 6;
 /** Temps laissé à la félicitation avant que l'adversaire ne joue par-dessus. */
 const FELICITATION_MS = 2000;
-/** Décalage entre deux jetons qui s'allument, quand le coup est salué. */
+/** Décalage entre deux tuiles qui s'allument, quand le coup est salué. */
 const ETINCELLE_PAS_MS = 70;
 /* Une seule formule, courte. Quatre tournures tournaient ici : la variété
    attirait l'œil sur le texte, alors que l'intérêt est ailleurs — dans les
-   jetons qui s'allument. Et sur un téléphone, une phrase plus longue s'étale
+   tuiles qui s'allument. Et sur un téléphone, une phrase plus longue s'étale
    sur trois lignes et n'a plus rien d'une petite tape dans le dos. */
 const FELICITATION = 'Meilleur coup !';
 
-/** Décalage entre deux jetons lors de la révélation d'un coup. */
+/** Décalage entre deux tuiles lors de la révélation d'un coup. */
 const REVEAL_STEP_MS = 60;
 /** Décalage entre deux lettres de la marque quand elle ondule. */
 const BRAND_WAVE_STEP_MS = 18;
@@ -264,7 +264,7 @@ export class App {
     for (let letter = 0; letter < 26; letter++) {
       const button = document.createElement('button');
       button.type = 'button';
-      // Le bouton montre le jeton tel qu'il se posera : la lettre seule, sans
+      // Le bouton montre la tuile telle qu'elle se posera : la lettre seule, sans
       // valeur en coin, un joker n'en portant pas.
       button.append(document.createTextNode(letterChar(letter)));
 
@@ -417,7 +417,7 @@ export class App {
 
     // Le score se pose au coin haut-droit de la bande la plus haute de
     // l'encadré — non du rectangle qui l'englobe. Sur une forme en L, ce
-    // rectangle a un coin dans le vide, loin de tout jeton ; la bande la plus
+    // rectangle a un coin dans le vide, loin de toute tuile ; la bande la plus
     // haute, elle, est occupée par définition.
     const sommet = Math.min(...emprises.map((e) => e.haut));
     const bordDroit = Math.max(
@@ -497,7 +497,7 @@ export class App {
         tile.dataset.rackIndex = String(i);
         if (this.selected === i) tile.classList.add('selected');
         if (this.marked.has(i)) tile.classList.add('marked');
-        // Un joker est un jeton vierge : il ne porte aucune lettre tant qu'on
+        // Un joker est une tuile vierge : elle ne porte aucune lettre tant qu'on
         // ne l'a pas posé, et ne vaut rien. Le « ? » d'avant se lisait comme
         // une lettre, et sa valeur comme un score à faire.
         const joker = letter === BLANK;
@@ -612,7 +612,7 @@ export class App {
         }
       } else if (entry.type === 'exchange') {
         what.className = 'what muted';
-        what.textContent = `échange ${entry.count} jeton${entry.count > 1 ? 's' : ''}`;
+        what.textContent = `échange ${entry.count} tuile${entry.count > 1 ? 's' : ''}`;
       } else {
         what.className = 'what muted';
         what.textContent = 'passe';
@@ -683,7 +683,7 @@ export class App {
       return;
     }
     if (this.exchangeMode) {
-      status.textContent = `${this.marked.size} jeton${this.marked.size > 1 ? 's' : ''} sélectionné${this.marked.size > 1 ? 's' : ''}.`;
+      status.textContent = `${this.marked.size} tuile${this.marked.size > 1 ? 's' : ''} sélectionnée${this.marked.size > 1 ? 's' : ''}.`;
       return;
     }
     if (this.mode !== 'solo' && !this.session?.connected) {
@@ -705,7 +705,7 @@ export class App {
         status.textContent = verdict.reason;
         return;
       }
-      status.textContent = 'Validez votre mot ou reprenez vos jetons.';
+      status.textContent = 'Validez votre mot ou reprenez vos tuiles.';
       return;
     }
     status.textContent =
@@ -734,7 +734,7 @@ export class App {
   }
 
   /**
-   * Manipuler ses jetons ne dépend pas du tour : on prépare son coup pendant
+   * Manipuler ses tuiles ne dépend pas du tour : on prépare son coup pendant
    * que l'adversaire réfléchit, comme on avance une pièce en pensée aux
    * échecs. Seul l'envoi du coup reste réservé à son tour.
    */
@@ -744,7 +744,7 @@ export class App {
 
   /**
    * Retire les poses préparées que le plateau a rattrapées : l'adversaire a
-   * pu jouer sur une case qu'on se réservait. Les jetons retournent au
+   * pu jouer sur une case qu'on se réservait. Les tuiles retournent au
    * chevalet, leur référence n'étant plus tenue par personne.
    * @returns {number} nombre de poses reprises
    */
@@ -785,17 +785,17 @@ export class App {
       return;
     }
 
-    // Sans jeton sélectionné, la case devient le point de saisie clavier.
+    // Sans tuile sélectionnée, la case devient le point de saisie clavier.
     const sameCell = this.cursor?.index === index;
     this.cursor = { index, direction: sameCell ? 1 - this.cursor.direction : 0 };
     this.refresh();
   }
 
   /**
-   * Pose un jeton du chevalet sur une case.
+   * Pose une tuile du chevalet sur une case.
    *
    * @param {number} index case visée
-   * @param {number} rackIndex jeton du chevalet
+   * @param {number} rackIndex tuile du chevalet
    * @param {{advance?: boolean}} [options] `advance` fait glisser le point de
    *   saisie clavier sur la case suivante. Réservé à la frappe : après une
    *   pose à la souris ou au doigt, rien n'indique où ira la lettre d'après.
@@ -848,7 +848,7 @@ export class App {
 
   /** Glisser-déposer au doigt comme à la souris. */
   /**
-   * Rend un jeton déplaçable à la souris comme au doigt.
+   * Rend une tuile déplaçable à la souris comme au doigt.
    *
    * @param {HTMLElement} element
    * @param {{from: 'rack', rackIndex: number}|{from: 'board', index: number}} origin
@@ -868,7 +868,7 @@ export class App {
         dragging = true;
         const box = element.getBoundingClientRect();
 
-        // Le jeton suivi par le pointeur est la tuile elle-même, clonée avec
+        // La tuile suivi par le pointeur est la tuile elle-même, clonée avec
         // ses classes : elle doit être identique à celle qu'on a saisie. Le
         // clone est pris avant « dragging », qui rend l'original invisible.
         const face = element.cloneNode(true);
@@ -935,7 +935,7 @@ export class App {
 
   /**
    * Signale la destination survolée : case accueillante, case refusée, ou
-   * chevalet lorsqu'on ramène un jeton déjà posé.
+   * chevalet lorsqu'on ramène une tuile déjà posée.
    */
   highlightDrop(origin, x, y) {
     const under = document.elementFromPoint(x, y);
@@ -956,7 +956,7 @@ export class App {
       cell.classList.toggle('drop-blocked', !free && !swap);
     }
 
-    // Le jeton suivi par le pointeur recouvre la case qu'il survole, et le
+    // La tuile suivi par le pointeur recouvre la case qu'il survole, et le
     // doigt par-dessus : un jalon posé là ne se verrait pas. C'est donc la
     // place libérée, à l'autre bout de l'échange, qui s'allume.
     const source = swapping ? this.dragOriginElement(origin) : null;
@@ -967,7 +967,7 @@ export class App {
     }
   }
 
-  /** La case ou l'emplacement de chevalet d'où part le jeton déplacé. */
+  /** La case ou l'emplacement de chevalet d'où part la tuile déplacée. */
   dragOriginElement(origin) {
     return origin.from === 'board'
       ? this.cells[origin.index] ?? null
@@ -977,13 +977,13 @@ export class App {
   /**
    * Ce que vaut un lâcher sur une case donnée.
    *
-   * `free` : la case est vide, le jeton s'y pose. La case de départ d'un
-   * jeton déplacé en fait partie — l'y reposer doit rester sans effet.
+   * `free` : la case est vide, la tuile s'y pose. La case de départ d'un
+   * tuile déplacée en fait partie — l'y reposer doit rester sans effet.
    *
-   * `swap` : la case porte une pose en attente, que le jeton lâché prend en
+   * `swap` : la case porte une pose en attente, que la tuile lâché prend en
    * remplaçant. Les deux échangent alors leur place, l'autre repartant vers
    * le plateau ou vers le chevalet selon d'où vient celui qu'on tient. Un
-   * jeton déjà validé, lui, n'est plus déplaçable : la case reste refusée.
+   * tuile déjà validée, elle, n'est plus déplaçable : la case reste refusée.
    */
   dropKind(origin, index) {
     if (index === origin.index) return { free: true, swap: false };
@@ -998,7 +998,7 @@ export class App {
     this.dropSource = null;
   }
 
-  /** Applique le lâcher d'un jeton à la position du pointeur. */
+  /** Applique le lâcher d'une tuile à la position du pointeur. */
   dropTile(origin, x, y) {
     if (this.exchangeMode) {
       this.refresh();
@@ -1015,7 +1015,7 @@ export class App {
 
       if (origin.from === 'rack') {
         if (free || swap) {
-          // Sur une case occupée, poser écrase la pose en attente : son jeton
+          // Sur une case occupée, poser écrase la pose en attente : sa tuile
           // n'est plus référencé, et le chevalet le reprend de lui-même.
           this.placeTile(index, origin.rackIndex);
           this.sons.jouer('pose');
@@ -1025,7 +1025,7 @@ export class App {
         this.refresh(); // reposé sur sa propre case
         return;
       } else if (free) {
-        // Déplacement d'un jeton déjà posé, sans repasser par le chevalet.
+        // Déplacement d'une tuile déjà posée, sans repasser par le chevalet.
         const tile = this.pending.get(origin.index);
         this.pending.delete(origin.index);
         this.pending.set(index, tile);
@@ -1059,7 +1059,7 @@ export class App {
   /**
    * Position d'insertion sur le chevalet, déduite des milieux d'emplacement.
    * Les emplacements vides comptent : leur index correspond toujours à celui
-   * du chevalet, même quand des jetons sont posés sur le plateau.
+   * du chevalet, même quand des tuiles sont posés sur le plateau.
    */
   rackDropIndex(x) {
     const slots = [...$('rack').children];
@@ -1071,9 +1071,9 @@ export class App {
   }
 
   /**
-   * Déplace un jeton du chevalet à une autre position.
+   * Déplace une tuile du chevalet à une autre position.
    *
-   * Les poses en attente référencent leur jeton par son index de chevalet :
+   * Les poses en attente référencent leur tuile par son index de chevalet :
    * ces références sont donc réécrites, faute de quoi valider le coup
    * consommerait les mauvaises lettres.
    */
@@ -1089,7 +1089,7 @@ export class App {
       return;
     }
 
-    // Position de départ de chaque jeton, relevée avant le remaniement : elle
+    // Position de départ de chaque tuile, relevée avant le remaniement : elle
     // sert à les faire glisser jusqu'à leur nouvelle place plutôt que de les
     // y téléporter.
     const departs = new Map();
@@ -1121,16 +1121,16 @@ export class App {
   }
 
   /**
-   * Fait glisser les jetons du chevalet de leur ancienne position vers la
+   * Fait glisser les tuiles du chevalet de leur ancienne position vers la
    * nouvelle. Le rendu vient de les recréer : on les anime depuis l'écart
    * mesuré, ce qui donne le mouvement sans dupliquer la mise en page.
    *
-   * Le jeton déplacé en est exclu : il vient d'être lâché à destination, le
+   * La tuile déplacée en est exclue : elle vient d'être lâchée à destination, le
    * faire repartir de son ancienne place donnerait un aller-retour.
    *
    * @param {Map<number, number>} departs ancien index → abscisse d'origine
    * @param {Map<number, number>} provenance nouvel index → ancien index
-   * @param {number} deplace nouvel index du jeton que l'on vient de lâcher
+   * @param {number} deplace nouvel index de la tuile que l'on vient de lâcher
    */
   slideRackTiles(departs, provenance, deplace) {
     if (reducedMotion.matches) return;
@@ -1165,7 +1165,7 @@ export class App {
       dialog.onclose = () => this.resolveBlank && finish(null);
 
       // La fenêtre s'ouvre à la frame suivante. Ouverte au milieu du geste qui
-      // vient de lâcher le jeton, elle reçoit le clic que le téléphone
+      // vient de lâcher la tuile, elle reçoit le clic que le téléphone
       // synthétise derrière le toucher, et le premier appui se perd.
       requestAnimationFrame(() => dialog.showModal());
     });
@@ -1397,7 +1397,7 @@ export class App {
 
   startExchange() {
     if (this.game.bagCount < 7) {
-      this.toast('Le sac contient moins de sept jetons.', 'error');
+      this.toast('Le sac contient moins de sept tuiles.', 'error');
       return;
     }
     this.recall();
@@ -1419,7 +1419,7 @@ export class App {
 
   confirmExchange() {
     if (this.marked.size === 0) {
-      this.toast('Choisissez au moins un jeton.', 'error');
+      this.toast('Choisissez au moins une tuile.', 'error');
       return;
     }
     const rack = this.game.players[HUMAN].rack;
@@ -1438,7 +1438,7 @@ export class App {
       this.toast(result.reason, 'error');
       return;
     }
-    this.toast(`${tiles.length} jeton${tiles.length > 1 ? 's' : ''} échangé${tiles.length > 1 ? 's' : ''}.`);
+    this.toast(`${tiles.length} tuile${tiles.length > 1 ? 's' : ''} échangée${tiles.length > 1 ? 's' : ''}.`);
     this.sons.jouer('echange');
     this.save();
     this.render();
@@ -1534,9 +1534,9 @@ export class App {
   }
 
   /**
-   * Allume les jetons du coup salué, l'un après l'autre.
+   * Allume les tuiles du coup salué, l'une après l'autre.
    *
-   * La félicitation arrive après le rendu du coup : les jetons sont donc en
+   * La félicitation arrive après le rendu du coup : les tuiles sont donc en
    * place et stables. La classe disparaît d'elle-même au rendu suivant, celui
    * du coup de l'adversaire.
    */
@@ -1641,7 +1641,7 @@ export class App {
       if (result.ok) {
         this.revealCells = [...this.game.lastMoveCells];
         this.revealKind = 'land';
-        // Les jetons se révèlent un à un : les claquements suivent le même pas,
+        // Les tuiles se révèlent un à un : les claquements suivent le même pas,
         // et l'on entend la longueur du mot avant de l'avoir lu.
         this.sons.jouerSerie('adverse', this.revealCells.length, REVEAL_STEP_MS);
         const words = result.words.map((w) => w.word).join(', ');
@@ -1659,7 +1659,7 @@ export class App {
       const result = this.game.exchange(decision.tiles);
       if (!result.ok) this.game.pass();
       this.sons.jouer('echange');
-      this.toast(`${name} échange ${decision.tiles.length} jeton${decision.tiles.length > 1 ? 's' : ''}.`);
+      this.toast(`${name} échange ${decision.tiles.length} tuile${decision.tiles.length > 1 ? 's' : ''}.`);
     } else {
       this.game.pass();
       this.toast(`${name} passe son tour.`);
@@ -1778,7 +1778,7 @@ export class App {
   }
 
   /**
-   * Fait onduler les jetons de la marque, de gauche à droite.
+   * Fait onduler les tuiles de la marque, de gauche à droite.
    *
    * Un nouveau clic reprend la vague depuis le début : les animations en
    * cours sont annulées explicitement, sans quoi deux clics rapprochés
@@ -2022,7 +2022,7 @@ export class App {
       );
       if (result.bingo) this.replay(this.boardEl, 'bingo');
     } else if (message.t === 'exchange') {
-      this.toast(`${this.opponentName} a échangé des jetons.`);
+      this.toast(`${this.opponentName} a échangé des tuiles.`);
     } else {
       this.toast(`${this.opponentName} passe son tour.`);
     }
@@ -2068,7 +2068,7 @@ export class App {
         }
       } else if (entry.type === 'exchange') {
         this.sons.jouer('echange');
-        this.toast(`${this.opponentName} a échangé des jetons.`);
+        this.toast(`${this.opponentName} a échangé des tuiles.`);
       } else {
         this.toast(`${this.opponentName} passe son tour.`);
       }

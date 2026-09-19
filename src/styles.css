@@ -57,7 +57,7 @@
   -webkit-tap-highlight-color: transparent;
 }
 
-/* Le jeu se manipule au doigt : une pression longue doit saisir un jeton, et
+/* Le jeu se manipule au doigt : une pression longue doit saisir une tuile, et
    jamais sélectionner le plateau comme du texte. Sans quoi le téléphone
    répond par sa loupe et ses poignées de sélection, et un glissement bleuit
    la partie entière. Le plateau et le chevalet s'en protégeaient déjà ; la
@@ -152,9 +152,9 @@ svg {
   container: entete / inline-size;
 }
 
-/* La marque est composée en jetons, repris des couleurs du plateau. Elle se
+/* La marque est composée en tuiles, repris des couleurs du plateau. Elle se
    lit comme un logo : la taille suit la largeur disponible et les valeurs
-   disparaissent quand les jetons deviennent trop petits. */
+   disparaissent quand les tuiles deviennent trop petits. */
 .brand {
   display: flex;
   align-items: center;
@@ -202,7 +202,7 @@ svg {
   gap: 2px;
 }
 
-/* Petite cascade au clic sur la marque : chaque jeton grossit et oscille,
+/* Petite cascade au clic sur la marque : chaque tuile grossit et oscille,
    avec un décalage posé en JavaScript qui fait courir la vague. */
 .brand-tile.wiggle {
   animation: brand-wiggle 0.38s cubic-bezier(0.3, 0.8, 0.4, 1.2) backwards;
@@ -246,7 +246,7 @@ svg {
 .brand-word:last-child .brand-tile { background: var(--dl); }
 
 /* Quand l'en-tête manque de place, la marque sur une seule ligne obligerait
-   à des jetons minuscules ou déborderait sur les boutons : on empile les deux
+   à des tuiles minuscules ou déborderait sur les boutons : on empile les deux
    mots. Le critère est la largeur de l'en-tête, pas celle de la fenêtre — sur
    grand écran, le panneau latéral lui en prend une bonne part. */
 @container entete (max-width: 620px) {
@@ -555,16 +555,16 @@ svg {
   background: var(--dw);
   color: rgb(255 255 255 / 0.8);
   /* L'étoile n'est pas une étiquette de deux lettres comme « MD » : elle peut
-     occuper la case, à la mesure d'une lettre de jeton. */
+     occuper la case, à la mesure d'une lettre de tuile. */
   font-size: 4.4cqw;
   line-height: 1;
 }
 
-/* Destination survolée pendant qu'un jeton est déplacé : vert si la case
+/* Destination survolée pendant qu'une tuile est déplacé : vert si la case
    accueille la lettre, or si elle en porte une déjà et que les deux vont
    échanger leur place, rouge si le lâcher est refusé.
 
-   Le jalon est porté par un calque au-dessus du jeton : une case occupée en
+   Le jalon est porté par un calque au-dessus de la tuile : une case occupée en
    masquerait autrement le pourtour, et c'est justement sur une case occupée
    que la distinction compte. */
 .cell.drop-target::after,
@@ -583,7 +583,7 @@ svg {
   background: color-mix(in srgb, var(--valid) 28%, transparent);
 }
 
-/* L'or teinte aussi le jeton qu'on va déloger : on voit lequel part. */
+/* L'or teinte aussi la tuile qu'on va déloger : on voit lequel part. */
 .cell.drop-swap::after {
   box-shadow: inset 0 0 0 0.5cqw var(--gold);
   background: color-mix(in srgb, var(--gold) 30%, transparent);
@@ -593,7 +593,7 @@ svg {
   box-shadow: inset 0 0 0 0.5cqw var(--danger);
 }
 
-/* L'autre bout de l'échange : la place que le jeton tenu va libérer, et où
+/* L'autre bout de l'échange : la place que la tuile tenu va libérer, et où
    celui qu'on déloge va venir. Creux, pour se lire comme une place en
    attente plutôt que comme une cible. */
 .cell.drop-swap-origin::after,
@@ -706,7 +706,7 @@ svg {
   50% { opacity: 0.35; }
 }
 
-/* --- Jetons ------------------------------------------------------- */
+/* --- Tuiles ------------------------------------------------------- */
 
 .tile {
   position: absolute;
@@ -722,14 +722,14 @@ svg {
   box-shadow: inset 0 -1.5px 0 rgb(0 0 0 / 0.18);
 }
 
-/* Le joker ne porte jamais de valeur : un vrai jeton vierge n'en a pas de
+/* Le joker ne porte jamais de valeur : un vrai tuile vierge n'en a pas de
    gravée, et un « 0 » se lirait comme un score. */
 .tile.blank .value,
 .rack-tile.blank .value {
   display: none;
 }
 
-/* Au chevalet il reste un jeton comme les autres, simplement vierge. Posé,
+/* Au chevalet il reste une tuile comme les autres, simplement vierge. Posé,
    il prend une teinte propre : la lettre qu'il représente est alors écrite,
    et rien ne le distinguerait plus d'une lettre ordinaire — sinon le chiffre
    manquant, trop discret au milieu d'un mot. */
@@ -760,7 +760,7 @@ svg {
   opacity: 0.65;
 }
 
-/* Un jeton posé mais pas encore validé reste neutre : le vert est réservé au
+/* Une tuile posée mais pas encore validée reste neutre : le vert est réservé au
    halo, qui signale que le mot est jouable. */
 .tile.pending {
   box-shadow:
@@ -784,7 +784,7 @@ svg {
   }
 }
 
-/* Révélation du coup adverse : les jetons tombent l'un après l'autre, le
+/* Révélation du coup adverse : les tuiles tombent l'une après l'autre, le
    décalage est posé en JavaScript dans l'ordre de la pose. */
 .tile.land {
   animation: land 0.34s cubic-bezier(0.25, 0.9, 0.3, 1.35) backwards;
@@ -801,7 +801,7 @@ svg {
   }
 }
 
-/* Lueur sur le dernier coup joué : portée par la case et non par le jeton,
+/* Lueur sur le dernier coup joué : portée par la case et non par la tuile,
    pour ne pas écraser l'animation de chute. */
 .cell.highlight::after {
   content: '';
@@ -890,7 +890,7 @@ svg {
   container-type: inline-size;
 }
 
-/* Porte-lettres en bois : une gorge sombre où reposent les jetons et, en
+/* Porte-lettres en bois : une gorge sombre où reposent les tuiles et, en
    contrebas, la lèvre qui les retient. L'ensemble n'ajoute que quelques
    pixels de hauteur. */
 .rack {
@@ -944,7 +944,7 @@ svg {
   border-radius: 6px;
   background: linear-gradient(165deg, #fdf3dd 0%, var(--tile) 55%, var(--tile-edge) 100%);
   color: var(--tile-text);
-  /* Mêmes proportions que les jetons du plateau (lettre à 65 % du côté,
+  /* Mêmes proportions que les tuiles du plateau (lettre à 65 % du côté,
      valeur à 31 %), quelle que soit la taille du chevalet. */
   font-size: 64.7cqw;
   font-weight: 700;
@@ -975,14 +975,14 @@ svg {
   opacity: 0.75;
 }
 
-/* Le jeton saisi quitte sa place : il n'existe plus que sous le pointeur. */
+/* La tuile saisie quitte sa place : elle n'existe plus que sous le pointeur. */
 .rack-tile.dragging,
 .tile.dragging {
   opacity: 0;
   animation: none;
 }
 
-/* Jeton qui (ré)apparaît sur le chevalet : retour d'une lettre reprise,
+/* Tuile qui (ré)apparaît sur le chevalet : retour d'une lettre reprise,
    réassort après un coup, ou mélange. Le décalage vient du JavaScript. */
 .rack-tile.pop {
   animation: rack-pop 0.34s cubic-bezier(0.2, 0.9, 0.3, 1.4) backwards;
@@ -999,7 +999,7 @@ svg {
   }
 }
 
-/* Jeton suivi par le pointeur. L'enveloppe ne porte que la position, la
+/* Tuile suivi par le pointeur. L'enveloppe ne porte que la position, la
    taille et l'élan ; la tuile qu'elle contient est le clone de celle qu'on a
    saisie, avec ses propres classes. Elle garde donc son apparence sans que
    rien n'ait à être redéfini ici — et sa taille donne aux marges internes de
@@ -1015,7 +1015,7 @@ svg {
   filter: drop-shadow(0 14px 26px rgb(0 0 0 / 0.55));
 }
 
-/* Le jeton est saisi, pas en train d'arriver : ni animation d'entrée, ni
+/* La tuile est saisi, pas en train d'arriver : ni animation d'entrée, ni
    transition de survol ne doivent se rejouer sous le pointeur. */
 .drag-ghost > * {
   animation: none;
@@ -1277,7 +1277,7 @@ svg {
   margin-bottom: 14px;
 }
 
-/* Les lettres se présentent comme le jeton qu'on va poser : même matière que
+/* Les lettres se présentent comme la tuile qu'on va poser : même matière que
    le joker sur le plateau, valeur zéro en coin comprise. Le choix se lit
    alors comme un aperçu, non comme une liste de touches. */
 .letter-grid button {
@@ -1287,7 +1287,7 @@ svg {
   aspect-ratio: 1;
   padding: 0 9% 7% 0;
   border-radius: 4px;
-  /* La fenêtre montre le jeton tel qu'il sera posé : teinte de joker comprise. */
+  /* La fenêtre montre la tuile telle qu'elle sera posée : teinte de joker comprise. */
   background: linear-gradient(165deg, #f6efff 0%, var(--tile-blank) 100%);
   color: var(--tile-text);
   font-weight: 700;
@@ -1419,7 +1419,7 @@ svg {
 
 .toast {
   /* Au-dessus du chevalet : une notification ne doit jamais masquer le
-     bouton « Jouer » ni les jetons. */
+     bouton « Jouer » ni les tuiles. */
   position: fixed;
   left: 50%;
   bottom: calc(172px + var(--safe-bottom));
@@ -1488,8 +1488,8 @@ svg {
   to { transform: translateX(130%); }
 }
 
-/* Coup optimal : les jetons du coup s'allument l'un après l'autre. Les deux
-   effets vivent sur les pseudo-éléments du jeton et non sur lui : il porte
+/* Coup optimal : les tuiles du coup s'allument l'une après l'autre. Les deux
+   effets vivent sur les pseudo-éléments de la tuile et non sur elle : elle porte
    déjà sa propre animation de pose, et deux animations ne peuvent pas se
    partager un même élément.
 
@@ -1499,13 +1499,13 @@ svg {
   position: absolute;
   inset: 0;
   border-radius: inherit;
-  animation: jeton-lueur 0.7s ease-out var(--etincelle-delai, 0ms) backwards;
+  animation: tuile-lueur 0.7s ease-out var(--etincelle-delai, 0ms) backwards;
   pointer-events: none;
 }
 
-/* La lueur est *intérieure*, et l'étoile tient dans le jeton : la case porte
+/* La lueur est *intérieure*, et l'étoile tient dans la tuile : la case porte
    `overflow: hidden`, et tout ce qui dépasse s'y ferait couper net. */
-@keyframes jeton-lueur {
+@keyframes tuile-lueur {
   0% { box-shadow: inset 0 0 0 0 rgb(255 225 150 / 0); }
   30% {
     box-shadow:
@@ -1515,7 +1515,7 @@ svg {
   100% { box-shadow: inset 0 0 0 0 rgb(255 225 150 / 0); }
 }
 
-/* Le scintillement : une étoile à quatre branches, au coin du jeton. */
+/* Le scintillement : une étoile à quatre branches, au coin de la tuile. */
 .tile.etincelle::after {
   content: '';
   position: absolute;
@@ -1525,11 +1525,11 @@ svg {
   height: 40%;
   background: radial-gradient(circle, #fffbe9 0%, #ffdf92 45%, rgb(255 210 120 / 0) 72%);
   clip-path: polygon(50% 0%, 61% 39%, 100% 50%, 61% 61%, 50% 100%, 39% 61%, 0% 50%, 39% 39%);
-  animation: jeton-etoile 0.7s ease-out var(--etincelle-delai, 0ms) backwards;
+  animation: tuile-etoile 0.7s ease-out var(--etincelle-delai, 0ms) backwards;
   pointer-events: none;
 }
 
-@keyframes jeton-etoile {
+@keyframes tuile-etoile {
   0% { opacity: 0; transform: scale(0.2) rotate(-35deg); }
   40% { opacity: 1; transform: scale(1.15) rotate(0deg); }
   100% { opacity: 0; transform: scale(0.5) rotate(25deg); }
@@ -1907,7 +1907,7 @@ svg {
   .side-actions .btn-label { display: inline; }
 
   /* Sur un plateau de 650 px, un chevalet de même largeur donnerait des
-     jetons démesurés : on le resserre sous le plateau. */
+     tuiles démesurées : on le resserre sous le plateau. */
   .tray {
     width: min(max(var(--board-max), 520px), 100%);
   }

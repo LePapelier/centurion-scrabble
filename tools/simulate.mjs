@@ -57,11 +57,11 @@ function playGame(levelA, levelB) {
     turns++;
   }
 
-  // Invariant : 102 jetons au total, où qu'ils soient.
+  // Invariant : 102 tuiles au total, où qu'ils soient.
   const onBoard = [...game.board.letters].filter((l) => l >= 0).length;
   const inRacks = game.players.reduce((sum, p) => sum + p.rack.length, 0);
   const total = onBoard + inRacks + game.bagCount;
-  if (total !== 102) throw new Error(`Jetons perdus : ${total} au lieu de 102`);
+  if (total !== 102) throw new Error(`Tuiles perdus : ${total} au lieu de 102`);
 
   return {
     scoreA: game.players[HUMAN].score,

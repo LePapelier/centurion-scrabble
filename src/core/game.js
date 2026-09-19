@@ -76,7 +76,7 @@ export class Game {
     }
   }
 
-  /** Retire des jetons du chevalet courant ; renvoie false si absents. */
+  /** Retire des tuiles du chevalet courant ; renvoie false si absents. */
   takeFromRack(player, letters) {
     const rack = [...player.rack];
     for (const letter of letters) {
@@ -103,7 +103,7 @@ export class Game {
     const probe = [...player.rack];
     for (const letter of needed) {
       const at = probe.indexOf(letter);
-      if (at < 0) return { ok: false, reason: 'Ces jetons ne sont pas sur votre chevalet.' };
+      if (at < 0) return { ok: false, reason: 'Ces tuiles ne sont pas sur votre chevalet.' };
       probe.splice(at, 1);
     }
 
@@ -134,15 +134,15 @@ export class Game {
     return { ok: true, score: verdict.score, words: verdict.words, bingo: verdict.bingo };
   }
 
-  /** Échange des jetons contre de nouveaux ; le tour est perdu. */
+  /** Échange des tuiles contre de nouveaux ; le tour est perdu. */
   exchange(letters) {
     if (this.finished) return { ok: false, reason: 'La partie est terminée.' };
     if (this.bag.length < RACK_SIZE) {
-      return { ok: false, reason: 'Il reste moins de sept jetons dans le sac.' };
+      return { ok: false, reason: 'Il reste moins de sept tuiles dans le sac.' };
     }
     const player = this.currentPlayer;
     if (!this.takeFromRack(player, letters)) {
-      return { ok: false, reason: 'Ces jetons ne sont pas sur votre chevalet.' };
+      return { ok: false, reason: 'Ces tuiles ne sont pas sur votre chevalet.' };
     }
 
     this.refill(player);
@@ -186,8 +186,8 @@ export class Game {
       this.players[other].score -= bonus;
       this.endReason =
         wentOut === HUMAN
-          ? `Vous avez posé tous vos jetons (+${bonus}).`
-          : `${this.players[wentOut].name} a posé tous ses jetons (+${bonus}).`;
+          ? `Vous avez posé toutes vos tuiles (+${bonus}).`
+          : `${this.players[wentOut].name} a posé toutes ses tuiles (+${bonus}).`;
     } else {
       for (const player of this.players) player.score -= rackValue(player.rack);
       this.endReason = 'Quatre tours blancs consécutifs : la partie s’arrête.';
