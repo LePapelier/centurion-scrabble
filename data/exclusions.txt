@@ -329,3 +329,12 @@ huiriez
 huirions
 huirons
 huiront
+
+# Signalé en partie : MEN, le pluriel anglais de « man ». MENS, lui, est bien
+# français — « tu mens » — et reste.
+#
+# Celui-ci diffère des précédents : il est présent dans les *deux* lexiques,
+# là où PREMIC et HUIR n'étaient que dans Morphalou. Réunir les sources ne
+# protège donc pas des emprunts que l'une et l'autre acceptent et que la
+# compétition refuse : seul le signalement en partie les attrape.
+men
