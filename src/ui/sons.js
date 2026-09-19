@@ -28,6 +28,23 @@ export const VOLUME_MAITRE = 0.85;
 const GAIN_BRUIT = 4.6;
 const GAIN_NOTE = 3.1;
 
+/*
+ * Repères de l'œuf de Pâques, lus dans `styles.css` :
+ *   — `brand-wiggle` dure 380 ms et culmine à 25 %, soit 95 ms ;
+ *   — `mascot-hop` dure 550 ms et retombe à 70 %, soit 385 ms.
+ * Les changer ici sans les changer là-bas désynchroniserait le tout.
+ */
+const PIC_LETTRE = 0.095;
+const ATTERRISSAGE = 0.385;
+
+/** Gamme pentatonique de do, sur trois octaves : aucun frottement possible. */
+const PENTATONIQUE = [
+  523.25, 587.33, 659.25, 783.99, 880,
+  1046.5, 1174.66, 1318.51, 1567.98, 1760,
+  2093, 2349.32, 2637.02, 3135.96, 3520,
+  4186.01, 4698.64, 5274.04,
+];
+
 export class Sons {
   constructor(actifs = true) {
     this.actifs = actifs;
@@ -177,8 +194,11 @@ export class Sons {
   /**
    * @param {string} nom
    * @param {number} [retard] en secondes, pour étaler une série
+   * @param {{lettres?: number, pas?: number}} [options] réglages d'un bruitage
+   *   qui doit épouser une animation : le nombre de lettres de la marque et
+   *   leur décalage, que seule l'interface connaît.
    */
-  jouer(nom, retard = 0) {
+  jouer(nom, retard = 0, options = {}) {
     if (!this.reveiller()) return;
 
     switch (nom) {
@@ -240,24 +260,33 @@ export class Sons {
         });
         break;
 
-      // La marque qu'on chatouille. Deux frappes — le « ba » de l'élan, le
-      // « boum » de la retombée — puis une cascade de xylophone qui monte,
-      // calée sur la vague qui parcourt les lettres à l'écran.
+      // La marque qu'on chatouille : une lame de xylophone par lettre, puis
+      // le baboum de la mascotte qui retombe.
+      //
+      // Tout est calé sur l'animation, au millième près. Chaque lettre grossit
+      // et se redresse en 380 ms, mais son pic — le moment où l'œil la voit
+      // sauter — tombe à 25 % de sa course, soit 95 ms après son départ ; les
+      // lettres partant l'une après l'autre, la lame doit suivre ce décalage
+      // et non le début de l'animation, sans quoi tout le glissement sonne en
+      // avance d'un dixième de seconde.
+      //
+      // La dernière lettre culmine ainsi à 383 ms, et la mascotte retombe à
+      // 385 ms : le glissement finit exactement sur le « boum », sans qu'il
+      // ait fallu forcer l'un ou l'autre.
       //
       // La gamme est pentatonique : n'importe quelles notes s'y enchaînent
       // sans jamais frotter, ce qu'une gamme ordinaire ne pardonne pas à
       // cette vitesse.
       case 'logo': {
-        this.frappe({ depart: 170, arrivee: 82, duree: 0.16, volume: 0.30, retard });
-        this.frappe({ depart: 130, arrivee: 42, duree: 0.42, volume: 0.50, retard: retard + 0.19 });
-        const gamme = [
-          523.25, 587.33, 659.25, 783.99, 880,
-          1046.5, 1174.66, 1318.51, 1567.98, 1760,
-          2093, 2349.32, 2637.02,
-        ];
-        gamme.forEach((f, i) => {
-          this.lame({ freq: f, duree: 0.34, volume: 0.24, retard: retard + 0.22 + i * 0.028 });
-        });
+        const lettres = options.lettres ?? 13;
+        const pas = (options.pas ?? 18) / 1000;
+        for (let i = 0; i < lettres; i++) {
+          const f = PENTATONIQUE[Math.min(i, PENTATONIQUE.length - 1)];
+          this.lame({ freq: f, duree: 0.3, volume: 0.15, retard: retard + PIC_LETTRE + i * pas });
+        }
+        // « ba » puis « boum », resserrés en un seul choc de retombée.
+        this.frappe({ depart: 170, arrivee: 82, duree: 0.14, volume: 0.22, retard: retard + ATTERRISSAGE - 0.07 });
+        this.frappe({ depart: 130, arrivee: 42, duree: 0.44, volume: 0.44, retard: retard + ATTERRISSAGE });
         break;
       }
 

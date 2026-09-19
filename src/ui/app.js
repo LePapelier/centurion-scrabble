@@ -1767,12 +1767,14 @@ export class App {
    * donnent l'impression de deux vagues qui se suivent.
    */
   wiggleBrand() {
+    const tiles = [...document.querySelectorAll('.brand-tile')];
+
     // Le son passe avant le garde-fou : qui demande moins d'animations n'a
     // pas demandé moins de surprises, et sans lui l'œuf de Pâques n'existe
-    // plus du tout pour cette personne.
-    this.sons.jouer('logo');
+    // plus du tout pour cette personne. Le nombre de lettres et leur décalage
+    // partent avec, pour qu'une lame de xylophone tombe sur chacune.
+    this.sons.jouer('logo', 0, { lettres: tiles.length, pas: BRAND_WAVE_STEP_MS });
     if (reducedMotion.matches) return;
-    const tiles = [...document.querySelectorAll('.brand-tile')];
 
     tiles.forEach((tile, i) => {
       for (const animation of tile.getAnimations()) animation.cancel();
