@@ -1,0 +1,34 @@
+# Mots courts du français de tous les jours : la seule liste que les niveaux
+# faibles de l'adversaire s'autorisent en dessous de quatre lettres.
+#
+# Affaiblir un adversaire en bornant la *longueur* des mots était l'inverse de
+# ce qu'il fallait : ça retirait ORDINATEUR, qu'un débutant trouve, et ça
+# gardait WU, AA, UD ou OC, qu'il n'a jamais vus. Le Novice jouait les 82 mots
+# de deux lettres de l'ODS — du vocabulaire de club — mais butait sur les mots
+# longs.
+#
+# Ce qui sépare un joueur occasionnel d'un joueur de club, c'est justement la
+# connaissance des mots *courts* : à deux et trois lettres, le lexique de
+# compétition n'est presque que notes de musique, lettres grecques,
+# interjections et emprunts.
+#
+# Au-delà de trois lettres, la « courance » n'est plus tenue ici : elle se lit
+# dans Dicollecte, dont le contenu de correcteur orthographique fait un bon
+# filtre (voir tools/build-dict.mjs).
+#
+# La liste est délibérément restrictive : un mot oublié rend seulement
+# l'adversaire un peu plus modeste, alors qu'un mot pointu laissé passer
+# trahit la machine immédiatement.
+
+ah ai an as au bu ca ce de do du eh en es et eu ex fa if il la le lu ma me mi
+ne ni nu oh on or os ou pu re sa se si su ta te tu un va vu
+
+age ail air ami ane arc art ave bac bal bar bas bec bel bis ble boa bol bon
+bot bus but cap car cas ces cet cil cle col coq cor cou cri cru cul des dit
+dix doc don dos duc duo dur eau elu epi ere est ete fan fer feu fil fin
+foi fou fut gai gaz gel gin ici ile ira jeu job jus lac las les lit loi lot
+lui lys mai mal mas mat mer mes met mie mil moi mot mur nef nez nid nom non
+nos nue oie ont oui pan par pas peu pic pie pin pis pli pot pou pre pro pur
+pus que qui rat riz roc roi rot rue sac sel ses six soi sol son sot sou suc
+sud sur tas tel tes the tic toi ton top tot tri val ver vie vin vis vit vol
+vos vue zen zoo

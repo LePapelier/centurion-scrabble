@@ -5,22 +5,34 @@
  *   bits  0..4   index de lettre (A=0 … Z=25)
  *   bit   5      un mot se termine sur cette arête
  *   bit   6      dernière arête du nœud
- *   bits  7..31  offset de la première arête du nœud fils (0 = feuille)
+ *   bit   7      ce mot appartient au vocabulaire courant (voir plus bas)
+ *   bits  8..31  offset de la première arête du nœud fils (0 = feuille)
  *
  * Un « nœud » est simplement l'offset de sa première arête ; ses arêtes sont
  * contiguës, triées par lettre, et la dernière porte le bit 6.
+ *
+ * Le bit 7 sert aux niveaux faibles de l'adversaire : ils ne jouent que les
+ * mots qu'un joueur occasionnel connaît. Le marquer ici plutôt que d'embarquer
+ * une seconde liste ne coûte rien — le bit était libre, l'offset n'ayant
+ * jamais eu besoin des 25 bits qu'on lui réservait.
  */
 
-const MAGIC = 0x43534431; // "CSD1"
+const MAGIC = 0x43534432; // "CSD2"
 
 export const LETTER_END = 1 << 5;
 export const LETTER_LAST = 1 << 6;
+export const LETTER_COMMON = 1 << 7;
 
 export class Dawg {
   /** @param {ArrayBuffer} buffer */
   constructor(buffer) {
     const header = new Uint32Array(buffer, 0, 4);
-    if (header[0] !== MAGIC) throw new Error('Dictionnaire illisible : en-tête inattendu.');
+    if (header[0] !== MAGIC) {
+      // Une version antérieure du format traîne souvent dans le cache du
+      // navigateur : on le dit, plutôt que de laisser croire à un fichier
+      // corrompu.
+      throw new Error('Dictionnaire illisible ou périmé : relancez `npm run build:dict`.');
+    }
     this.edgeCount = header[1];
     this.root = header[2];
     this.wordCount = header[3];
@@ -46,9 +58,14 @@ export class Dawg {
     return (this.edges[edge] & LETTER_LAST) !== 0;
   }
 
+  /** Le mot qui s'achève sur cette arête relève-t-il du vocabulaire courant ? */
+  isCommon(edge) {
+    return (this.edges[edge] & LETTER_COMMON) !== 0;
+  }
+
   /** Nœud atteint en franchissant cette arête (0 s'il n'y a pas de suite). */
   child(edge) {
-    return this.edges[edge] >>> 7;
+    return this.edges[edge] >>> 8;
   }
 
   /**
@@ -118,13 +135,39 @@ export class Dawg {
 
   /** @param {string} word — en majuscules non accentuées */
   has(word) {
-    if (word.length < 2) return false;
+    const indices = this.indicesOf(word);
+    return indices !== null && this.hasIndices(indices);
+  }
+
+  /**
+   * Le mot est-il du vocabulaire courant ? Sert aux niveaux faibles, qui ne
+   * jouent pas les mots qu'un joueur occasionnel n'a jamais vus. Un mot absent
+   * du dictionnaire répond non, comme un mot pointu.
+   * @param {string} word — en majuscules non accentuées
+   */
+  estCourant(word) {
+    const indices = this.indicesOf(word);
+    if (indices === null) return false;
+
+    let node = this.root;
+    let edge = -1;
+    for (const letterIndex of indices) {
+      edge = this.edgeFor(node, letterIndex);
+      if (edge < 0) return false;
+      node = this.child(edge);
+    }
+    return this.isWordEnd(edge) && this.isCommon(edge);
+  }
+
+  /** @returns {number[]|null} indices de lettres, ou null si le mot est mal formé */
+  indicesOf(word) {
+    if (word.length < 2) return null;
     const indices = [];
     for (let i = 0; i < word.length; i++) {
       const code = word.charCodeAt(i) - 65;
-      if (code < 0 || code > 25) return false;
+      if (code < 0 || code > 25) return null;
       indices.push(code);
     }
-    return this.hasIndices(indices);
+    return indices;
   }
 }

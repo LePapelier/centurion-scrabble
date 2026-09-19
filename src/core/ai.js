@@ -2,10 +2,17 @@
  * Choix du coup de l'adversaire.
  *
  * Tous les coups légaux sont d'abord énumérés, puis classés. Le niveau agit
- * sur trois leviers indépendants :
- *   — le lexique accessible (longueur maximale des mots) ;
- *   — le rang visé dans le classement (un novice choisit volontairement un
- *     coup médiocre) ;
+ * sur quatre leviers indépendants :
+ *   — le vocabulaire : aux deux premiers niveaux, seuls les mots qu'un joueur
+ *     occasionnel connaît sont jouables. Le dictionnaire les marque d'un bit
+ *     (voir `dawg.js` et `data/mots-courants.txt`) ; c'est ce qui sépare
+ *     vraiment un débutant d'un joueur de club, bien plus que la longueur
+ *     des mots ;
+ *   — la part du meilleur coup visée (un débutant ne voit pas l'optimum) ;
+ *   — l'appétit pour les coups qui posent beaucoup de jetons : un débutant
+ *     cherche à se débarrasser de ses lettres plutôt qu'à grappiller deux
+ *     points dans un coin, et sans ce levier les parties duraient le double
+ *     d'une partie réelle ;
  *   — la prise en compte du reliquat, c'est-à-dire la qualité du chevalet
  *     laissé pour le tour suivant.
  */
@@ -146,12 +153,26 @@ function chooseDiscard(rack, smart) {
  * @returns {{type:'play', move:object}|{type:'exchange', tiles:number[]}|{type:'pass'}}
  */
 export function chooseMove(board, rack, dawg, difficulty, context) {
-  const moves = generateMoves(board, rack, dawg, {
+  let moves = generateMoves(board, rack, dawg, {
     maxWordLength: difficulty.maxWordLength,
     maxTilesPlaced: difficulty.maxTilesPlaced,
   });
 
   const canExchange = context.bagCount >= RACK_SIZE;
+
+  // Vocabulaire ordinaire : on écarte les coups reposant sur un mot court de
+  // compétition.
+  //
+  // Quand il ne reste plus rien d'ordinaire — un Q sans U, par exemple — on
+  // échange, ou on passe si le sac est trop maigre. Jamais on ne repêche le
+  // mot pointu : c'est exactement là que la machine se trahissait, et un tour
+  // blanc est un aveu bien plus crédible que WU.
+  if (difficulty.vocabulaireCourant) {
+    // Tous les mots formés doivent être ordinaires, y compris ceux qui
+    // naissent perpendiculairement : poser MAISON en fabriquant OC au passage
+    // suppose de savoir qu'OC existe.
+    moves = moves.filter((move) => move.words.every((w) => dawg.estCourant(w.word)));
+  }
 
   if (moves.length === 0) {
     if (canExchange) return { type: 'exchange', tiles: chooseDiscard(rack, difficulty.useLeave).drop };
@@ -175,6 +196,12 @@ export function chooseMove(board, rack, dawg, difficulty, context) {
     if (endgame) {
       // En fin de partie, vider son chevalet prime.
       value += move.placements.length * 2;
+    } else if (difficulty.tileBonus) {
+      // Sans ce terme, viser une fraction du meilleur coup revient à jouer le
+      // mot le plus court possible : c'est le moyen le plus simple d'atteindre
+      // une cible basse. Le sac ne se vidait plus et la partie s'étirait sur
+      // deux fois trop de tours.
+      value += difficulty.tileBonus * move.placements.length;
     }
     move.value = value;
   }

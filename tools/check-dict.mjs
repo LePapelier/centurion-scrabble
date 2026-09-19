@@ -124,6 +124,26 @@ const falsePositives = negatives.filter((w) => dawg.has(w));
 console.log(`Recherche : ${probes.length} sondes, ${lookupFailures} échecs`);
 console.log(`Faux positifs : ${falsePositives.length ? falsePositives.join(', ') : 'aucun'}`);
 
-const ok = missing === 0 && extra === 0 && lookupFailures === 0 && falsePositives.length === 0;
+// Vocabulaire courant : le bit que lisent les niveaux faibles. Un témoin de
+// chaque côté suffit à détecter la panne qui compte — le marquage qui ne
+// s'applique plus du tout, et qui laisse le Novice muet ou bavard sans que
+// rien d'autre ne bronche.
+const attendusCourants = ['ET', 'LE', 'MOT', 'AMI', 'MAISON', 'ORDINATEUR', 'MANGER'];
+const attendusPointus = ['AA', 'WU', 'OC', 'RHO', 'UTE', 'IWAN', 'DAUW'];
+const courantsManquants = attendusCourants.filter((w) => !dawg.estCourant(w));
+const pointusPasses = attendusPointus.filter((w) => dawg.estCourant(w));
+
+console.log(
+  `Vocabulaire : ${courantsManquants.length ? `courants non marqués : ${courantsManquants.join(', ')}` : 'témoins courants marqués'}` +
+    ` / ${pointusPasses.length ? `pointus marqués à tort : ${pointusPasses.join(', ')}` : 'témoins pointus écartés'}`,
+);
+
+const ok =
+  missing === 0 &&
+  extra === 0 &&
+  lookupFailures === 0 &&
+  falsePositives.length === 0 &&
+  courantsManquants.length === 0 &&
+  pointusPasses.length === 0;
 console.log(ok ? '\n✅ Dictionnaire conforme.' : '\n❌ Incohérence détectée.');
 process.exit(ok ? 0 : 1);

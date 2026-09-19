@@ -124,7 +124,62 @@ async function collectWords() {
     }
   }
 
-  return { words: [...words].sort(), source, base, added, removed };
+  return { words: [...words].sort(), source, base, added, removed, commun: collectCommon(words) };
+}
+
+/* ------------------------------------------------------------------ */
+/* 2 bis. Vocabulaire courant                                          */
+/* ------------------------------------------------------------------ */
+
+/**
+ * Les mots qu'un joueur occasionnel connaît, marqués d'un bit dans le DAWG
+ * pour que les niveaux faibles de l'adversaire s'y tiennent.
+ *
+ * Deux régimes, parce que le lexique de compétition ne se concentre pas au
+ * même endroit selon la longueur :
+ *
+ *   — deux et trois lettres : liste tenue à la main (`data/mots-courants.txt`).
+ *     C'est là que vivent AA, WU, UD, OC, RHO, UTE — les mots qu'on apprend
+ *     par cœur en club et que personne ne rencontre ailleurs. Aucun lexique
+ *     ne les distingue : Dicollecte contient OC, MU, RU et NA comme il
+ *     contient LE et DE. Il faut donc trancher à la main, et c'est tenable :
+ *     il n'y a que quelques centaines de mots à ces longueurs.
+ *
+ *   — quatre lettres et plus : appartenance à Dicollecte. C'est un
+ *     correcteur orthographique, donc une liste de mots qu'on écrit
+ *     vraiment ; Morphalou, lexique savant, apporte à côté les IWAN, DAUW,
+ *     MANOLA et EBOTTANT. Le filtre est imparfait — il laisse passer ILION —
+ *     mais il ne rejette aucun mot courant, ce qui est la propriété qui
+ *     compte : l'adversaire doit pouvoir jouer MAISON.
+ */
+function collectCommon(words) {
+  const commun = new Set();
+
+  const liste = join(ROOT, 'data', 'mots-courants.txt');
+  if (existsSync(liste)) {
+    // Le fichier s'écrit en paragraphes, plusieurs mots par ligne : c'est une
+    // liste qu'on relit à l'œil, pas une colonne à comparer.
+    for (const line of loadLines(liste)) {
+      if (line.startsWith('#')) continue;
+      for (const entry of line.split(/\s+/)) {
+        const w = normalize(entry);
+        if (w && words.has(w)) commun.add(w);
+      }
+    }
+  } else {
+    console.warn('Vocabulaire : data/mots-courants.txt absent — les niveaux faibles');
+    console.warn('            joueront tout le lexique, y compris les mots de club.\n');
+  }
+
+  const usuels = new Set();
+  const path = join(ROOT, 'node_modules', 'an-array-of-french-words', 'index.json');
+  for (const entry of JSON.parse(readFileSync(path, 'utf8'))) {
+    const w = normalize(entry);
+    if (w) usuels.add(w);
+  }
+  for (const w of words) if (w.length > 3 && usuels.has(w)) commun.add(w);
+
+  return commun;
 }
 
 /* ------------------------------------------------------------------ */
@@ -137,18 +192,24 @@ class Node {
   constructor() {
     this.id = ++nodeCounter;
     this.final = false;
+    /** Le mot qui s'achève ici est-il du vocabulaire courant ? */
+    this.commun = false;
     this.edges = new Map(); // lettre → Node
   }
 
-  /** Signature d'équivalence : deux nœuds de même signature sont fusionnés. */
+  /**
+   * Signature d'équivalence : deux nœuds de même signature sont fusionnés.
+   * `commun` en fait partie, sans quoi deux fins de mot que seule la courance
+   * distingue seraient confondues et le bit se propagerait au hasard.
+   */
   signature() {
-    let s = this.final ? '1' : '0';
+    let s = `${this.final ? '1' : '0'}${this.commun ? 'c' : ''}`;
     for (const [letter, child] of this.edges) s += `|${letter}${child.id}`;
     return s;
   }
 }
 
-function buildDawg(sortedWords) {
+function buildDawg(sortedWords, commun) {
   const root = new Node();
   const register = new Map();
   /** @type {[Node, string, Node][]} */
@@ -181,6 +242,7 @@ function buildDawg(sortedWords) {
       node = child;
     }
     node.final = true;
+    node.commun = commun.has(word);
     previous = word;
   }
   minimize(0);
@@ -195,7 +257,8 @@ function buildDawg(sortedWords) {
  *   bits  0..4   index de lettre (A=0 … Z=25)
  *   bit   5      le mot se termine sur cette arête
  *   bit   6      dernière arête du nœud
- *   bits  7..31  offset de la première arête du nœud fils (0 = feuille)
+ *   bit   7      ce mot est du vocabulaire courant
+ *   bits  8..31  offset de la première arête du nœud fils (0 = feuille)
  *
  *   L'emplacement 0 est réservé pour que l'offset 0 signifie « pas de fils ».
  */
@@ -232,8 +295,14 @@ function serialize(root) {
       let word = letter.charCodeAt(0) - CODE_A;
       if (child.final) word |= 1 << 5;
       if (index === letters.length - 1) word |= 1 << 6;
+      if (child.final && child.commun) word |= 1 << 7;
       const childOffset = offsets.get(child) ?? 0;
-      word |= childOffset << 7;
+      // 24 bits pour l'offset : de quoi tenir seize millions d'arêtes, quand
+      // le dictionnaire actuel en compte moins de deux cent mille. La borne
+      // est vérifiée pour que le jour où elle sauterait, elle saute ici et
+      // non silencieusement à la lecture.
+      if (childOffset >= 1 << 24) throw new Error('DAWG trop grand : offset sur plus de 24 bits.');
+      word |= childOffset << 8;
       edges[slot++] = word;
     });
   }
@@ -244,14 +313,15 @@ function serialize(root) {
 /* ------------------------------------------------------------------ */
 
 const started = Date.now();
-const { words, source, base, added, removed } = await collectWords();
+const { words, source, base, added, removed, commun } = await collectWords();
 console.log(`Lexique   : ${words.length} mots  (${source})`);
 if (added || removed) console.log(`            +${added} supplément, −${removed} exclusions (base ${base})`);
+console.log(`Courants  : ${commun.size} mots jouables par les niveaux faibles`);
 
-const root = buildDawg(words);
+const root = buildDawg(words, commun);
 const { edges, rootOffset, nodeCount } = serialize(root);
 
-const header = new Uint32Array([0x43534431 /* "CSD1" */, edges.length, rootOffset, words.length]);
+const header = new Uint32Array([0x43534432 /* "CSD2" */, edges.length, rootOffset, words.length]);
 const payload = new Uint8Array(header.byteLength + edges.byteLength);
 payload.set(new Uint8Array(header.buffer), 0);
 payload.set(new Uint8Array(edges.buffer), header.byteLength);
@@ -260,7 +330,7 @@ mkdirSync(OUT_DIR, { recursive: true });
 writeFileSync(join(OUT_DIR, 'fr.dawg'), payload);
 writeFileSync(
   join(OUT_DIR, 'fr.meta.json'),
-  JSON.stringify({ source, words: words.length, nodes: nodeCount, edges: edges.length, builtAt: new Date().toISOString() }, null, 2),
+  JSON.stringify({ source, words: words.length, common: commun.size, nodes: nodeCount, edges: edges.length, builtAt: new Date().toISOString() }, null, 2),
 );
 
 const kb = (n) => `${(n / 1024).toFixed(0)} Ko`;
