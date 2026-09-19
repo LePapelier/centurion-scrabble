@@ -1468,6 +1468,73 @@ svg {
   100% { opacity: 1; transform: translate(-50%, 0) scale(1); }
 }
 
+/* Une lueur traverse le message une fois, comme un reflet sur du métal.
+   `overflow` la retient dans les coins arrondis. */
+.toast.best {
+  overflow: hidden;
+}
+
+.toast.best::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(105deg, transparent 38%, rgb(255 242 200 / 0.28) 50%, transparent 62%);
+  transform: translateX(-130%);
+  animation: toast-lueur 0.85s ease-out 0.18s backwards;
+  pointer-events: none;
+}
+
+@keyframes toast-lueur {
+  to { transform: translateX(130%); }
+}
+
+/* Coup optimal : les jetons du coup s'allument l'un après l'autre. Les deux
+   effets vivent sur les pseudo-éléments du jeton et non sur lui : il porte
+   déjà sa propre animation de pose, et deux animations ne peuvent pas se
+   partager un même élément.
+
+   Le décalage est posé en JavaScript, dans l'ordre des cases. */
+.tile.etincelle::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  animation: jeton-lueur 0.7s ease-out var(--etincelle-delai, 0ms) backwards;
+  pointer-events: none;
+}
+
+/* La lueur est *intérieure*, et l'étoile tient dans le jeton : la case porte
+   `overflow: hidden`, et tout ce qui dépasse s'y ferait couper net. */
+@keyframes jeton-lueur {
+  0% { box-shadow: inset 0 0 0 0 rgb(255 225 150 / 0); }
+  30% {
+    box-shadow:
+      inset 0 0 0 0.1em rgb(255 218 128 / 0.95),
+      inset 0 0 0.55em 0.08em rgb(255 205 105 / 0.7);
+  }
+  100% { box-shadow: inset 0 0 0 0 rgb(255 225 150 / 0); }
+}
+
+/* Le scintillement : une étoile à quatre branches, au coin du jeton. */
+.tile.etincelle::after {
+  content: '';
+  position: absolute;
+  top: 4%;
+  right: 4%;
+  width: 40%;
+  height: 40%;
+  background: radial-gradient(circle, #fffbe9 0%, #ffdf92 45%, rgb(255 210 120 / 0) 72%);
+  clip-path: polygon(50% 0%, 61% 39%, 100% 50%, 61% 61%, 50% 100%, 39% 61%, 0% 50%, 39% 39%);
+  animation: jeton-etoile 0.7s ease-out var(--etincelle-delai, 0ms) backwards;
+  pointer-events: none;
+}
+
+@keyframes jeton-etoile {
+  0% { opacity: 0; transform: scale(0.2) rotate(-35deg); }
+  40% { opacity: 1; transform: scale(1.15) rotate(0deg); }
+  100% { opacity: 0; transform: scale(0.5) rotate(25deg); }
+}
+
 @keyframes rise {
   from { opacity: 0; transform: translate(-50%, 10px); }
 }

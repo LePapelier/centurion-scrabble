@@ -72,13 +72,15 @@ const THINKING_JITTER_MS = 700;
 const MIN_COUPS_POUR_FELICITER = 6;
 /** Temps laissé à la félicitation avant que l'adversaire ne joue par-dessus. */
 const FELICITATION_MS = 2000;
+/** Décalage entre deux jetons qui s'allument, quand le coup est salué. */
+const ETINCELLE_PAS_MS = 70;
 /* Courtes à dessein : sur un téléphone, une phrase plus longue s'étale sur
    trois lignes et n'a plus rien d'une petite tape dans le dos. */
 const FELICITATIONS = [
   'Coup optimal !',
   'Bravo — le meilleur coup.',
   'Optimal : rien de mieux.',
-  'Le meilleur coup du chevalet.',
+  'Le meilleur coup.',
 ];
 
 /** Décalage entre deux jetons lors de la révélation d'un coup. */
@@ -1527,9 +1529,27 @@ export class App {
   feliciter() {
     this.toast(FELICITATIONS[Math.floor(Math.random() * FELICITATIONS.length)], 'best');
     this.sons.jouer('optimal');
+    this.etinceler();
     // L'adversaire enchaîne aussitôt et son propre message chasserait
     // celui-ci : on lui demande de patienter le temps qu'on le lise.
     this.felicitationJusqua = performance.now() + FELICITATION_MS;
+  }
+
+  /**
+   * Allume les jetons du coup salué, l'un après l'autre.
+   *
+   * La félicitation arrive après le rendu du coup : les jetons sont donc en
+   * place et stables. La classe disparaît d'elle-même au rendu suivant, celui
+   * du coup de l'adversaire.
+   */
+  etinceler() {
+    if (reducedMotion.matches) return;
+    (this.game.lastMoveCells ?? []).forEach((index, i) => {
+      const tile = this.boardEl?.querySelector(`[data-index="${index}"] .tile`);
+      if (!tile) return;
+      tile.style.setProperty('--etincelle-delai', `${i * ETINCELLE_PAS_MS}ms`);
+      tile.classList.add('etincelle');
+    });
   }
 
   runComputerTurn() {
