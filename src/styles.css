@@ -1436,6 +1436,13 @@ svg {
   animation: rise 0.2s ease-out;
 }
 
+/* Le bouton du son porte les deux dessins : les ondes quand il est actif, la
+   croix quand il est coupé. Un seul bouton, pas de bascule d'icône en script. */
+#btn-sound .sound-off { display: none; }
+#btn-sound[aria-pressed='false'] .sound-on { display: none; }
+#btn-sound[aria-pressed='false'] .sound-off { display: inline; }
+#btn-sound[aria-pressed='false'] { opacity: 0.55; }
+
 .toast.error { background: #6e2b23; }
 .toast.good { background: var(--valid-dark); }
 

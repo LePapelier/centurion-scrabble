@@ -21,6 +21,7 @@ import {
 } from '../core/constants.js';
 import { Game, HUMAN, COMPUTER } from '../core/game.js';
 import { validateMove } from '../core/board.js';
+import { Sons } from './sons.js';
 import {
   PeerSession,
   inviteLink,
@@ -46,6 +47,7 @@ const PREMIUM_LABEL = {
 const STORAGE_KEY = 'centurion-scrabble/partie';
 const LEVEL_KEY = 'centurion-scrabble/niveau';
 const NAME_KEY = 'centurion-scrabble/nom';
+const SON_KEY = 'centurion-scrabble/son';
 /** Nom montré à l'adversaire quand le joueur n'en a choisi aucun. */
 const DEFAULT_NAME = 'Joueur';
 /**
@@ -124,6 +126,19 @@ export class App {
     this.requestId = 0;
     this.pendingRequests = new Map();
     this.toastTimer = null;
+
+    /**
+     * Bruitages. Le réglage est retenu d'une partie sur l'autre ; en son
+     * absence, le son est actif — c'est un jeu, et le bouton est en évidence
+     * dans l'en-tête pour qui préfère le silence.
+     */
+    let sonActif = true;
+    try {
+      sonActif = localStorage.getItem(SON_KEY) !== 'off';
+    } catch {
+      /* stockage indisponible : on garde le réglage par défaut */
+    }
+    this.sons = new Sons(sonActif);
 
     /** Coup en attente d'un verdict d'optimalité : {id, score}. */
     this.attenteOptimalite = null;
@@ -1003,6 +1018,7 @@ export class App {
           // Sur une case occupée, poser écrase la pose en attente : son jeton
           // n'est plus référencé, et le chevalet le reprend de lui-même.
           this.placeTile(index, origin.rackIndex);
+          this.sons.jouer('pose');
           return;
         }
       } else if (index === origin.index) {
@@ -1014,6 +1030,7 @@ export class App {
         this.pending.delete(origin.index);
         this.pending.set(index, tile);
         this.cursor = null;
+        this.sons.jouer('pose');
         this.refresh();
         return;
       } else if (swap) {
@@ -1022,6 +1039,7 @@ export class App {
         this.pending.set(origin.index, this.pending.get(index));
         this.pending.set(index, moved);
         this.cursor = null;
+        this.sons.jouer('pose');
         this.refresh();
         return;
       }
@@ -1215,6 +1233,24 @@ export class App {
     $('btn-shuffle').onclick = () => this.shuffleRack();
     $('btn-hint').onclick = () => this.askHint();
 
+    const boutonSon = $('btn-sound');
+    const majSon = () => {
+      boutonSon.setAttribute('aria-pressed', String(this.sons.actifs));
+      boutonSon.setAttribute('aria-label', this.sons.actifs ? 'Couper le son' : 'Rétablir le son');
+    };
+    majSon();
+    boutonSon.onclick = () => {
+      this.sons.actifs = !this.sons.actifs;
+      majSon();
+      try {
+        localStorage.setItem(SON_KEY, this.sons.actifs ? 'on' : 'off');
+      } catch {
+        /* le réglage vaudra pour cette session seulement */
+      }
+      // Un aperçu immédiat : rallumer sans rien entendre laisse dans le doute.
+      if (this.sons.actifs) this.sons.jouer('pose');
+    };
+
     $('ai-name').onclick = () => {
       if (this.mode === 'solo') $('rules-dialog').showModal();
     };
@@ -1308,6 +1344,7 @@ export class App {
       const verdict = validateMove(this.game.board, this.placements(), this.dawg);
       if (!verdict.ok) {
         this.toast(verdict.reason, 'error');
+        this.sons.jouer('refus');
         return;
       }
       this.sendIntent({ t: 'play', placements: this.placements() });
@@ -1320,6 +1357,7 @@ export class App {
     const result = this.game.play(this.placements(), this.dawg);
     if (!result.ok) {
       this.toast(result.reason, 'error');
+      this.sons.jouer('refus');
       return;
     }
 
@@ -1334,6 +1372,7 @@ export class App {
       result.bingo ? `Scrabble ! ${words} +${result.score}` : `${words} +${result.score}`,
       'good',
     );
+    this.sons.jouer(result.bingo ? 'scrabble' : 'coup');
     if (result.bingo) this.replay(this.boardEl, 'bingo');
     this.jugerOptimalite(depart, result.score);
 
@@ -1400,6 +1439,7 @@ export class App {
       return;
     }
     this.toast(`${tiles.length} jeton${tiles.length > 1 ? 's' : ''} échangé${tiles.length > 1 ? 's' : ''}.`);
+    this.sons.jouer('echange');
     this.save();
     this.render();
     this.broadcast();
@@ -1486,6 +1526,7 @@ export class App {
   /** Salue un coup optimal. */
   feliciter() {
     this.toast(FELICITATIONS[Math.floor(Math.random() * FELICITATIONS.length)], 'best');
+    this.sons.jouer('optimal');
     // L'adversaire enchaîne aussitôt et son propre message chasserait
     // celui-ci : on lui demande de patienter le temps qu'on le lise.
     this.felicitationJusqua = performance.now() + FELICITATION_MS;
@@ -1582,9 +1623,15 @@ export class App {
       if (result.ok) {
         this.revealCells = [...this.game.lastMoveCells];
         this.revealKind = 'land';
+        // Les jetons se révèlent un à un : les claquements suivent le même pas,
+        // et l'on entend la longueur du mot avant de l'avoir lu.
+        this.sons.jouerSerie('adverse', this.revealCells.length, REVEAL_STEP_MS);
         const words = result.words.map((w) => w.word).join(', ');
         this.toast(result.bingo ? `${name} scrabble : ${words} (+${result.score})` : `${name} : ${words} (+${result.score})`);
-        if (result.bingo) this.replay(this.boardEl, 'bingo');
+        if (result.bingo) {
+          this.sons.jouer('scrabble', (this.revealCells.length * REVEAL_STEP_MS) / 1000);
+          this.replay(this.boardEl, 'bingo');
+        }
       } else {
         // Garde-fou : plutôt passer que bloquer la partie sur un coup rejeté.
         this.game.pass();
@@ -1593,6 +1640,7 @@ export class App {
     } else if (decision.type === 'exchange') {
       const result = this.game.exchange(decision.tiles);
       if (!result.ok) this.game.pass();
+      this.sons.jouer('echange');
       this.toast(`${name} échange ${decision.tiles.length} jeton${decision.tiles.length > 1 ? 's' : ''}.`);
     } else {
       this.game.pass();
@@ -1620,6 +1668,7 @@ export class App {
       `<div class="${this.game.winner === HUMAN ? 'won' : ''}"><div class="n">Vous</div><div class="v">${human.score}</div></div>` +
       `<div class="${this.game.winner === COMPUTER ? 'won' : ''}"><div class="n">${ai.name}</div><div class="v">${ai.score}</div></div>`;
     $('end-dialog').showModal();
+    this.sons.jouer(this.game.winner === HUMAN ? 'victoire' : 'defaite');
     if (this.mode !== 'solo') return;
     try {
       localStorage.removeItem(STORAGE_KEY);
@@ -1876,6 +1925,7 @@ export class App {
         if (this.mode !== 'guest') return;
         this.busy = false;
         this.toast(String(message.reason ?? 'Coup refusé.'), 'error');
+        this.sons.jouer('refus');
         this.refresh();
         return;
 
@@ -1981,14 +2031,19 @@ export class App {
       this.revealCells = [...(snap.lastMoveCells ?? [])];
       this.revealKind = 'land';
       if (entry.type === 'play') {
+        this.sons.jouerSerie('adverse', this.revealCells.length, REVEAL_STEP_MS);
         const words = entry.words.join(', ');
         this.toast(
           entry.bingo
             ? `Scrabble de ${this.opponentName} ! ${words} +${entry.score}`
             : `${this.opponentName} : ${words} +${entry.score}`,
         );
-        if (entry.bingo) this.replay(this.boardEl, 'bingo');
+        if (entry.bingo) {
+          this.sons.jouer('scrabble', (this.revealCells.length * REVEAL_STEP_MS) / 1000);
+          this.replay(this.boardEl, 'bingo');
+        }
       } else if (entry.type === 'exchange') {
+        this.sons.jouer('echange');
         this.toast(`${this.opponentName} a échangé des jetons.`);
       } else {
         this.toast(`${this.opponentName} passe son tour.`);
