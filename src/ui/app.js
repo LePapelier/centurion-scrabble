@@ -74,14 +74,11 @@ const MIN_COUPS_POUR_FELICITER = 6;
 const FELICITATION_MS = 2000;
 /** Décalage entre deux jetons qui s'allument, quand le coup est salué. */
 const ETINCELLE_PAS_MS = 70;
-/* Courtes à dessein : sur un téléphone, une phrase plus longue s'étale sur
-   trois lignes et n'a plus rien d'une petite tape dans le dos. */
-const FELICITATIONS = [
-  'Coup optimal !',
-  'Bravo — le meilleur coup.',
-  'Optimal : rien de mieux.',
-  'Le meilleur coup.',
-];
+/* Une seule formule, courte. Quatre tournures tournaient ici : la variété
+   attirait l'œil sur le texte, alors que l'intérêt est ailleurs — dans les
+   jetons qui s'allument. Et sur un téléphone, une phrase plus longue s'étale
+   sur trois lignes et n'a plus rien d'une petite tape dans le dos. */
+const FELICITATION = 'Meilleur coup !';
 
 /** Décalage entre deux jetons lors de la révélation d'un coup. */
 const REVEAL_STEP_MS = 60;
@@ -1527,7 +1524,7 @@ export class App {
 
   /** Salue un coup optimal. */
   feliciter() {
-    this.toast(FELICITATIONS[Math.floor(Math.random() * FELICITATIONS.length)], 'best');
+    this.toast(FELICITATION, 'best');
     this.sons.jouer('optimal');
     this.etinceler();
     // L'adversaire enchaîne aussitôt et son propre message chasserait
