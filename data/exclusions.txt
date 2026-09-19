@@ -300,3 +300,14 @@ ovalez
 ovaliez
 ovalions
 ovalons
+
+# Signalé en partie : PREMIC, un singulier qui n'existe pas. « Prémices » ne
+# s'emploie qu'au pluriel — 1mot.net refuse PREMICE, et PREMIC n'a même pas
+# de page. PREMICES reste, évidemment.
+#
+# Entrée propre à Morphalou, absente de Dicollecte : la même signature que
+# les IWAN et DAUW que le vocabulaire courant écarte déjà pour les niveaux
+# faibles. Ici c'est le dictionnaire lui-même qu'il faut corriger, puisque le
+# mot était accepté du joueur. PREMIX, de même origine, est bien valide et
+# reste en place.
+premic
