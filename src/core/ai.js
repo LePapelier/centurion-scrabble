@@ -236,6 +236,21 @@ export function chooseMove(board, rack, dawg, difficulty, context) {
   return { type: 'play', move: chosen };
 }
 
+/**
+ * Le meilleur score atteignable depuis cette position, et le nombre de coups
+ * légaux qui s'offraient.
+ *
+ * Sert à saluer un coup optimal. Le compte accompagne le score parce qu'on ne
+ * félicite pas quelqu'un qui n'avait pas le choix : trouver le meilleur de
+ * trois coups possibles n'est pas un exploit.
+ */
+export function bestScore(board, rack, dawg) {
+  const moves = generateMoves(board, rack, dawg);
+  let best = 0;
+  for (const move of moves) if (move.score > best) best = move.score;
+  return { score: best, count: moves.length };
+}
+
 /** Meilleur coup absolu — utilisé par le bouton « indice ». */
 export function bestMove(board, rack, dawg) {
   const moves = generateMoves(board, rack, dawg);

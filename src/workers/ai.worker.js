@@ -3,7 +3,7 @@
  * sur un plateau chargé : elle se fait ici pour ne jamais figer l'interface.
  */
 import { Dawg } from '../core/dawg.js';
-import { chooseMove, bestMove } from '../core/ai.js';
+import { chooseMove, bestMove, bestScore } from '../core/ai.js';
 import { difficultyByLevel } from '../core/constants.js';
 
 /** @type {Dawg|null} */
@@ -34,6 +34,12 @@ self.onmessage = (event) => {
           { bagCount: message.bagCount },
         );
         self.postMessage({ type: 'decision', id: message.id, decision, ms: performance.now() - started });
+        break;
+      }
+
+      case 'best': {
+        const { score, count } = bestScore(rebuildBoard(message.board), message.rack, dawg);
+        self.postMessage({ type: 'best', id: message.id, score, count });
         break;
       }
 

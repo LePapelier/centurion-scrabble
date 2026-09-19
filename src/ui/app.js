@@ -60,6 +60,25 @@ const DEFAULT_NAME = 'Joueur';
 const THINKING_FLOOR_MS = 900;
 const THINKING_JITTER_MS = 700;
 
+/**
+ * Félicitations quand le joueur trouve le coup qui rapporte le plus.
+ *
+ * Le seuil existe parce qu'on ne félicite pas quelqu'un qui n'avait pas le
+ * choix : en fin de partie il ne reste parfois que deux coups possibles, et
+ * jouer le meilleur des deux n'est pas un exploit. En dessous, on se tait.
+ */
+const MIN_COUPS_POUR_FELICITER = 6;
+/** Temps laissé à la félicitation avant que l'adversaire ne joue par-dessus. */
+const FELICITATION_MS = 2000;
+/* Courtes à dessein : sur un téléphone, une phrase plus longue s'étale sur
+   trois lignes et n'a plus rien d'une petite tape dans le dos. */
+const FELICITATIONS = [
+  'Coup optimal !',
+  'Bravo — le meilleur coup.',
+  'Optimal : rien de mieux.',
+  'Le meilleur coup du chevalet.',
+];
+
 /** Décalage entre deux jetons lors de la révélation d'un coup. */
 const REVEAL_STEP_MS = 60;
 /** Décalage entre deux lettres de la marque quand elle ondule. */
@@ -105,6 +124,11 @@ export class App {
     this.requestId = 0;
     this.pendingRequests = new Map();
     this.toastTimer = null;
+
+    /** Coup en attente d'un verdict d'optimalité : {id, score}. */
+    this.attenteOptimalite = null;
+    /** Instant jusqu'auquel l'adversaire laisse lire une félicitation. */
+    this.felicitationJusqua = 0;
 
     /** Cases à animer au prochain rendu, dans l'ordre de la pose. */
     this.revealCells = [];
@@ -1271,6 +1295,13 @@ export class App {
   commitPlay() {
     if (this.pending.size === 0 || this.busy || this.game.current !== HUMAN) return;
 
+    // Le plateau et le chevalet d'*avant* le coup : `play()` va les modifier,
+    // et c'est sur la position de départ que se juge l'optimalité.
+    const depart = {
+      board: { letters: [...this.game.board.letters], blanks: [...this.game.board.blanks] },
+      rack: [...this.game.players[HUMAN].rack],
+    };
+
     if (this.mode === 'guest') {
       // L'invité ne fait pas autorité : il vérifie pour lui-même, puis laisse
       // l'hôte arbitrer et lui renvoyer l'état.
@@ -1280,6 +1311,9 @@ export class App {
         return;
       }
       this.sendIntent({ t: 'play', placements: this.placements() });
+      // L'hôte applique le même dictionnaire et la même validation : un coup
+      // que l'invité accepte ne sera pas refusé là-bas.
+      this.jugerOptimalite(depart, verdict.score);
       return;
     }
 
@@ -1301,6 +1335,7 @@ export class App {
       'good',
     );
     if (result.bingo) this.replay(this.boardEl, 'bingo');
+    this.jugerOptimalite(depart, result.score);
 
     this.save();
     this.render();
@@ -1433,6 +1468,29 @@ export class App {
     if (this.mode === 'solo' && this.game.current === COMPUTER) this.runComputerTurn();
   }
 
+  /**
+   * Demande au moteur si le coup qu'on vient de jouer était le meilleur
+   * possible, et félicite le cas échéant.
+   *
+   * Le calcul est le même que celui de l'indice — l'énumération complète des
+   * coups légaux — donc il part dans le worker. Il ne touche pas à `busy` :
+   * c'est une vérification d'arrière-plan, elle ne doit rien bloquer.
+   */
+  jugerOptimalite(depart, score) {
+    const id = ++this.requestId;
+    this.pendingRequests.set(id, 'best');
+    this.attenteOptimalite = { id, score };
+    this.worker.postMessage({ type: 'best', id, board: depart.board, rack: depart.rack });
+  }
+
+  /** Salue un coup optimal. */
+  feliciter() {
+    this.toast(FELICITATIONS[Math.floor(Math.random() * FELICITATIONS.length)], 'best');
+    // L'adversaire enchaîne aussitôt et son propre message chasserait
+    // celui-ci : on lui demande de patienter le temps qu'on le lise.
+    this.felicitationJusqua = performance.now() + FELICITATION_MS;
+  }
+
   runComputerTurn() {
     this.busy = true;
     document.querySelector('.thinking-label').textContent =
@@ -1468,6 +1526,15 @@ export class App {
     if (!kind) return;
     this.pendingRequests.delete(message.id);
 
+    if (message.type === 'best') {
+      const attente = this.attenteOptimalite;
+      this.attenteOptimalite = null;
+      if (attente?.id === message.id && message.count >= MIN_COUPS_POUR_FELICITER && attente.score >= message.score) {
+        this.feliciter();
+      }
+      return;
+    }
+
     if (message.type === 'hint') {
       this.busy = false;
       const move = message.move;
@@ -1495,7 +1562,13 @@ export class App {
 
     // Un temps de réflexion minimal évite un coup qui « claque » sans transition.
     const elapsed = performance.now() - this.thinkingSince;
-    const attendu = THINKING_FLOOR_MS + Math.random() * THINKING_JITTER_MS;
+    let attendu = THINKING_FLOOR_MS + Math.random() * THINKING_JITTER_MS;
+    // Une félicitation vient peut-être de s'afficher : l'adversaire attend
+    // qu'on ait fini de la lire avant de poser son coup par-dessus.
+    if (this.felicitationJusqua) {
+      attendu = Math.max(attendu, this.felicitationJusqua - this.thinkingSince);
+      this.felicitationJusqua = 0;
+    }
     if (elapsed < attendu) await new Promise((r) => setTimeout(r, attendu - elapsed));
 
     this.applyComputerDecision(message.decision);

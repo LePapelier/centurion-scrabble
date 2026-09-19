@@ -1439,6 +1439,28 @@ svg {
 .toast.error { background: #6e2b23; }
 .toast.good { background: var(--valid-dark); }
 
+/* Coup optimal : le seul message doré du jeu, pour qu'il ne se confonde avec
+   aucun autre. Une seule pulsation — la félicitation doit rester une
+   respiration, pas un feu d'artifice. */
+.toast.best {
+  background: linear-gradient(180deg, #7a5a12, #5a4110);
+  border-color: #d8b25c;
+  color: #ffeec2;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  box-shadow: var(--shadow), 0 0 0 1px rgb(216 178 92 / 0.55), 0 0 18px rgb(216 178 92 / 0.28);
+  /* Une seule animation : `rise` et celle-ci pilotent toutes deux `transform`,
+     et la dernière déclarée écraserait l'autre. Celle-ci fait donc la montée
+     et la pulsation. */
+  animation: toast-best-pop 0.5s ease-out;
+}
+
+@keyframes toast-best-pop {
+  0% { opacity: 0; transform: translate(-50%, 10px) scale(0.94); }
+  45% { opacity: 1; transform: translate(-50%, 0) scale(1.045); }
+  100% { opacity: 1; transform: translate(-50%, 0) scale(1); }
+}
+
 @keyframes rise {
   from { opacity: 0; transform: translate(-50%, 10px); }
 }
