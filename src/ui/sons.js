@@ -170,30 +170,49 @@ export class Sons {
   }
 
   /**
-   * Une frappe de peau : une sinusoïde qui chute en fréquence aussitôt jouée.
-   * C'est tout le secret d'une grosse caisse — l'oreille entend la descente
-   * comme un choc, là où une note tenue à 50 Hz ne serait qu'un bourdon.
+   * Un coup de tambour.
+   *
+   * Le cœur est une sinusoïde qui chute en fréquence aussitôt jouée : c'est
+   * cette descente que l'oreille prend pour un choc, là où une note tenue à
+   * 50 Hz ne serait qu'un bourdon.
+   *
+   * Mais une sinusoïde seule fait une grosse caisse de synthétiseur, pas une
+   * peau tendue. Deux choses l'en séparent, ajoutées ici :
+   *
+   *   — un second mode, à 1,6 fois le fondamental. Une membrane ne vibre pas
+   *     en harmoniques entières comme une corde : ses modes tombent sur les
+   *     zéros des fonctions de Bessel, dont le premier est à peu près là.
+   *     C'est ce rapport bancal qui fait entendre « tambour » plutôt que
+   *     « note grave », et il s'éteint plus vite que le fondamental ;
+   *   — le bruit de la peau elle-même, une bande étroite vers 200 Hz, brève.
+   *     Sans elle le coup est propre et creux.
+   *
+   * La mailloche, enfin, claque par-dessus : sans ce point d'attaque aigu,
+   * le coup reste mou quel que soit son volume.
    */
   frappe({ depart = 140, arrivee = 45, duree = 0.3, volume = 0.5, retard = 0 }) {
     const ctx = this.ctx;
     const t = ctx.currentTime + retard;
 
-    const osc = ctx.createOscillator();
-    osc.type = 'sine';
-    osc.frequency.setValueAtTime(depart, t);
-    osc.frequency.exponentialRampToValueAtTime(arrivee, t + duree * 0.6);
+    for (const [rapport, part, tenue] of [[1, 1, 1], [1.6, 0.3, 0.45]]) {
+      const osc = ctx.createOscillator();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(depart * rapport, t);
+      osc.frequency.exponentialRampToValueAtTime(arrivee * rapport, t + duree * 0.6);
 
-    const gain = ctx.createGain();
-    gain.gain.setValueAtTime(0.0001, t);
-    gain.gain.exponentialRampToValueAtTime(volume, t + 0.008);
-    gain.gain.exponentialRampToValueAtTime(0.0001, t + duree);
+      const gain = ctx.createGain();
+      gain.gain.setValueAtTime(0.0001, t);
+      gain.gain.exponentialRampToValueAtTime(volume * part, t + 0.008);
+      gain.gain.exponentialRampToValueAtTime(0.0001, t + duree * tenue);
 
-    osc.connect(gain).connect(this.maitre);
-    osc.start(t);
-    osc.stop(t + duree + 0.02);
+      osc.connect(gain).connect(this.maitre);
+      osc.start(t);
+      osc.stop(t + duree + 0.02);
+    }
 
-    // Le claquement de la mailloche sur la peau, sans quoi le coup est mou.
-    this.claquer({ freq: 1800, duree: 0.03, volume: volume * 0.16, retard, q: 0.8 });
+    // La peau, puis la mailloche.
+    this.claquer({ freq: depart * 1.45, duree: duree * 0.28, volume: volume * 0.3, retard, q: 1.6 });
+    this.claquer({ freq: 1800, duree: 0.03, volume: volume * 0.14, retard, q: 0.8 });
   }
 
   /**
@@ -317,11 +336,11 @@ export class Sons {
         const pas = (options.pas ?? 18) / 1000;
         for (let i = 0; i < lettres; i++) {
           const f = PENTATONIQUE[Math.min(i, PENTATONIQUE.length - 1)];
-          this.lame({ freq: f, duree: 0.3, volume: 0.15, retard: retard + PIC_LETTRE + i * pas });
+          this.lame({ freq: f, duree: 0.3, volume: 0.095, retard: retard + PIC_LETTRE + i * pas });
         }
         // « ba » puis « boum », resserrés en un seul choc de retombée.
-        this.frappe({ depart: 170, arrivee: 82, duree: 0.14, volume: 0.22, retard: retard + ATTERRISSAGE - 0.07 });
-        this.frappe({ depart: 130, arrivee: 42, duree: 0.44, volume: 0.44, retard: retard + ATTERRISSAGE });
+        this.frappe({ depart: 150, arrivee: 78, duree: 0.16, volume: 0.28, retard: retard + ATTERRISSAGE - 0.07 });
+        this.frappe({ depart: 120, arrivee: 46, duree: 0.55, volume: 0.66, retard: retard + ATTERRISSAGE });
         break;
       }
 
