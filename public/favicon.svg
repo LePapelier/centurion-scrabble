@@ -1,6 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <rect width="64" height="64" rx="13" fill="#f0e2c4" />
-  <rect x="3" y="3" width="58" height="58" rx="11" fill="none" stroke="#cdb98f" stroke-width="2" />
-  <text x="30" y="45" font-family="ui-sans-serif, system-ui, sans-serif" font-size="40" font-weight="800" fill="#2a2118">C</text>
-  <text x="50" y="55" font-family="ui-sans-serif, system-ui, sans-serif" font-size="16" font-weight="600" fill="#2a2118" opacity="0.65">3</text>
+  <!-- Le C est tracé, non composé : une lettre en <text> dépendrait de la
+       police du système, dont la largeur varie d'un appareil à l'autre. La
+       version précédente n'avait d'ailleurs pas d'ancrage, si bien que le C
+       partait du milieu vers la droite et débordait du cadre. -->
+  <rect width="64" height="64" rx="13" fill="#15301f" />
+  <rect x="7" y="7" width="50" height="50" rx="8" fill="#f0e2c4" />
+  <path d="M43 22 A15 15 0 1 0 43 42" fill="none" stroke="#2a2118" stroke-width="9.5" stroke-linecap="round" />
 </svg>
