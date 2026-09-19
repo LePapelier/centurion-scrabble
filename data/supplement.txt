@@ -104,3 +104,8 @@ gex
 # KETE, KETES, KETTE et KETH, vérifiés au passage, sont bien invalides.
 ket
 kets
+
+# Signalé en partie : FEUJ et son pluriel FEUJS, absents des deux lexiques.
+# FEUJE et FEUJES, vérifiés au passage, sont invalides.
+feuj
+feujs
