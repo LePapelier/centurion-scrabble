@@ -1767,6 +1767,10 @@ export class App {
    * donnent l'impression de deux vagues qui se suivent.
    */
   wiggleBrand() {
+    // Le son passe avant le garde-fou : qui demande moins d'animations n'a
+    // pas demandé moins de surprises, et sans lui l'œuf de Pâques n'existe
+    // plus du tout pour cette personne.
+    this.sons.jouer('logo');
     if (reducedMotion.matches) return;
     const tiles = [...document.querySelectorAll('.brand-tile')];
 

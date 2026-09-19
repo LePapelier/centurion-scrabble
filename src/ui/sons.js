@@ -117,6 +117,59 @@ export class Sons {
     osc.stop(t + duree + 0.02);
   }
 
+  /**
+   * Une frappe de peau : une sinusoïde qui chute en fréquence aussitôt jouée.
+   * C'est tout le secret d'une grosse caisse — l'oreille entend la descente
+   * comme un choc, là où une note tenue à 50 Hz ne serait qu'un bourdon.
+   */
+  frappe({ depart = 140, arrivee = 45, duree = 0.3, volume = 0.5, retard = 0 }) {
+    const ctx = this.ctx;
+    const t = ctx.currentTime + retard;
+
+    const osc = ctx.createOscillator();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(depart, t);
+    osc.frequency.exponentialRampToValueAtTime(arrivee, t + duree * 0.6);
+
+    const gain = ctx.createGain();
+    gain.gain.setValueAtTime(0.0001, t);
+    gain.gain.exponentialRampToValueAtTime(volume, t + 0.008);
+    gain.gain.exponentialRampToValueAtTime(0.0001, t + duree);
+
+    osc.connect(gain).connect(this.maitre);
+    osc.start(t);
+    osc.stop(t + duree + 0.02);
+
+    // Le claquement de la mailloche sur la peau, sans quoi le coup est mou.
+    this.claquer({ freq: 1800, duree: 0.03, volume: volume * 0.16, retard, q: 0.8 });
+  }
+
+  /**
+   * Une lame de xylophone. Ce qui la distingue d'une note ordinaire, c'est
+   * son harmonique aiguë : sur un vrai instrument, la lame est creusée pour
+   * que son premier partiel tombe à trois fois le fondamental, et non deux.
+   * D'où ce timbre sec et cristallin qu'aucune sinusoïde seule ne donne.
+   */
+  lame({ freq, duree = 0.3, volume = 0.3, retard = 0 }) {
+    const ctx = this.ctx;
+    const t = ctx.currentTime + retard;
+
+    for (const [rapport, part, tenue] of [[1, 1, 1], [3, 0.4, 0.55], [6.2, 0.14, 0.3]]) {
+      const osc = ctx.createOscillator();
+      osc.type = 'sine';
+      osc.frequency.value = freq * rapport;
+
+      const gain = ctx.createGain();
+      gain.gain.setValueAtTime(0.0001, t);
+      gain.gain.exponentialRampToValueAtTime(volume * part, t + 0.005);
+      gain.gain.exponentialRampToValueAtTime(0.0001, t + duree * tenue);
+
+      osc.connect(gain).connect(this.maitre);
+      osc.start(t);
+      osc.stop(t + duree + 0.02);
+    }
+  }
+
   /* ---------------------------------------------------------------- */
   /* Le répertoire                                                     */
   /* ---------------------------------------------------------------- */
@@ -186,6 +239,27 @@ export class Sons {
           this.note({ freq: f, duree: 0.42, volume: 0.12, retard: retard + i * 0.14, forme: 'sine' });
         });
         break;
+
+      // La marque qu'on chatouille. Deux frappes — le « ba » de l'élan, le
+      // « boum » de la retombée — puis une cascade de xylophone qui monte,
+      // calée sur la vague qui parcourt les lettres à l'écran.
+      //
+      // La gamme est pentatonique : n'importe quelles notes s'y enchaînent
+      // sans jamais frotter, ce qu'une gamme ordinaire ne pardonne pas à
+      // cette vitesse.
+      case 'logo': {
+        this.frappe({ depart: 170, arrivee: 82, duree: 0.16, volume: 0.30, retard });
+        this.frappe({ depart: 130, arrivee: 42, duree: 0.42, volume: 0.50, retard: retard + 0.19 });
+        const gamme = [
+          523.25, 587.33, 659.25, 783.99, 880,
+          1046.5, 1174.66, 1318.51, 1567.98, 1760,
+          2093, 2349.32, 2637.02,
+        ];
+        gamme.forEach((f, i) => {
+          this.lame({ freq: f, duree: 0.34, volume: 0.24, retard: retard + 0.22 + i * 0.028 });
+        });
+        break;
+      }
 
       // Jetons rendus au sac : un froissement plus long, deux passes.
       case 'echange':
