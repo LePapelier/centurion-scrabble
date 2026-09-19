@@ -311,3 +311,21 @@ ovalons
 # mot était accepté du joueur. PREMIX, de même origine, est bien valide et
 # reste en place.
 premic
+
+# Signalé en partie : HUIR. Le verbe n'existe pas — 1mot.net refuse HUIR,
+# HUIRA et HUIRENT. Morphalou lui a conjugué le futur, le conditionnel et un
+# passé simple, treize formes bâties sur un infinitif fantôme. HUI et HUIS,
+# eux, sont de vrais mots et ne sont pas concernés.
+huir
+huira
+huirai
+huiraient
+huirais
+huirait
+huiras
+huirent
+huirez
+huiriez
+huirions
+huirons
+huiront
