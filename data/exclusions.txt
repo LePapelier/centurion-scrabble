@@ -434,3 +434,20 @@ rampins
 # est invalide, pas de page sur 1mot.net. MMM, lui, est valide et reste —
 # une asymétrie de plus. HMMM, HM, MM et MMH sont invalides et déjà absents.
 hmm
+
+# Signalé en partie : PUSZTA, la plaine hongroise. Pas de page sur 1mot.net,
+# et l'entrée est propre à Morphalou — la signature de PREMIC et RAMPIN.
+# PUSZTAS était déjà absent.
+puszta
+
+# Trouvés en passant en revue les mots contenant « SZ », tous propres à
+# Morphalou. Ceux-ci sont des agglutinations : « leurs zigues », « nos
+# zigues », « vos zigues » avec l'espace perdu. NOZIGUES, la forme sans S,
+# est explicitement refusée par 1mot.net ; les trois autres n'ont pas même
+# de page.
+leurszigues
+noszigues
+voszigues
+
+# GROSZY, le pluriel polonais de grosz : explicitement refusé.
+groszy
