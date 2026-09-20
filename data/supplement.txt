@@ -125,3 +125,14 @@ ramins
 # lexiques alors que le mot est entré dans l'usage.
 ramen
 ramens
+
+# Signalé en partie : NEY, la flûte de roseau du Proche-Orient, et son
+# pluriel NEYS. Absents des deux lexiques.
+ney
+neys
+
+# Croisés dans le même voisinage : NAY, l'autre graphie de la même flûte, et
+# NAYS. Valides et absents eux aussi. NYE et NYES, vérifiés au passage, ne
+# le sont pas.
+nay
+nays
