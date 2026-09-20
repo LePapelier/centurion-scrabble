@@ -142,3 +142,9 @@ nays
 # passage, sont invalides.
 yue
 yues
+
+# Signalé en partie : CIF, le terme de commerce maritime (coût, assurance,
+# fret). Absent des deux lexiques. Pas de pluriel : CIFS est invalide,
+# vérifié — comme GEX, le singulier se joue seul. CIFLE, CIFER et CIFSIC,
+# croisés au passage, sont invalides aussi.
+cif
