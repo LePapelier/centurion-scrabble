@@ -136,3 +136,9 @@ neys
 # le sont pas.
 nay
 nays
+
+# Signalé en partie : YUE, la langue du sud de la Chine, et son pluriel
+# YUES. Absents des deux lexiques. YEU, YEUS, YU, YUS et YOU, vérifiés au
+# passage, sont invalides.
+yue
+yues
