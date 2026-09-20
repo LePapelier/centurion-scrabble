@@ -114,3 +114,14 @@ feujs
 # deux ne se déduisent décidément pas l'un de l'autre. AYES et AYO, vérifiés
 # au passage, sont invalides.
 ays
+
+# Croisés en vérifiant RAMPIN : RAMIN, le bois d'Asie du Sud-Est, et son
+# pluriel RAMINS, valides et absents des deux lexiques. RAMINE et RAMINAS,
+# vérifiés au passage, sont invalides.
+ramin
+ramins
+
+# Toujours dans le même voisinage : RAMEN et RAMENS, absents des deux
+# lexiques alors que le mot est entré dans l'usage.
+ramen
+ramens

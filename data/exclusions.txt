@@ -422,3 +422,10 @@ deflaquez
 deflaquiez
 deflaquions
 deflaquons
+
+# Signalé en partie : RAMPIN et son pluriel. Ni l'un ni l'autre n'a de page
+# sur 1mot.net. Entrée propre à Morphalou, absente de Dicollecte — la
+# signature déjà vue avec PREMIC. RAMINS, RAPIN, RAMPONS et RAMPIONS,
+# croisés au passage, sont bien valides et restent.
+rampin
+rampins
