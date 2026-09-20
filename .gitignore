@@ -5,3 +5,9 @@ dist/
 
 # Lexique source récupéré par `npm run dict:fetch` (8,9 Mo, LGPL-LR).
 data/morphalou-strict.txt
+
+# Produits par tools/verifier-lexique.mjs : un cache local et son rapport,
+# qui dépendent de la machine et du moment. Ce qu'ils révèlent finit dans
+# supplement.txt ou exclusions.txt, après relecture.
+data/verifications.json
+data/rapport-verification.txt

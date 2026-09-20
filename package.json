@@ -9,7 +9,8 @@
     "build": "vite build",
     "preview": "vite preview",
     "dict:fetch": "node tools/fetch-morphalou.mjs",
-    "build:dict": "node tools/build-dict.mjs"
+    "build:dict": "node tools/build-dict.mjs",
+    "dict:verifier": "node tools/verifier-lexique.mjs"
   },
   "devDependencies": {
     "an-array-of-french-words": "^2.0.0",
