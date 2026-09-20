@@ -429,3 +429,8 @@ deflaquons
 # croisés au passage, sont bien valides et restent.
 rampin
 rampins
+
+# HMM, laissé en suspens faute de verdict lors d'un passage précédent : il
+# est invalide, pas de page sur 1mot.net. MMM, lui, est valide et reste —
+# une asymétrie de plus. HMMM, HM, MM et MMH sont invalides et déjà absents.
+hmm
