@@ -1792,6 +1792,63 @@ svg {
 }
 
 /* ------------------------------------------------------------------ */
+/* Téléphone couché — la hauteur devient la ressource rare              */
+/* ------------------------------------------------------------------ */
+/*
+ * La mise en page verticale suppose un écran plus haut que large : elle
+ * réserve 310 px au reste de la colonne et donne le solde au plateau. Couché,
+ * un téléphone n'a que 390 px de haut — le plateau tombait à 80 px, soit cinq
+ * pixels par case, et le chevalet débordait à côté.
+ *
+ * Ici le plateau prend toute la hauteur et tout le reste passe à sa droite.
+ * Son côté se calcule sur la hauteur de la fenêtre, jamais sur la largeur de
+ * sa colonne : la colonne est dimensionnée par lui, la déduire de lui-même
+ * tournerait en rond.
+ */
+@media (orientation: landscape) and (max-height: 560px) {
+  .app {
+    /* 52 px : marges de `.app`, écart de la pile et ligne d'état sous le
+       plateau. */
+    --board-cote: calc(100dvh - 52px);
+    --board-max: var(--board-cote);
+
+    display: grid;
+    grid-template-columns: var(--board-cote) minmax(0, 1fr);
+    grid-template-rows: auto auto 1fr auto;
+    grid-template-areas:
+      'board  top'
+      'board  scores'
+      'board  tray'
+      'board  log';
+    column-gap: 14px;
+    row-gap: 6px;
+    max-width: none;
+    padding: 6px 10px calc(6px + var(--safe-bottom));
+  }
+
+  .topbar { grid-area: top; }
+  .scoreboard { grid-area: scores; }
+  .board-wrap { grid-area: board; place-items: center; }
+  /* Le chevalet suit le plateau plutôt que la colonne : à pleine largeur,
+     ses tuiles feraient trois fois la taille d'une case. */
+  .tray {
+    grid-area: tray;
+    width: min(100%, calc(var(--board-cote) * 1.1));
+    margin-inline: auto;
+    align-self: center;
+  }
+  .log-panel { grid-area: log; }
+
+  /* La marque prend la moitié d'une colonne déjà étroite : seule la mascotte
+     reste, elle suffit à identifier le jeu. */
+  .brand-words { display: none; }
+
+  /* L'historique déplié mangerait toute la colonne : il reste replié, et son
+     contenu défile sur la hauteur disponible. */
+  .log { max-height: 26vh; }
+}
+
+/* ------------------------------------------------------------------ */
 /* Grand écran — placé en dernier pour surcharger toutes les règles     */
 /* de base, quel que soit l'ordre dans lequel elles ont été ajoutées.   */
 /* ------------------------------------------------------------------ */
