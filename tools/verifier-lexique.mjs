@@ -50,6 +50,10 @@ const MIN = Number(opt('min', 2));
 const MAX = Number(opt('max', 5));
 const PAUSE = Number(opt('pause', 1000));
 const LIMITE = Number(opt('limite', Infinity));
+/* Budget de temps, pour une exécution surveillée par une horloge — un job
+   d'intégration continue est coupé net au bout de six heures, et un arrêt
+   net perdrait le cache non sauvegardé. */
+const MINUTES = Number(opt('minutes', Infinity));
 const SUSPECTS = drapeau('suspects');
 const EXCLUSIONS = drapeau('exclusions');
 const SIMULER = drapeau('simuler');
@@ -184,7 +188,10 @@ console.log(`À vérifier : ${quoi}`);
 console.log(`Déjà en cache : ${mots.length - restants.length}`);
 console.log(`Restants : ${restants.length}` +
   (SIMULER ? '  (simulation, aucun accès réseau)' : `  — environ ${((restants.length * PAUSE) / 3600000).toFixed(1)} h à ${PAUSE} ms`));
+if (Number.isFinite(MINUTES)) console.log(`Budget : ${MINUTES} min`);
 console.log('Ctrl-C à tout moment : le travail déjà fait est conservé.\n');
+
+const echeance = Number.isFinite(MINUTES) ? Date.now() + MINUTES * 60000 : Infinity;
 
 let faits = 0;
 let echecs = 0;
@@ -226,6 +233,10 @@ function ecrireRapport() {
 
 for (const mot of restants) {
   if (arret || faits >= LIMITE) break;
+  if (Date.now() >= echeance) {
+    console.log('\nBudget de temps épuisé — arrêt propre.');
+    break;
+  }
 
   const { code, html } = await demander(mot);
   const verdict = lireVerdict(html, code, mot);
@@ -255,5 +266,12 @@ for (const mot of restants) {
 const trouves = ecrireRapport();
 writeFileSync(CACHE, JSON.stringify(cache, null, 0));
 console.log(`\n${faits} mots vérifiés, ${trouves} désaccords.`);
+const vus = mots.filter((m) => cache[m]).length;
+console.log(`Avancement : ${vus} / ${mots.length} (${((vus / mots.length) * 100).toFixed(1)} %)`);
+if (process.env.GITHUB_OUTPUT) {
+  const fs = await import('node:fs');
+  fs.appendFileSync(process.env.GITHUB_OUTPUT,
+    `desaccords=${trouves}\nverifies=${vus}\ntotal=${mots.length}\n`);
+}
 console.log(`Rapport : data/rapport-verification.txt`);
 console.log(`Cache   : data/verifications.json  (relancer reprend où on en est)`);

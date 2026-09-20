@@ -1,0 +1,119 @@
+# Confronte le lexique à 1mot.net depuis un runner GitHub, qui a l'accès
+# réseau que l'environnement de développement n'a pas.
+#
+# Déclenchement manuel seulement : la tâche interroge le site d'un tiers, et
+# ce n'est pas quelque chose qu'on met en route tout seul. Pour en faire une
+# habitude, décommenter le `schedule` plus bas.
+#
+# Le travail s'accumule d'une exécution à l'autre : le cache des verdicts est
+# conservé entre les lancements, si bien qu'une portée de neuf heures se
+# couvre en trois lancements de trois heures.
+
+name: Vérifier le lexique
+
+on:
+  workflow_dispatch:
+    inputs:
+      portee:
+        description: Quoi vérifier
+        type: choice
+        default: suspects
+        options:
+          - suspects      # entrées propres à Morphalou — meilleur rendement
+          - tout          # tous les mots de la plage de longueurs
+          - exclusions    # relit ce qu'on a écarté, pour l'erreur inverse
+      max:
+        description: Longueur maximale des mots
+        default: '5'
+      minutes:
+        description: Durée du lancement (un job est coupé à 360 min)
+        default: '300'
+      pause:
+        description: Pause entre deux requêtes, en millisecondes
+        default: '1000'
+
+  # Pour une vérification régulière, décommenter — et se rappeler que cela
+  # interroge un site tiers chaque semaine, sans personne pour surveiller.
+  # schedule:
+  #   - cron: '0 3 * * 0'
+
+permissions:
+  contents: read
+
+jobs:
+  verifier:
+    runs-on: ubuntu-latest
+    # Marge sur le budget demandé : le script s'arrête de lui-même avant,
+    # cette borne n'est qu'un filet.
+    timeout-minutes: 350
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      # Les verdicts déjà obtenus, pour ne pas redemander au site ce qu'on
+      # sait déjà. La clé change à chaque lancement — un cache est immuable —
+      # et `restore-keys` rattrape le plus récent.
+      - name: Reprendre les verdicts connus
+        uses: actions/cache/restore@v4
+        with:
+          path: data/verifications.json
+          key: lexique-verdicts-${{ github.run_id }}
+          restore-keys: lexique-verdicts-
+
+      - name: Vérifier
+        id: verif
+        run: |
+          case "${{ inputs.portee || 'suspects' }}" in
+            suspects)   PORTEE=--suspects ;;
+            exclusions) PORTEE=--exclusions ;;
+            *)          PORTEE= ;;
+          esac
+          node tools/verifier-lexique.mjs $PORTEE \
+            --max=${{ inputs.max || '5' }} \
+            --minutes=${{ inputs.minutes || '300' }} \
+            --pause=${{ inputs.pause || '1000' }}
+
+      - name: Conserver les verdicts
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: data/verifications.json
+          key: lexique-verdicts-${{ github.run_id }}
+
+      - name: Déposer le rapport
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rapport-lexique
+          path: data/rapport-verification.txt
+          if-no-files-found: warn
+
+      # Les désaccords sont écrits sur la page du lancement : on les lit sans
+      # rien télécharger.
+      - name: Résumé
+        if: always()
+        run: |
+          {
+            echo "## Vérification du lexique"
+            echo
+            echo "- portée : \`${{ inputs.portee || 'suspects' }}\`, jusqu'à ${{ inputs.max || '5' }} lettres"
+            echo "- avancement : ${{ steps.verif.outputs.verifies }} / ${{ steps.verif.outputs.total }}"
+            echo "- désaccords : **${{ steps.verif.outputs.desaccords }}**"
+            echo
+            if [ -s data/rapport-verification.txt ]; then
+              echo '<details><summary>Rapport</summary>'
+              echo
+              echo '```'
+              head -c 60000 data/rapport-verification.txt
+              echo '```'
+              echo
+              echo '</details>'
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
