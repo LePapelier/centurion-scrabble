@@ -468,3 +468,49 @@ aha
 # source en annonçait 81, on y est tombé juste, puis TO l'a porté à 82, et YO
 # le ramène à 81. Le compte ne prouve rien, on s'en tient au cas par cas.
 yo
+
+# Signalé en partie : ENOLISES. 1mot.net refuse explicitement ENOLISE, la
+# forme de tête : c'est le verbe « énoliser » tout entier qui est fantôme,
+# comme OVALER, FLAQUER et HUIR avant lui. Trente-sept formes conjuguées.
+#
+# Ce qui reste et doit rester : ENOL, ENOLS, ENOLATE et ENOLATES, vérifiés
+# valides. ENOLIQUE(S), ENOLISABLE(S) et ENOLISATION(S) restent aussi, faute
+# de verdict : aucune page trouvée, mais pas de refus explicite non plus, et
+# ce sont des termes de chimie qui peuvent exister indépendamment du verbe.
+enolisa
+enolisai
+enolisaient
+enolisais
+enolisait
+enolisames
+enolisant
+enolisas
+enolisasse
+enolisassent
+enolisasses
+enolisassiez
+enolisassions
+enolisat
+enolisates
+enolise
+enolisee
+enolisees
+enolisent
+enoliser
+enolisera
+enoliserai
+enoliseraient
+enoliserais
+enoliserait
+enoliseras
+enoliserent
+enoliserez
+enoliseriez
+enoliserions
+enoliserons
+enoliseront
+enolises
+enolisez
+enolisiez
+enolisions
+enolisons
