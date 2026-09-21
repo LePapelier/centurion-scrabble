@@ -451,3 +451,12 @@ voszigues
 
 # GROSZY, le pluriel polonais de grosz : explicitement refusé.
 groszy
+
+# Signalé en partie : AHI, refusé explicitement par 1mot.net. AHIS était déjà
+# absent. En vérifiant, deux voisines de la même farine passaient aussi et
+# sont refusées pareillement : AHE et AHA. Toutes trois propres à Morphalou.
+#
+# HAI, HAIS et AH, vérifiés au passage, sont bien valides et restent.
+ahi
+ahe
+aha
