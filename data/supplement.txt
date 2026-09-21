@@ -174,3 +174,10 @@ tolasses
 tolassent
 tolions
 toliez
+
+# Signalé en partie : HUN et son pluriel HUNS, le peuple d'Attila. Absents
+# des deux lexiques, qui les prennent pour un nom propre — la compétition les
+# admet comme noms communs. HUNO, HUNIS, HUNG et HUNTS, vérifiés au passage,
+# sont invalides.
+hun
+huns
