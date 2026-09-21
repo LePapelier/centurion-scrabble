@@ -526,3 +526,12 @@ enolisons
 hahe
 haha
 hahas
+
+# Signalé en partie : DOG et son pluriel DOGS, l'anglais. Tous deux refusés
+# explicitement par 1mot.net, tous deux propres à Morphalou.
+#
+# DOGE, DOGES, DOGUE et DOGUES, vérifiés au passage, sont bien valides et
+# restent : c'est le chien anglais qui sort, pas le magistrat vénitien ni le
+# molosse.
+dog
+dogs
