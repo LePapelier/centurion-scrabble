@@ -148,3 +148,29 @@ yues
 # vérifié — comme GEX, le singulier se joue seul. CIFLE, CIFER et CIFSIC,
 # croisés au passage, sont invalides aussi.
 cif
+
+# Le verbe « tôler » — couvrir de tôle. Son infinitif était là, mais presque
+# toute sa conjugaison manquait : les accents étant retirés, les formes de
+# « tolérer » occupaient la place et masquaient le trou. TOLERA, TOLERAI et
+# les autres appartiennent à tolérer ; celles-ci sont bien celles de tôler.
+#
+# Seize des dix-sept vérifiées une par une sur 1mot.net. TOLASSENT est la
+# seule déduite : TOLASSE et TOLASSES sont valides, et tout le reste du
+# paradigme aussi — mais elle n'a pas de page trouvée, elle reste à confirmer.
+tolent
+tolons
+tolez
+tola
+tolai
+tolames
+tolates
+tolat
+tolant
+tolais
+tolait
+tolaient
+tolasse
+tolasses
+tolassent
+tolions
+toliez
