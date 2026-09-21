@@ -181,3 +181,9 @@ toliez
 # sont invalides.
 hun
 huns
+
+# Signalé en partie : KAT et son pluriel KATS, l'autre graphie du khat. Les
+# deux lexiques n'ont que KHAT et KHATS, qui étaient déjà là. KATE, KATES et
+# KATZ, vérifiés au passage, sont invalides.
+kat
+kats
