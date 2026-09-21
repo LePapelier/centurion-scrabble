@@ -198,3 +198,9 @@ gifs
 # aussi.
 gift
 gifts
+
+# Trouvés en vérifiant si « skater » se conjugue — il ne se conjugue pas,
+# mais SKAT, le jeu de cartes allemand, et son pluriel SKATS manquaient.
+# Absents des deux lexiques.
+skat
+skats
