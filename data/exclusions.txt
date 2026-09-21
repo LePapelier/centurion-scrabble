@@ -543,3 +543,11 @@ dogs
 # Le reste de la famille HYA- (HYALIN, HYALITE, HYALOÏDE et compagnie) n'est
 # pas touché : ce sont des termes de minéralogie bien installés.
 hyas
+
+# Signalé : VOT, refusé explicitement par 1mot.net. Entrée propre à Morphalou
+# (une forme ancienne de « vœu »), absente de Dicollecte.
+#
+# VOTS, VOTO et VOTOS, également refusés, étaient déjà absents. Le reste de la
+# famille — VOTE, VOTA, VOTER, VOTANT et toute la conjugaison — est valide et
+# ne bouge pas.
+vot
