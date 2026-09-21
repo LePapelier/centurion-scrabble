@@ -551,3 +551,12 @@ hyas
 # famille — VOTE, VOTA, VOTER, VOTANT et toute la conjugaison — est valide et
 # ne bouge pas.
 vot
+
+# Signalé : LAR, refusé explicitement par 1mot.net. Le gibbon lar est dans
+# Morphalou, pas en compétition. Son pluriel LARS est refusé pareillement et
+# part avec lui.
+#
+# Attention à ne pas confondre : LARE et LARES, les dieux du foyer romains,
+# sont bien valides et restent. C'est le singe qui sort, pas les divinités.
+lar
+lars
