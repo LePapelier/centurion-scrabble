@@ -514,3 +514,15 @@ enolisez
 enolisiez
 enolisions
 enolisons
+
+# Signalé en partie : HAHE, refusé explicitement. En vérifiant, HAHA et son
+# pluriel HAHAS passaient aussi et sont refusés pareillement. Troisième lot
+# d'interjections de Morphalou après AHI, AHE et AHA : le lexique en recense
+# large, la compétition tranche au cas par cas.
+#
+# HAHNIUM et HAHNIUMS, l'élément 105, restent : vérifiés valides. HAHNIE et
+# HAHNIES restent aussi, faute de verdict — aucune page trouvée, mais pas de
+# refus explicite, et on ne retire pas sur une absence de résultat.
+hahe
+haha
+hahas
