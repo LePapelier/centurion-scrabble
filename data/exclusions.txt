@@ -460,3 +460,11 @@ groszy
 ahi
 ahe
 aha
+
+# Signalé en partie : YO, refusé explicitement par 1mot.net. YOS, YOU, YOSES
+# et YOMS le sont aussi et étaient déjà absents. YOYO et YOYOS restent.
+#
+# C'est le deuxième mouvement sur le compte des mots de deux lettres : une
+# source en annonçait 81, on y est tombé juste, puis TO l'a porté à 82, et YO
+# le ramène à 81. Le compte ne prouve rien, on s'en tient au cas par cas.
+yo
