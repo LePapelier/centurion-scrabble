@@ -535,3 +535,11 @@ hahas
 # molosse.
 dog
 dogs
+
+# Signalé : HYAS, le crabe-araignée. Pas de page sur 1mot.net, et l'entrée est
+# propre à Morphalou — la même signature que PREMIC, RAMPIN et PUSZTA. Le nom
+# est invariable, il n'y avait rien d'autre à retirer.
+#
+# Le reste de la famille HYA- (HYALIN, HYALITE, HYALOÏDE et compagnie) n'est
+# pas touché : ce sont des termes de minéralogie bien installés.
+hyas
