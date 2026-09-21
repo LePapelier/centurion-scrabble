@@ -187,3 +187,14 @@ huns
 # KATZ, vérifiés au passage, sont invalides.
 kat
 kats
+
+# Signalé en partie : GIF et son pluriel GIFS, le format d'image. Les deux
+# lexiques les ignorent — un sigle lexicalisé, comme LED et DEL en leur
+# temps. GIFE et GIFY, vérifiés au passage, sont invalides.
+gif
+gifs
+
+# Croisés dans le même voisinage : GIFT et GIFTS, valides et absents eux
+# aussi.
+gift
+gifts
