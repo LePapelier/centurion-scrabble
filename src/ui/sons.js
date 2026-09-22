@@ -294,6 +294,15 @@ export class Sons {
         });
         break;
 
+      // Message reçu : deux notes brèves qui montent, discrètes. Cela
+      // arrive pendant que l'autre réfléchit, parfois au milieu d'un coup
+      // qu'on prépare : il faut le remarquer sans sursauter, et cela doit se
+      // distinguer nettement du claquement d'une tuile adverse.
+      case 'message':
+        this.note({ freq: 987.77, duree: 0.09, volume: 0.075, retard, forme: 'sine' });
+        this.note({ freq: 1318.51, duree: 0.13, volume: 0.065, retard: retard + 0.07, forme: 'sine' });
+        break;
+
       // Coup optimal : deux notes, une quinte, claires et vite passées. La
       // félicitation doit faire sourire, pas interrompre.
       case 'optimal':

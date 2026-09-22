@@ -1,5 +1,11 @@
 /**
- * Déroulement d'une partie à deux : sac, chevalets, tours, fin de partie.
+ * Déroulement d'une partie : sac, chevalets, tours, fin de partie.
+ *
+ * De deux à quatre joueurs. Les sièges sont numérotés dans l'ordre du tour,
+ * et le siège 0 est toujours celui qui regarde : en solo c'est le joueur
+ * humain, en ligne c'est le destinataire de l'instantané. Tout le rendu peut
+ * donc se contenter de savoir qu'il est le joueur 0, sans jamais demander
+ * quelle place il occupe réellement dans la partie.
  *
  * L'état est volontairement sérialisable en JSON pour être conservé dans le
  * stockage local du navigateur et repris après fermeture de l'onglet.
@@ -7,11 +13,21 @@
 import { DISTRIBUTION, RACK_SIZE, VALUES, BLANK, SIZE, difficultyByLevel } from './constants.js';
 import { createBoard, applyPlacements, validateMove } from './board.js';
 
+/** Le siège de celui qui regarde. Toujours 0, par construction. */
 export const HUMAN = 0;
+/** En solo, l'adversaire calculé occupe le siège suivant. */
 export const COMPUTER = 1;
 
-/** Nombre de tours blancs consécutifs qui mettent fin à la partie. */
-const SCORELESS_LIMIT = 4;
+/** Bornes du nombre de joueurs autour de la table. */
+export const MIN_PLAYERS = 2;
+export const MAX_PLAYERS = 4;
+
+/**
+ * Tours blancs consécutifs qui mettent fin à la partie : deux par joueur.
+ * À deux cela redonne les quatre tours d'avant ; à quatre, chacun a encore
+ * eu deux occasions de débloquer la situation avant qu'on arrête les frais.
+ */
+const SCORELESS_PER_PLAYER = 2;
 
 function shuffle(array) {
   for (let i = array.length - 1; i > 0; i--) {
@@ -33,28 +49,71 @@ export function rackValue(rack) {
   return rack.reduce((sum, letter) => sum + VALUES[letter], 0);
 }
 
+/** Écriture des seuls nombres que le texte de fin ait à énoncer. */
+const NOMBRES = { 4: 'Quatre', 6: 'Six', 8: 'Huit' };
+
+/**
+ * Phrase expliquant la fin de partie, rédigée du point de vue du siège 0.
+ *
+ * Elle est reconstruite chez chaque joueur plutôt que transmise toute faite :
+ * rédigée une fois pour toutes par l'hôte, elle dirait « Vous avez posé
+ * toutes vos tuiles » et chaque invité la lirait comme parlant de lui.
+ */
+function endingText(players, ending) {
+  if (!ending) return '';
+  if (ending.wentOut === null) {
+    const turns = ending.turns ?? SCORELESS_PER_PLAYER * players.length;
+    return `${NOMBRES[turns] ?? turns} tours blancs consécutifs : la partie s’arrête.`;
+  }
+  const { wentOut, bonus } = ending;
+  return wentOut === HUMAN
+    ? `Vous avez posé toutes vos tuiles (+${bonus}).`
+    : `${players[wentOut].name} a posé toutes ses tuiles (+${bonus}).`;
+}
+
+/** Siège du vainqueur, ou null si plusieurs joueurs terminent à égalité. */
+function leader(players) {
+  const best = Math.max(...players.map((p) => p.score));
+  const tied = players.filter((p) => p.score === best);
+  return tied.length === 1 ? players.indexOf(tied[0]) : null;
+}
+
 export class Game {
+  /**
+   * @param {object} options
+   * @param {string[]} [options.names] noms des joueurs, dans l'ordre du tour.
+   *   Fournis, la partie est entièrement humaine (deux à quatre joueurs) ;
+   *   absents, on ouvre une partie solo contre l'adversaire calculé.
+   */
   constructor(options = {}) {
     this.level = options.level ?? 3;
     this.board = createBoard();
     this.bag = freshBag();
-    this.players = [
-      { name: options.humanName ?? 'Vous', rack: [], score: 0, isAI: false },
-      // L'adversaire porte le nom de sa difficulté. « Centurion » désignait à
-      // la fois le jeu, le niveau le plus fort et tout adversaire calculé :
-      // on lisait « Centurion joue » en affrontant un Novice.
-      {
-        name: options.computerName ?? difficultyByLevel(this.level).name,
-        rack: [],
-        score: 0,
-        isAI: true,
-      },
-    ];
+
+    if (options.names) {
+      const names = options.names.slice(0, MAX_PLAYERS);
+      this.players = names.map((name) => ({ name, rack: [], score: 0, isAI: false }));
+    } else {
+      this.players = [
+        { name: options.humanName ?? 'Vous', rack: [], score: 0, isAI: false },
+        // L'adversaire porte le nom de sa difficulté. « Centurion » désignait à
+        // la fois le jeu, le niveau le plus fort et tout adversaire calculé :
+        // on lisait « Centurion joue » en affrontant un Novice.
+        {
+          name: options.computerName ?? difficultyByLevel(this.level).name,
+          rack: [],
+          score: 0,
+          isAI: true,
+        },
+      ];
+    }
+
     this.current = options.firstPlayer ?? HUMAN;
     this.history = [];
     this.scorelessTurns = 0;
     this.finished = false;
     this.winner = null;
+    this.ending = null;
     this.lastMoveCells = [];
 
     this.players.forEach((player) => this.refill(player));
@@ -68,6 +127,10 @@ export class Game {
 
   get currentPlayer() {
     return this.players[this.current];
+  }
+
+  get playerCount() {
+    return this.players.length;
   }
 
   refill(player) {
@@ -163,13 +226,18 @@ export class Game {
     return { ok: true };
   }
 
+  /** Seuil de tours blancs, proportionnel au nombre de joueurs. */
+  get scorelessLimit() {
+    return SCORELESS_PER_PLAYER * this.players.length;
+  }
+
   afterScorelessTurn() {
-    if (this.scorelessTurns >= SCORELESS_LIMIT) this.finish(null);
+    if (this.scorelessTurns >= this.scorelessLimit) this.finish(null);
     else this.nextTurn();
   }
 
   nextTurn() {
-    this.current = this.current === HUMAN ? COMPUTER : HUMAN;
+    this.current = (this.current + 1) % this.players.length;
   }
 
   /**
@@ -180,21 +248,24 @@ export class Game {
     this.finished = true;
 
     if (wentOut !== null) {
-      const other = wentOut === HUMAN ? COMPUTER : HUMAN;
-      const bonus = rackValue(this.players[other].rack);
+      // Celui qui sort encaisse le reliquat de tous les autres, et chacun
+      // perd le sien. À plus de deux, la prime peut donc peser lourd.
+      let bonus = 0;
+      this.players.forEach((player, seat) => {
+        if (seat === wentOut) return;
+        const left = rackValue(player.rack);
+        player.score -= left;
+        bonus += left;
+      });
       this.players[wentOut].score += bonus;
-      this.players[other].score -= bonus;
-      this.endReason =
-        wentOut === HUMAN
-          ? `Vous avez posé toutes vos tuiles (+${bonus}).`
-          : `${this.players[wentOut].name} a posé toutes ses tuiles (+${bonus}).`;
+      this.ending = { wentOut, bonus };
     } else {
       for (const player of this.players) player.score -= rackValue(player.rack);
-      this.endReason = 'Quatre tours blancs consécutifs : la partie s’arrête.';
+      this.ending = { wentOut: null, turns: this.scorelessLimit };
     }
 
-    const [a, b] = this.players;
-    this.winner = a.score === b.score ? null : a.score > b.score ? HUMAN : COMPUTER;
+    this.endReason = endingText(this.players, this.ending);
+    this.winner = leader(this.players);
   }
 
   /* ---------------------------------------------------------------- */
@@ -203,37 +274,45 @@ export class Game {
 
   /**
    * État transmis à un joueur distant, exprimé de SON point de vue : il s'y
-   * voit toujours en position 0. L'interface n'a donc jamais à savoir quel
-   * siège elle occupe, et le chevalet de l'adversaire n'est jamais transmis.
+   * voit toujours en position 0, et les autres le suivent dans l'ordre du
+   * tour. L'interface n'a donc jamais à savoir quel siège elle occupe, et
+   * aucun chevalet adverse n'est transmis.
+   *
+   * La table est tournée, pas retournée : à quatre, celui qui joue après moi
+   * reste en position 1 pour moi comme pour lui, ce qui garde lisible « à qui
+   * le tour » sans transmettre de numéro de siège absolu.
    *
    * @param {number} viewer siège du destinataire dans cette partie
    */
   snapshot(viewer) {
-    const other = viewer === HUMAN ? COMPUTER : HUMAN;
+    const seats = this.seatsFrom(viewer);
+    const local = (seat) => (seat - viewer + this.players.length) % this.players.length;
     return {
       letters: [...this.board.letters],
       blanks: [...this.board.blanks],
       rack: [...this.players[viewer].rack],
-      opponentTiles: this.players[other].rack.length,
-      names: [this.players[viewer].name, this.players[other].name],
-      scores: [this.players[viewer].score, this.players[other].score],
-      current: this.current === viewer ? HUMAN : COMPUTER,
+      tiles: seats.map((seat) => this.players[seat].rack.length),
+      names: seats.map((seat) => this.players[seat].name),
+      scores: seats.map((seat) => this.players[seat].score),
+      current: local(this.current),
       bagCount: this.bag.length,
-      history: this.history.map((entry) => ({
-        ...entry,
-        player: entry.player === viewer ? HUMAN : COMPUTER,
-      })),
+      history: this.history.map((entry) => ({ ...entry, player: local(entry.player) })),
       scorelessTurns: this.scorelessTurns,
       finished: this.finished,
-      winner: this.winner === null ? null : this.winner === viewer ? HUMAN : COMPUTER,
-      endReason: this.endReason,
+      winner: this.winner === null ? null : local(this.winner),
+      ending: this.ending ? { ...this.ending, wentOut: this.ending.wentOut === null ? null : local(this.ending.wentOut) } : null,
       lastMoveCells: this.lastMoveCells,
     };
   }
 
+  /** Sièges dans l'ordre du tour, en partant de celui indiqué. */
+  seatsFrom(seat) {
+    return this.players.map((_, i) => (seat + i) % this.players.length);
+  }
+
   /**
    * Reconstitue une partie jouable côté invité à partir d'un instantané.
-   * Le sac et le chevalet adverse ne sont représentés que par leur taille :
+   * Le sac et les chevalets adverses ne sont représentés que par leur taille :
    * l'invité n'a aucune information cachée, et seul l'hôte arbitre.
    */
   static fromSnapshot(snap) {
@@ -243,16 +322,21 @@ export class Game {
       blanks: Uint8Array.from(snap.blanks),
     };
     game.bag = new Array(snap.bagCount).fill(0);
-    game.players = [
-      { name: snap.names[0], rack: [...snap.rack], score: snap.scores[0], isAI: false },
-      { name: snap.names[1], rack: new Array(snap.opponentTiles).fill(0), score: snap.scores[1], isAI: false },
-    ];
+    game.players = snap.names.map((name, seat) => ({
+      name,
+      rack: seat === HUMAN ? [...snap.rack] : new Array(snap.tiles[seat]).fill(0),
+      score: snap.scores[seat],
+      isAI: false,
+    }));
     game.current = snap.current;
     game.history = snap.history;
     game.scorelessTurns = snap.scorelessTurns;
     game.finished = snap.finished;
     game.winner = snap.winner;
-    game.endReason = snap.endReason;
+    game.ending = snap.ending ?? null;
+    // La phrase de fin est rédigée ici, avec les noms tels que ce joueur les
+    // voit : transmise toute faite, elle tutoierait le mauvais joueur.
+    game.endReason = endingText(game.players, game.ending);
     game.lastMoveCells = snap.lastMoveCells ?? [];
     game.level = 0;
     return game;
@@ -263,6 +347,7 @@ export class Game {
   toJSON() {
     return {
       version: 2,
+      ending: this.ending ?? null,
       level: this.level,
       letters: [...this.board.letters],
       blanks: [...this.board.blanks],
@@ -290,6 +375,9 @@ export class Game {
     game.scorelessTurns = data.scorelessTurns;
     game.finished = data.finished;
     game.winner = data.winner;
+    // Les parties enregistrées avant l'arrivée des tables à plus de deux ne
+    // portent que la phrase toute faite : on la garde telle quelle.
+    game.ending = data.ending ?? null;
     game.endReason = data.endReason;
     game.lastMoveCells = data.lastMoveCells ?? [];
     return game;

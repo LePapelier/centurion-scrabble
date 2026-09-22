@@ -19,7 +19,7 @@ import {
   DOUBLE_WORD,
   TRIPLE_WORD,
 } from '../core/constants.js';
-import { Game, HUMAN, COMPUTER } from '../core/game.js';
+import { Game, HUMAN, COMPUTER, MIN_PLAYERS, MAX_PLAYERS } from '../core/game.js';
 import { validateMove } from '../core/board.js';
 import { Sons } from './sons.js';
 import {
@@ -28,6 +28,7 @@ import {
   codeFromLocation,
   clearLocationCode,
   normalizeCode,
+  myToken,
 } from '../net/session.js';
 
 const PREMIUM_CLASS = {
@@ -82,6 +83,21 @@ const FELICITATION = 'Meilleur coup !';
 
 /** Décalage entre deux tuiles lors de la révélation d'un coup. */
 const REVEAL_STEP_MS = 60;
+
+/**
+ * Réactions d'un seul appui. Huit, pas davantage : elles doivent tenir sur
+ * une rangée à la largeur d'un téléphone, et se choisir sans lire. Elles
+ * couvrent ce qu'on se dit vraiment pendant une partie — l'approbation, la
+ * surprise devant un coup, le dépit, et le mot qu'on n'attendait pas.
+ */
+const EMOJIS = ['👍', '😂', '😮', '🤯', '😭', '🔥', '🎉', '🤔'];
+
+/** Longueur maximale d'un message, et profondeur du fil conservé. */
+const CHAT_MAX = 140;
+const CHAT_MEMORY = 60;
+/** Bulles montrées simultanément au-dessus du plateau, et leur durée. */
+const BUBBLE_STACK = 3;
+const BUBBLE_MS = 4200;
 /** Décalage entre deux lettres de la marque quand elle ondule. */
 const BRAND_WAVE_STEP_MS = 18;
 const SCORE_COUNT_MS = 520;
@@ -151,8 +167,10 @@ export class App {
     /** Index du chevalet déjà affichés, pour n'animer que les nouveaux. */
     this.rackShown = new Set();
     this.forceRackPop = false;
-    this.shownScores = [0, 0];
-    this.scoreFrames = [0, 0];
+    this.shownScores = [];
+    this.scoreFrames = [];
+    /** Une entrée par carte de score : {card, name, value}. */
+    this.scoreCards = null;
     this.haloScore = null;
     /** Halos de mot, du plus long au plus court ; le premier vient du balisage. */
     this.halos = [];
@@ -160,18 +178,28 @@ export class App {
     this.dropCell = null;
     this.dropSource = null;
 
-    /** 'solo' face à l'IA, 'host' ou 'guest' en partie à deux. */
+    /** 'solo' face à l'IA, 'host' ou 'guest' en partie en ligne. */
     this.mode = 'solo';
     this.session = null;
     /** Une partie en réseau a été lancée : un « hello » vaut alors retour. */
     this.netStarted = false;
+    /** Places de la table en ligne, hôte en tête. */
+    this.seats = [];
+    /** Nombre de joueurs voulu par l'hôte, de deux à quatre. */
+    this.tableSize = MIN_PLAYERS;
+    /** Composition de la table telle que l'hôte l'annonce, côté invité. */
+    this.lobbyNames = [];
+    this.lobbySize = 0;
+    /** Fil du tchat : {from, text, mine}. */
+    this.chat = [];
+    /** Messages arrivés pendant que la fenêtre du tchat était fermée. */
+    this.unread = 0;
     // Vide tant que le joueur n'a rien choisi : le champ doit s'offrir libre,
     // et non demander qu'on efface un nom qu'on n'a pas mis. Les versions
     // précédentes enregistraient le nom par défaut dès la première ouverture :
     // on ne le prend pas pour un choix.
     const enregistre = localStorage.getItem(NAME_KEY) ?? '';
     this.myName = enregistre === DEFAULT_NAME ? '' : enregistre;
-    this.opponentName = 'Adversaire';
 
     this.level = Number(localStorage.getItem(LEVEL_KEY)) || 3;
     this.game = this.restore() ?? new Game({ level: this.level });
@@ -294,8 +322,10 @@ export class App {
       option.addEventListener('click', () => {
         this.level = difficulty.level;
         this.game.level = difficulty.level;
-        // La partie en cours change d'adversaire : son nom doit suivre.
-        this.game.players[COMPUTER].name = difficulty.name;
+        // La partie en cours change d'adversaire : son nom doit suivre. En
+        // ligne il n'y a pas d'adversaire calculé, et le siège 1 appartient
+        // à quelqu'un : on n'y touche pas.
+        if (this.mode === 'solo') this.game.players[COMPUTER].name = difficulty.name;
         this.save();
         this.renderLevels();
         this.renderScores();
@@ -525,35 +555,81 @@ export class App {
     this.forceRackPop = false;
   }
 
-  renderScores() {
-    const [human, ai] = this.game.players;
-    this.updateScore($('score-human-value'), $('score-human'), 0, human.score);
-    this.updateScore($('score-ai-value'), $('score-ai'), 1, ai.score);
-    const label = $('ai-name');
-    if (this.mode === 'solo') {
-      const difficulty = difficultyByLevel(this.level);
-      // Contenu entièrement issu de nos constantes : pas de texte distant ici.
-      label.innerHTML = `${levelIcon(difficulty.level)}<span>${difficulty.name}</span>`;
-      label.disabled = false;
-      label.title = `${difficulty.name}, niveau ${difficulty.level}. ${difficulty.blurb}`;
-      label.setAttribute('aria-label', `Niveau ${difficulty.level}, ${difficulty.name}. Changer de niveau.`);
-    } else {
-      // Nom venu du réseau : jamais interprété comme du balisage.
-      label.textContent = this.opponentName;
-      label.disabled = true;
-      label.removeAttribute('title');
-      label.removeAttribute('aria-label');
-    }
-    $('bag-count').textContent = String(this.game.bagCount);
+  /**
+   * Bâtit une carte par joueur. Le sac se glisse entre les deux quand ils ne
+   * sont que deux — c'est la disposition d'origine, et elle reste la plus
+   * lisible ; à trois ou quatre il passe en bout de rangée, faute de milieu.
+   */
+  buildScoreCards() {
+    const board = $('scoreboard');
+    const bag = $('bag');
+    bag.remove();
+    board.textContent = '';
 
-    const active = this.game.finished ? -1 : this.game.current;
-    $('score-human').classList.toggle('active', active === HUMAN);
-    $('score-ai').classList.toggle('active', active === COMPUTER);
+    this.scoreCards = this.game.players.map((player, seat) => {
+      const card = document.createElement('div');
+      card.className = 'score-card';
+      card.dataset.seat = String(seat);
+
+      // Seul l'adversaire calculé porte un bouton : lui seul mène quelque
+      // part, le réglage du niveau.
+      const name = document.createElement(player.isAI ? 'button' : 'span');
+      name.className = player.isAI ? 'score-name level-chip' : 'score-name';
+      if (player.isAI) {
+        name.type = 'button';
+        name.onclick = () => {
+          if (this.mode === 'solo') $('rules-dialog').showModal();
+        };
+      }
+
+      const value = document.createElement('span');
+      value.className = 'score-value';
+      value.textContent = String(player.score);
+
+      card.append(name, value);
+      board.append(card);
+      return { card, name, value };
+    });
+
+    const middle = this.game.players.length === 2 ? board.children[1] : null;
+    board.insertBefore(bag, middle);
+    board.dataset.seats = String(this.game.players.length);
+
+    this.shownScores = this.game.players.map((p) => p.score);
+    this.scoreFrames = this.game.players.map(() => 0);
+  }
+
+  renderScores() {
+    if (this.scoreCards?.length !== this.game.players.length) this.buildScoreCards();
+
+    this.game.players.forEach((player, seat) => {
+      const { card, name, value } = this.scoreCards[seat];
+
+      if (player.isAI && this.mode === 'solo') {
+        const difficulty = difficultyByLevel(this.level);
+        // Contenu entièrement issu de nos constantes : pas de texte distant ici.
+        name.innerHTML = `${levelIcon(difficulty.level)}<span>${difficulty.name}</span>`;
+        name.disabled = false;
+        name.title = `${difficulty.name}, niveau ${difficulty.level}. ${difficulty.blurb}`;
+        name.setAttribute('aria-label', `Niveau ${difficulty.level}, ${difficulty.name}. Changer de niveau.`);
+      } else {
+        // Nom venu du réseau : jamais interprété comme du balisage.
+        name.textContent = seat === HUMAN ? 'Vous' : player.name;
+        if (player.isAI) name.disabled = true;
+        name.removeAttribute('title');
+        name.removeAttribute('aria-label');
+      }
+
+      this.updateScore(value, card, seat, player.score);
+      card.classList.toggle('active', !this.game.finished && this.game.current === seat);
+    });
+
+    $('bag-count').textContent = String(this.game.bagCount);
   }
 
   /** Fait défiler un score jusqu'à sa nouvelle valeur. */
   updateScore(valueEl, cardEl, slot, target) {
-    const from = this.shownScores[slot];
+    const from = this.shownScores[slot] ?? 0;
     if (from === target) {
       valueEl.textContent = String(target);
       return;
@@ -598,7 +674,7 @@ export class App {
 
       const who = document.createElement('span');
       who.className = 'who';
-      who.textContent = this.game.players[entry.player].name;
+      who.textContent = this.seatName(entry.player);
 
       const what = document.createElement('span');
       what.className = 'what';
@@ -688,12 +764,17 @@ export class App {
     }
     if (this.mode !== 'solo' && !this.session?.connected) {
       status.classList.add('warn');
-      status.textContent = 'Liaison interrompue avec votre adversaire.';
+      status.textContent =
+        this.mode === 'host'
+          ? 'Liaison interrompue : plus personne à la table.'
+          : 'Liaison interrompue avec la partie.';
       return;
     }
     if (this.game.current !== HUMAN) {
       const tour =
-        this.mode === 'solo' ? 'Au tour de votre adversaire.' : `Au tour de ${this.opponentName}.`;
+        this.mode === 'solo'
+          ? 'Au tour de votre adversaire.'
+          : `Au tour de ${this.seatName(this.game.current)}.`;
       status.textContent = this.pending.size > 0 ? `Coup préparé. ${tour}` : tour;
       return;
     }
@@ -714,10 +795,16 @@ export class App {
         : 'À vous de jouer.';
   }
 
+  /** Nom d'un siège tel que ce joueur-ci doit le lire. */
+  seatName(seat) {
+    if (seat === HUMAN) return 'Vous';
+    return this.game.players[seat]?.name ?? 'Adversaire';
+  }
+
   endSentence() {
     if (this.game.winner === null) return 'Égalité parfaite.';
     if (this.game.winner === HUMAN) return 'Vous gagnez !';
-    return `${this.game.players[COMPUTER].name} l’emporte.`;
+    return `${this.seatName(this.game.winner)} l’emporte.`;
   }
 
   /* ---------------------------------------------------------------- */
@@ -1251,10 +1338,6 @@ export class App {
       if (this.sons.actifs) this.sons.jouer('pose');
     };
 
-    $('ai-name').onclick = () => {
-      if (this.mode === 'solo') $('rules-dialog').showModal();
-    };
-
     // Mêmes actions que le menu « ⋯ », présentées en clair sur grand écran.
     $('btn-exchange-wide').onclick = () => this.startExchange();
     $('btn-pass-wide').onclick = () => this.passTurn();
@@ -1451,15 +1534,17 @@ export class App {
       this.session?.send({ t: 'resign' });
       return;
     }
+    if (this.mode === 'host') {
+      // L'hôte abandonne comme les autres : la partie revient au meilleur
+      // des joueurs restants.
+      this.endByResignation(HUMAN);
+      return;
+    }
     this.game.finished = true;
     this.game.winner = COMPUTER;
-    this.game.endReason =
-      this.mode === 'solo'
-        ? 'Vous avez abandonné la partie.'
-        : `${this.playerName()} a abandonné la partie.`;
+    this.game.endReason = 'Vous avez abandonné la partie.';
     this.save();
     this.render();
-    this.broadcast();
     this.showEnd();
   }
 
@@ -1469,8 +1554,10 @@ export class App {
       return;
     }
     if (this.mode === 'guest') {
+      // Seul l'hôte rebat les cartes : à quatre, une revanche lancée par un
+      // invité prendrait les trois autres de court.
       this.session?.send({ t: 'rematch' });
-      this.toast('Revanche proposée à votre adversaire.');
+      this.toast('Revanche demandée à l’hôte.');
       return;
     }
     this.game = new Game({ level: this.level });
@@ -1679,12 +1766,26 @@ export class App {
   /* ---------------------------------------------------------------- */
 
   showEnd() {
-    const [human, ai] = this.game.players;
     $('end-title').textContent = this.endSentence();
     $('end-detail').textContent = this.game.endReason ?? '';
-    $('end-scores').innerHTML =
-      `<div class="${this.game.winner === HUMAN ? 'won' : ''}"><div class="n">Vous</div><div class="v">${human.score}</div></div>` +
-      `<div class="${this.game.winner === COMPUTER ? 'won' : ''}"><div class="n">${ai.name}</div><div class="v">${ai.score}</div></div>`;
+
+    // Les noms viennent du réseau : montés en éléments, jamais en balisage.
+    const scores = $('end-scores');
+    scores.textContent = '';
+    scores.dataset.seats = String(this.game.players.length);
+    this.game.players.forEach((player, seat) => {
+      const block = document.createElement('div');
+      if (this.game.winner === seat) block.className = 'won';
+      const name = document.createElement('div');
+      name.className = 'n';
+      name.textContent = this.seatName(seat);
+      const value = document.createElement('div');
+      value.className = 'v';
+      value.textContent = String(player.score);
+      block.append(name, value);
+      scores.append(block);
+    });
+
     $('end-dialog').showModal();
     this.sons.jouer(this.game.winner === HUMAN ? 'victoire' : 'defaite');
     if (this.mode !== 'solo') return;
@@ -1711,6 +1812,8 @@ export class App {
     // Clin d'œil : la marque se déhanche quand on la touche.
     document.querySelector('.brand').addEventListener('click', () => this.wiggleBrand());
 
+    this.bindChat();
+
     $('btn-multi').onclick = () => this.openMultiplayer();
     $('mp-close').onclick = () => $('mp-dialog').close();
 
@@ -1728,10 +1831,24 @@ export class App {
       }
     };
 
+    const seatPicker = $('mp-seats');
+    for (const option of seatPicker.children) {
+      option.onclick = () => {
+        this.tableSize = Number(option.dataset.seats);
+        for (const other of seatPicker.children) {
+          const chosen = other === option;
+          other.classList.toggle('selected', chosen);
+          other.setAttribute('aria-checked', String(chosen));
+        }
+      };
+    }
+
     $('mp-create').onclick = () => {
       nameField.onchange();
       this.startHosting();
     };
+
+    $('mp-start').onclick = () => this.startNetworkGame();
 
     const codeField = $('mp-code');
     codeField.oninput = () => {
@@ -1813,9 +1930,84 @@ export class App {
   openMultiplayer() {
     $('mp-choice').hidden = this.mode !== 'solo';
     $('mp-invite').hidden = this.mode !== 'host' || !this.session?.code;
+    $('mp-waiting').hidden = this.mode !== 'guest' || this.netStarted;
     $('mp-leave').hidden = this.mode === 'solo';
     if (this.mode === 'solo') this.setNetStatus('');
+    this.renderRoster();
     $('mp-dialog').showModal();
+  }
+
+  /* --- La table ----------------------------------------------------- */
+
+  /**
+   * Places de la partie en ligne, dans l'ordre du tour. L'hôte occupe la
+   * première ; chaque invité est reconnu à son jeton et non à sa liaison,
+   * qui change à chaque reconnexion.
+   *
+   * @type {{token: string, id: string|null, name: string}[]}
+   */
+  resetSeats() {
+    this.seats = [{ token: myToken(), id: null, name: this.playerName() }];
+  }
+
+  seatOfToken(token) {
+    return this.seats.findIndex((seat) => seat.token === token);
+  }
+
+  seatOfConn(id) {
+    return this.seats.findIndex((seat) => seat.id === id);
+  }
+
+  /** Noms de la table, hôte en tête. */
+  tableNames() {
+    return this.seats.map((seat) => seat.name);
+  }
+
+  /** Liste des joueurs attablés, dans la fenêtre de mise en relation. */
+  renderRoster() {
+    const list = this.mode === 'host' ? $('mp-roster') : $('mp-roster-guest');
+    if (!list) return;
+    list.textContent = '';
+
+    const names = this.mode === 'host' ? this.tableNames() : (this.lobbyNames ?? []);
+    const size = this.mode === 'host' ? this.tableSize : (this.lobbySize ?? names.length);
+
+    names.forEach((name, seat) => {
+      const item = document.createElement('li');
+      item.className = 'mp-player';
+      const who = document.createElement('span');
+      // Nom venu du réseau : posé en texte, jamais interprété.
+      who.textContent = name;
+      item.append(who);
+      if (seat === 0) {
+        const tag = document.createElement('span');
+        tag.className = 'mp-tag';
+        tag.textContent = 'hôte';
+        item.append(tag);
+      }
+      list.append(item);
+    });
+
+    // Les places encore vides se montrent : on voit qui l'on attend.
+    for (let n = names.length; n < size; n++) {
+      const item = document.createElement('li');
+      item.className = 'mp-player empty';
+      item.textContent = 'Place libre…';
+      list.append(item);
+    }
+
+    if (this.mode === 'host' && !this.netStarted) {
+      // Lancer devient possible dès qu'il y a de quoi jouer, sans attendre
+      // que la table soit pleine.
+      const ready = this.seats.length >= MIN_PLAYERS;
+      $('mp-start').hidden = !ready;
+      $('mp-start').textContent =
+        this.seats.length === this.tableSize
+          ? 'Lancer la partie'
+          : `Lancer à ${this.seats.length} joueurs`;
+    } else {
+      $('mp-start').hidden = true;
+    }
   }
 
   /* --- Établissement de la liaison --------------------------------- */
@@ -1823,7 +2015,8 @@ export class App {
   startHosting() {
     this.teardownSession();
     this.mode = 'host';
-    this.opponentName = 'Adversaire';
+    this.netStarted = false;
+    this.resetSeats();
 
     this.session = new PeerSession({
       onStatus: (text) => this.setNetStatus(text),
@@ -1832,15 +2025,19 @@ export class App {
         $('mp-invite').hidden = false;
         $('mp-leave').hidden = false;
         $('mp-code-value').textContent = code;
+        this.renderRoster();
       },
-      onConnected: () => this.setNetStatus('Adversaire connecté, préparation…', 'live'),
-      onData: (message) => this.onPeerData(message),
+      onConnected: () => this.setNetStatus('Un joueur se présente…', 'live'),
+      onData: (message, id) => this.onPeerData(message, id),
+      onGuestGone: (id) => this.onGuestGone(id),
       onDropped: (reason) => this.onPeerDropped(reason),
       onResumed: () => this.onPeerResumed(),
       onClosed: (reason) => this.onPeerLost(reason),
       onError: (message) => this.onPeerError(message),
     });
 
+    // Une place pour chacun, l'hôte excepté : il tient déjà la sienne.
+    this.session.capacity = this.tableSize - 1;
     this.session.host();
     this.renderNetChip();
   }
@@ -1848,7 +2045,9 @@ export class App {
   startJoining(code) {
     this.teardownSession();
     this.mode = 'guest';
-    this.opponentName = 'Adversaire';
+    this.netStarted = false;
+    this.lobbyNames = [];
+    this.lobbySize = 0;
 
     this.session = new PeerSession({
       onStatus: (text) => this.setNetStatus(text),
@@ -1859,7 +2058,7 @@ export class App {
         // Le code a rempli son office : on le retire de l'adresse pour qu'un
         // rechargement ne relance pas une connexion vers une partie close.
         clearLocationCode();
-        this.session.send({ t: 'hello', name: this.playerName() });
+        this.session.send({ t: 'hello', name: this.playerName(), token: myToken() });
       },
       onData: (message) => this.onPeerData(message),
       onDropped: (reason) => this.onPeerDropped(reason),
@@ -1874,35 +2073,53 @@ export class App {
 
   /** Nouvelle partie en ligne : seul l'hôte la crée, puis la diffuse. */
   startNetworkGame() {
+    if (this.seats.length < MIN_PLAYERS) {
+      this.toast('Il manque encore un joueur.', 'error');
+      return;
+    }
+
     this.netStarted = true;
-    const first = Math.random() < 0.5 ? HUMAN : COMPUTER;
-    this.game = new Game({
-      firstPlayer: first,
-      humanName: this.playerName(),
-      computerName: this.opponentName,
-    });
+    // Le premier à jouer est tiré au sort parmi tous les présents : à quatre,
+    // commencer serait un avantage systématique pour l'hôte.
+    const first = Math.floor(Math.random() * this.seats.length);
+    this.game = new Game({ names: this.tableNames(), firstPlayer: first });
 
     this.pending.clear();
     this.selected = null;
     this.cursor = null;
     this.cancelExchange();
-    this.shownScores = [0, 0];
+    this.scoreCards = null;
 
-    this.session.send({ t: 'welcome', name: this.playerName() });
+    this.sendWelcome();
     this.render();
     this.broadcast();
     $('mp-dialog').close();
     this.toast(
-      first === HUMAN ? 'Partie lancée. Vous commencez.' : `Partie lancée. ${this.opponentName} commence.`,
+      first === HUMAN ? 'Partie lancée. Vous commencez.' : `Partie lancée. ${this.seatName(first)} commence.`,
     );
   }
 
-  /* --- Échange de messages ----------------------------------------- */
+  /** Annonce à chacun que la partie démarre, avec la table telle qu'elle est. */
+  sendWelcome() {
+    this.seats.forEach((seat, index) => {
+      if (index === HUMAN) return;
+      this.session.sendTo(seat.id, { t: 'welcome', names: this.tableNames() });
+    });
+  }
 
-  /** Diffuse l'état courant à l'invité. */
+  /** Diffuse l'état de la partie, un instantané par siège. */
   broadcast() {
-    if (this.mode !== 'host' || !this.session?.connected) return;
-    this.session.send({ t: 'state', snap: this.game.snapshot(COMPUTER) });
+    if (this.mode !== 'host' || !this.game) return;
+    this.seats.forEach((seat, index) => {
+      if (index === HUMAN || !seat.id) return;
+      this.session.sendTo(seat.id, { t: 'state', snap: this.game.snapshot(index) });
+    });
+  }
+
+  /** Annonce la composition de la table à ceux qui attendent. */
+  broadcastLobby() {
+    if (this.mode !== 'host' || this.netStarted) return;
+    this.session.send({ t: 'lobby', names: this.tableNames(), size: this.tableSize });
   }
 
   sendIntent(intent) {
@@ -1915,34 +2132,43 @@ export class App {
     this.renderControls();
   }
 
-  onPeerData(message) {
+  /* --- Échange de messages ----------------------------------------- */
+
+  onPeerData(message, id) {
     switch (message.t) {
       case 'hello':
         if (this.mode !== 'host') return;
-        this.opponentName = this.cleanName(message.name);
-        // L'adversaire revient d'une coupure : on lui rend la partie en cours
-        // plutôt que d'en ouvrir une autre sous ses pieds.
-        if (this.netStarted) {
-          this.session.send({ t: 'welcome', name: this.playerName() });
-          this.broadcast();
-          $('mp-dialog').close();
-          this.setNetStatus('Adversaire revenu. Partie reprise.', 'live');
-          this.toast(`${this.opponentName} a repris la partie.`);
-          this.render();
-          return;
-        }
-        this.startNetworkGame();
+        this.welcomeGuest(message, id);
+        return;
+
+      case 'lobby':
+        if (this.mode !== 'guest' || this.netStarted) return;
+        this.lobbyNames = this.safeNames(message.names);
+        this.lobbySize = Math.min(MAX_PLAYERS, Math.max(MIN_PLAYERS, Math.trunc(Number(message.size)) || MIN_PLAYERS));
+        $('mp-waiting').hidden = false;
+        this.setNetStatus(
+          this.lobbyNames.length >= this.lobbySize
+            ? 'Table complète. La partie va commencer…'
+            : 'En attente des autres joueurs…',
+          'live',
+        );
+        this.renderRoster();
         return;
 
       case 'welcome':
         if (this.mode !== 'guest') return;
-        this.opponentName = this.cleanName(message.name);
-        this.renderScores();
+        this.netStarted = true;
+        $('mp-waiting').hidden = true;
+        this.scoreCards = null;
         return;
 
       case 'state':
         if (this.mode !== 'guest') return;
         this.applySnapshot(message.snap);
+        return;
+
+      case 'chat':
+        this.onChat(message, id);
         return;
 
       case 'reject':
@@ -1954,7 +2180,7 @@ export class App {
         return;
 
       case 'busy':
-        this.toast('Cette partie a déjà deux joueurs.', 'error');
+        this.toast('Cette partie est complète.', 'error');
         this.leaveMultiplayer();
         return;
 
@@ -1963,7 +2189,7 @@ export class App {
       case 'exchange':
       case 'resign':
       case 'rematch':
-        if (this.mode === 'host') this.handleGuestIntent(message);
+        if (this.mode === 'host') this.handleGuestIntent(message, id);
         return;
 
       default:
@@ -1972,28 +2198,101 @@ export class App {
   }
 
   /**
-   * Arbitrage d'une intention reçue de l'invité. Le contenu vient du réseau :
+   * Installe un joueur à la table, ou le rend à sa place.
+   *
+   * Un jeton déjà connu est un revenant : sa place l'attend, même si la
+   * partie a continué sans lui et même si la table est pleine. Un jeton
+   * inconnu ne peut s'asseoir qu'avant le premier coup.
+   */
+  welcomeGuest(message, id) {
+    const name = this.cleanName(message.name);
+    const token = this.safeToken(message.token);
+    const known = token ? this.seatOfToken(token) : -1;
+
+    if (known >= 0) {
+      this.seats[known].id = id;
+      this.seats[known].name = name;
+      if (this.netStarted) {
+        this.game.players[known].name = name;
+        this.session.sendTo(id, { t: 'welcome', names: this.tableNames() });
+        this.session.sendTo(id, { t: 'state', snap: this.game.snapshot(known) });
+        this.setNetStatus(`${name} a repris la partie.`, 'live');
+        this.toast(`${name} a repris la partie.`);
+        this.render();
+        return;
+      }
+      this.afterSeatChange();
+      return;
+    }
+
+    if (this.netStarted || this.seats.length >= this.tableSize) {
+      this.session.sendTo(id, { t: 'busy' });
+      return;
+    }
+
+    this.seats.push({ token, id, name });
+    this.toast(`${name} rejoint la partie.`);
+    this.afterSeatChange();
+
+    // Table complète : plus rien à attendre, on distribue.
+    if (this.seats.length === this.tableSize) this.startNetworkGame();
+  }
+
+  /** Un invité a quitté la liaison : sa place reste, lui non. */
+  onGuestGone(id) {
+    const seat = this.seatOfConn(id);
+    if (seat < 0) return;
+    this.seats[seat].id = null;
+
+    if (!this.netStarted) {
+      // Avant le premier coup, un partant libère vraiment sa place.
+      const [gone] = this.seats.splice(seat, 1);
+      this.toast(`${gone.name} a quitté la table.`);
+      this.afterSeatChange();
+      return;
+    }
+
+    this.setNetStatus(`${this.seats[seat].name} s’est déconnecté.`, 'error');
+    this.toast(`${this.seats[seat].name} s’est déconnecté. Il peut revenir avec le même code.`);
+    this.render();
+  }
+
+  afterSeatChange() {
+    this.setNetStatus(
+      this.seats.length >= this.tableSize
+        ? 'Table complète.'
+        : `En attente des autres joueurs (${this.seats.length}/${this.tableSize})…`,
+      'live',
+    );
+    this.renderRoster();
+    this.broadcastLobby();
+    this.renderNetChip();
+  }
+
+  /**
+   * Arbitrage d'une intention reçue d'un invité. Le contenu vient du réseau :
    * il est ramené à des valeurs sûres avant d'atteindre le moteur, qui
    * revérifie de toute façon chevalet, géométrie et dictionnaire.
    */
-  handleGuestIntent(message) {
+  handleGuestIntent(message, id) {
+    const seat = this.seatOfConn(id);
+    if (seat < 0) return;
+
     if (message.t === 'rematch') {
-      this.startNetworkGame();
+      // Une revanche appartient à l'hôte : sinon le premier invité impatient
+      // rebattrait les cartes des autres.
+      if (!this.game?.finished) return;
+      this.toast(`${this.seats[seat].name} demande une revanche.`);
       return;
     }
 
     if (message.t === 'resign') {
-      this.game.finished = true;
-      this.game.winner = HUMAN;
-      this.game.endReason = `${this.opponentName} a abandonné la partie.`;
-      this.render();
-      this.broadcast();
-      this.showEnd();
+      this.endByResignation(seat);
       return;
     }
 
-    if (this.game.finished || this.game.current !== COMPUTER) {
-      this.session.send({ t: 'reject', reason: 'Ce n’est pas votre tour.' });
+    if (this.game.finished || this.game.current !== seat) {
+      this.session.sendTo(id, { t: 'reject', reason: 'Ce n’est pas votre tour.' });
       return;
     }
 
@@ -2007,24 +2306,26 @@ export class App {
     }
 
     if (!result.ok) {
-      this.session.send({ t: 'reject', reason: result.reason });
+      this.session.sendTo(id, { t: 'reject', reason: result.reason });
       return;
     }
 
+    const name = this.seats[seat].name;
     if (message.t === 'play') {
       this.revealCells = [...this.game.lastMoveCells];
       this.revealKind = 'land';
       const words = result.words.map((w) => w.word).join(', ');
       this.toast(
         result.bingo
-          ? `Scrabble de ${this.opponentName} ! ${words} +${result.score}`
-          : `${this.opponentName} : ${words} +${result.score}`,
+          ? `Scrabble de ${name} ! ${words} +${result.score}`
+          : `${name} : ${words} +${result.score}`,
       );
+      this.sons.jouerSerie('adverse', this.revealCells.length, REVEAL_STEP_MS);
       if (result.bingo) this.replay(this.boardEl, 'bingo');
     } else if (message.t === 'exchange') {
-      this.toast(`${this.opponentName} a échangé des tuiles.`);
+      this.toast(`${name} a échangé des tuiles.`);
     } else {
-      this.toast(`${this.opponentName} passe son tour.`);
+      this.toast(`${name} passe son tour.`);
     }
 
     this.render();
@@ -2032,26 +2333,49 @@ export class App {
     this.afterTurn();
   }
 
+  /**
+   * Un joueur abandonne : la partie s'arrête et revient au meilleur des
+   * autres. À deux c'est l'adversaire ; à quatre, celui qui menait.
+   */
+  endByResignation(seat) {
+    const others = this.game.players
+      .map((player, index) => ({ index, score: player.score }))
+      .filter((entry) => entry.index !== seat)
+      .sort((a, b) => b.score - a.score);
+
+    this.game.finished = true;
+    this.game.winner = others.length && others[0].score !== others[1]?.score ? others[0].index : null;
+    this.game.endReason = `${this.seatName(seat)} a abandonné la partie.`;
+    this.render();
+    this.broadcast();
+    this.showEnd();
+  }
+
   /** Applique un instantané reçu de l'hôte. */
   applySnapshot(snap) {
     const before = this.game?.history?.length ?? 0;
     this.game = Game.fromSnapshot(snap);
-    this.opponentName = snap.names[1];
+    if (this.scoreCards && this.scoreCards.length !== this.game.players.length) {
+      this.scoreCards = null;
+    }
+    this.netStarted = true;
 
     const entry = snap.history.length > before ? snap.history.at(-1) : null;
 
-    // Un coup préparé survit au coup de l'adversaire : mon chevalet n'a pas
-    // bougé, mes poses restent les miennes — seules tombent celles dont la
-    // case vient d'être prise. Mon propre coup validé, lui, renouvelle le
+    // Un coup préparé survit au coup d'un autre : mon chevalet n'a pas bougé,
+    // mes poses restent les miennes — seules tombent celles dont la case
+    // vient d'être prise. Mon propre coup validé, lui, renouvelle le
     // chevalet : les poses y référeraient les mauvaises lettres.
-    if (entry?.player === COMPUTER) this.prunePending();
+    if (entry && entry.player !== HUMAN) this.prunePending();
     else this.pending.clear();
 
     this.selected = null;
     this.busy = false;
     this.cancelExchange();
     if (this.pending.size === 0) this.cursor = null;
-    if (entry && entry.player === COMPUTER) {
+
+    if (entry && entry.player !== HUMAN) {
+      const name = this.seatName(entry.player);
       this.revealCells = [...(snap.lastMoveCells ?? [])];
       this.revealKind = 'land';
       if (entry.type === 'play') {
@@ -2059,8 +2383,8 @@ export class App {
         const words = entry.words.join(', ');
         this.toast(
           entry.bingo
-            ? `Scrabble de ${this.opponentName} ! ${words} +${entry.score}`
-            : `${this.opponentName} : ${words} +${entry.score}`,
+            ? `Scrabble de ${name} ! ${words} +${entry.score}`
+            : `${name} : ${words} +${entry.score}`,
         );
         if (entry.bingo) {
           this.sons.jouer('scrabble', (this.revealCells.length * REVEAL_STEP_MS) / 1000);
@@ -2068,15 +2392,185 @@ export class App {
         }
       } else if (entry.type === 'exchange') {
         this.sons.jouer('echange');
-        this.toast(`${this.opponentName} a échangé des tuiles.`);
+        this.toast(`${name} a échangé des tuiles.`);
       } else {
-        this.toast(`${this.opponentName} passe son tour.`);
+        this.toast(`${name} passe son tour.`);
       }
     }
 
     $('mp-dialog').close();
     this.render();
     if (this.game.finished) this.showEnd();
+  }
+
+
+  /* ---------------------------------------------------------------- */
+  /* Tchat                                                             */
+  /* ---------------------------------------------------------------- */
+
+  /**
+   * L'hôte relaie : un invité n'écrit qu'à lui, et c'est lui qui redistribue
+   * en estampillant l'auteur. Personne ne peut donc parler sous le nom d'un
+   * autre — le nom transmis dans le message n'est jamais cru sur parole.
+   */
+  onChat(message, id) {
+    const text = this.safeChat(message.text);
+    if (!text) return;
+
+    if (this.mode === 'host') {
+      const seat = this.seatOfConn(id);
+      if (seat < 0) return;
+      const from = this.seats[seat].name;
+      this.pushChat(from, text, false);
+      this.session.sendExcept(id, { t: 'chat', from, text });
+      return;
+    }
+
+    this.pushChat(this.cleanName(message.from), text, false);
+  }
+
+  /** Envoie un message, et l'inscrit chez soi sans attendre l'écho. */
+  sendChat(text) {
+    const clean = this.safeChat(text);
+    if (!clean || this.mode === 'solo' || !this.session) return;
+
+    this.pushChat(this.playerName(), clean, true);
+    if (this.mode === 'host') {
+      this.session.send({ t: 'chat', from: this.playerName(), text: clean });
+    } else {
+      this.session.send({ t: 'chat', text: clean });
+    }
+  }
+
+  pushChat(from, text, mine) {
+    this.chat.push({ from, text, mine });
+    // Le fil ne sert qu'à relire les derniers échanges : au-delà, il n'a
+    // plus d'usage et pèse sur l'affichage.
+    if (this.chat.length > CHAT_MEMORY) this.chat.shift();
+
+    const open = $('chat-dialog').open;
+    if (!mine && !open) {
+      this.unread++;
+      this.sons.jouer('message');
+    }
+    if (!mine) this.showBubble(from, text);
+    this.renderChat();
+    this.renderChatBadge();
+  }
+
+  renderChat() {
+    const log = $('chat-log');
+    log.textContent = '';
+    for (const entry of this.chat) {
+      const item = document.createElement('li');
+      item.className = `chat-line${entry.mine ? ' mine' : ''}`;
+      if (this.isEmoji(entry.text)) item.classList.add('solo-emoji');
+
+      const who = document.createElement('span');
+      who.className = 'chat-who';
+      // Tout vient du réseau : posé en texte, jamais interprété.
+      who.textContent = entry.mine ? 'Vous' : entry.from;
+
+      const what = document.createElement('span');
+      what.className = 'chat-what';
+      what.textContent = entry.text;
+
+      item.append(who, what);
+      log.append(item);
+    }
+    this.scrollChat();
+  }
+
+  renderChatBadge() {
+    const badge = $('chat-badge');
+    badge.hidden = this.unread === 0;
+    badge.textContent = String(Math.min(this.unread, 9));
+  }
+
+  /**
+   * Bulle éphémère au-dessus du plateau : on voit passer ce qui se dit sans
+   * quitter son coup des yeux. Les bulles s'empilent et s'effacent seules.
+   */
+  showBubble(from, text) {
+    const zone = $('chat-bubbles');
+    const bubble = document.createElement('div');
+    bubble.className = this.isEmoji(text) ? 'chat-bubble big' : 'chat-bubble';
+
+    const who = document.createElement('span');
+    who.className = 'bubble-who';
+    who.textContent = from;
+    const what = document.createElement('span');
+    what.textContent = text;
+
+    bubble.append(who, what);
+    zone.append(bubble);
+    while (zone.children.length > BUBBLE_STACK) zone.firstElementChild.remove();
+    setTimeout(() => bubble.remove(), BUBBLE_MS);
+  }
+
+  /** Un message fait-il d'une seule émoticône ? Il s'affiche alors en grand. */
+  isEmoji(text) {
+    return [...text].length <= 2 && /\p{Extended_Pictographic}/u.test(text);
+  }
+
+  openChat() {
+    this.unread = 0;
+    this.renderChatBadge();
+    this.renderChat();
+    const sheet = $('chat-dialog');
+    sheet.showModal();
+    sheet.focus();
+    // Le journal est encore masqué au moment du rendu : sa hauteur vaut
+    // alors zéro et le défilement ne mène nulle part. On le refait une fois
+    // la fenêtre ouverte, pour arriver sur le dernier message.
+    this.scrollChat();
+  }
+
+  scrollChat() {
+    const log = $('chat-log');
+    log.scrollTop = log.scrollHeight;
+  }
+
+  bindChat() {
+    const row = $('emoji-row');
+    for (const emoji of EMOJIS) {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'emoji';
+      button.textContent = emoji;
+      button.setAttribute('aria-label', `Envoyer ${emoji}`);
+      // Un appui, c'est parti : c'est tout l'intérêt d'une réaction rapide.
+      button.onclick = () => this.sendChat(emoji);
+      row.append(button);
+    }
+
+    $('btn-chat').onclick = () => this.openChat();
+    $('chat-close').onclick = () => $('chat-dialog').close();
+
+    $('chat-form').onsubmit = (event) => {
+      event.preventDefault();
+      const field = $('chat-input');
+      this.sendChat(field.value);
+      field.value = '';
+    };
+  }
+
+  /** Message reçu du réseau : ramené à une ligne de texte sans balisage. */
+  safeChat(raw) {
+    return String(raw ?? '')
+      .replace(/\s+/g, ' ')
+      .trim()
+      .slice(0, CHAT_MAX);
+  }
+
+  safeNames(raw) {
+    if (!Array.isArray(raw)) return [];
+    return raw.slice(0, MAX_PLAYERS).map((name) => this.cleanName(name));
+  }
+
+  safeToken(raw) {
+    const token = String(raw ?? '').replace(/[^A-Z0-9]/gi, '').slice(0, 24);
+    return token || null;
   }
 
   /* --- Assainissement des messages reçus ---------------------------- */
@@ -2156,7 +2650,10 @@ export class App {
     this.setNetStatus(message, 'error');
     $('mp-choice').hidden = false;
     $('mp-invite').hidden = true;
+    $('mp-waiting').hidden = true;
     this.mode = 'solo';
+    this.seats = [];
+    this.renderChatMode();
     this.renderNetChip();
   }
 
@@ -2164,12 +2661,19 @@ export class App {
     this.teardownSession();
     this.mode = 'solo';
     this.netStarted = false;
-    this.opponentName = 'Adversaire';
+    this.seats = [];
+    this.lobbyNames = [];
+    this.chat = [];
+    this.unread = 0;
+    this.scoreCards = null;
     clearLocationCode();
     this.setNetStatus('');
     $('mp-choice').hidden = false;
     $('mp-invite').hidden = true;
+    $('mp-waiting').hidden = true;
     $('mp-leave').hidden = true;
+    $('chat-dialog').close();
+    this.renderChatMode();
 
     // La partie solo laissée en plan a été préservée pendant la partie en
     // ligne : on la reprend plutôt que d'en démarrer une autre.
@@ -2197,7 +2701,25 @@ export class App {
     status.className = `mp-status ${kind}`.trim();
   }
 
+  /**
+   * Ce que dit la pastille de liaison : à deux, le nom de l'adversaire, seul
+   * renseignement utile ; au-delà, un décompte, parce que trois noms ne
+   * tiennent pas dans l'en-tête d'un téléphone.
+   */
+  tableLabel() {
+    const others = (this.game?.players?.length ?? 2) - 1;
+    if (others <= 1) return this.seatName(1);
+    return `${others + 1} joueurs`;
+  }
+
+  /** Le tchat n'a de sens qu'avec quelqu'un en face. */
+  renderChatMode() {
+    $('btn-chat').hidden = this.mode === 'solo';
+    this.renderChatBadge();
+  }
+
   renderNetChip() {
+    this.renderChatMode();
     const chip = $('netchip');
     if (this.mode === 'solo') {
       chip.hidden = true;
@@ -2214,7 +2736,7 @@ export class App {
     label.className = 'netchip-label';
     // « Reprise… » plutôt que « Reconnexion… » : à 390 px de large, le mot
     // entier ne tient pas et se ferait tronquer.
-    label.textContent = live ? this.opponentName : reprise ? 'Reprise…' : 'Hors ligne';
+    label.textContent = live ? this.tableLabel() : reprise ? 'Reprise…' : 'Hors ligne';
     chip.append(label);
   }
 

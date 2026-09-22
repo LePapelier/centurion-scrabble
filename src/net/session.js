@@ -1,5 +1,5 @@
 /**
- * Liaison directe entre deux navigateurs, sans serveur applicatif.
+ * Liaison directe entre navigateurs, sans serveur applicatif.
  *
  * WebRTC exige tout de même un intermédiaire pour la mise en relation
  * initiale : on utilise le courtier public de PeerJS, qui ne voit transiter
@@ -7,8 +7,11 @@
  * passent de navigateur à navigateur. Le site peut donc rester entièrement
  * statique (GitHub Pages, hébergement mutualisé…).
  *
- * L'hôte fait autorité : il détient le sac et les deux chevalets, valide les
- * coups et diffuse l'état. L'invité n'envoie que des intentions.
+ * La table est une étoile : chaque invité n'est relié qu'à l'hôte, qui fait
+ * autorité — il détient le sac et tous les chevalets, valide les coups,
+ * diffuse l'état et relaie les messages du tchat. Les invités n'envoient que
+ * des intentions et ne se parlent jamais directement : à quatre, cela fait
+ * trois liaisons au lieu de six, et une seule version de la vérité.
  */
 import Peer from 'peerjs';
 
@@ -31,6 +34,41 @@ const RESUME_DELAYS_MS = [800, 1500, 3000, 6000, 10000, 15000];
 
 /** Au-delà, on cesse d'espérer et la partie est déclarée perdue. */
 const MAX_RESUME_ATTEMPTS = 20;
+
+/** Invités simultanés qu'un hôte peut accueillir, lui non compris. */
+export const MAX_GUESTS = 3;
+
+/** Clé du jeton qui permet à un invité de retrouver son siège. */
+const TOKEN_KEY = 'centurion-scrabble/jeton';
+
+/**
+ * Jeton stable propre à ce navigateur.
+ *
+ * Une reconnexion ouvre une liaison neuve, avec un identifiant PeerJS neuf :
+ * sans ce jeton, l'hôte prendrait le revenant pour un cinquième joueur et le
+ * refuserait, alors que sa place l'attend. Le jeton survit à la fermeture de
+ * l'onglet ; à défaut de stockage, il vaut pour la session.
+ */
+let sessionToken = null;
+export function myToken() {
+  if (sessionToken) return sessionToken;
+  try {
+    const kept = localStorage.getItem(TOKEN_KEY);
+    if (kept) {
+      sessionToken = kept;
+      return sessionToken;
+    }
+  } catch {
+    /* stockage indisponible : le jeton ne vaudra que pour cette session */
+  }
+  sessionToken = makeCode() + makeCode();
+  try {
+    localStorage.setItem(TOKEN_KEY, sessionToken);
+  } catch {
+    /* stockage indisponible : tant pis, la reprise en pâtira */
+  }
+  return sessionToken;
+}
 
 export function makeCode() {
   const values = new Uint32Array(CODE_LENGTH);
@@ -65,13 +103,14 @@ export function clearLocationCode() {
 }
 
 /**
- * Une session réseau : au plus un adversaire à la fois.
+ * Une session réseau : un hôte et jusqu'à trois invités.
  *
  * Événements attendus dans `handlers` :
  *   onStatus(texte)       — message d'avancement destiné à l'écran
  *   onReady(code)         — l'hôte est joignable
- *   onConnected()         — les deux navigateurs se parlent
- *   onData(message)       — message reçu de l'adversaire
+ *   onConnected(id)       — une liaison s'est ouverte (id : l'invité, côté hôte)
+ *   onData(message, id)   — message reçu (id : l'invité qui l'envoie)
+ *   onGuestGone(id)       — un invité a quitté la liaison (hôte seulement)
  *   onDropped(raison)     — liaison rompue, reprise en cours
  *   onResumed()           — liaison rétablie après une coupure
  *   onClosed(raison)      — liaison rompue sans retour possible
@@ -81,7 +120,10 @@ export class PeerSession {
   constructor(handlers = {}) {
     this.handlers = handlers;
     this.peer = null;
+    /** Côté invité : l'unique liaison vers l'hôte. */
     this.conn = null;
+    /** Côté hôte : une liaison par invité, indexée par son identifiant. */
+    this.conns = new Map();
     this.role = null; // 'host' | 'guest'
     this.code = null;
     this.closing = false;
@@ -89,10 +131,22 @@ export class PeerSession {
     this.resumeTimer = null;
     this.attempts = 0;
     this.resuming = false;
+    /** Places encore ouvertes à la table, hôte non compris. */
+    this.capacity = MAX_GUESTS;
   }
 
   get connected() {
+    if (this.role === 'host') return this.openConns().length > 0;
     return Boolean(this.conn?.open);
+  }
+
+  /** Liaisons effectivement ouvertes, côté hôte. */
+  openConns() {
+    return [...this.conns.values()].filter((conn) => conn.open);
+  }
+
+  get guestCount() {
+    return this.openConns().length;
   }
 
   /** Liaison coupée mais pas abandonnée : une reprise est en cours. */
@@ -107,11 +161,12 @@ export class PeerSession {
   /* ---------------------------------------------------------------- */
 
   /**
-   * Ouvre une partie et attend un adversaire.
+   * Ouvre une partie et attend des adversaires.
    * @param {number} attempt réservé aux reprises après collision d'identifiant
    */
   host(attempt = 0, resume = false) {
     const previous = this.code;
+    const capacity = this.capacity;
     this.destroy();
     this.closing = false;
     this.resuming = resume;
@@ -119,6 +174,8 @@ export class PeerSession {
     // Une reprise garde le code : le lien déjà transmis à l'adversaire doit
     // continuer de mener à cette partie.
     this.code = resume && previous ? previous : makeCode();
+    // `destroy` a remis la capacité par défaut : on restitue celle choisie.
+    this.capacity = capacity;
     if (!resume) this.attempts = 0;
     this.emit('onStatus', resume ? 'Rétablissement de la partie…' : 'Ouverture de la partie…');
 
@@ -127,19 +184,21 @@ export class PeerSession {
 
     peer.on('open', () => {
       this.emit('onReady', this.code);
-      this.emit('onStatus', 'En attente de votre adversaire…');
+      this.emit('onStatus', 'En attente des autres joueurs…');
     });
 
     peer.on('connection', (conn) => {
-      // Une partie se joue à deux : toute liaison supplémentaire est refusée.
-      if (this.conn?.open) {
+      // La table a un nombre de places fini : au-delà, on refuse poliment.
+      // Le revenant, lui, est reconnu plus haut dans la pile — à son jeton —
+      // et l'hôte lui rend sa place sans qu'elle compte pour une nouvelle.
+      if (this.guestCount >= this.capacity) {
         conn.on('open', () => {
           conn.send({ t: 'busy' });
           setTimeout(() => conn.close(), 200);
         });
         return;
       }
-      this.attach(conn);
+      this.attachGuest(conn);
     });
 
     peer.on('error', (error) => {
@@ -193,7 +252,7 @@ export class PeerSession {
 
     peer.on('open', () => {
       const conn = peer.connect(PREFIX + code, { reliable: true, serialization: 'json' });
-      this.attach(conn);
+      this.attachHost(conn);
 
       this.timer = setTimeout(() => {
         if (this.connected) return;
@@ -257,7 +316,8 @@ export class PeerSession {
 
   /* ---------------------------------------------------------------- */
 
-  attach(conn) {
+  /** Côté invité : l'unique liaison, celle qui mène à l'hôte. */
+  attachHost(conn) {
     this.conn = conn;
 
     conn.on('open', () => {
@@ -276,19 +336,46 @@ export class PeerSession {
     conn.on('close', () => {
       if (this.closing) return;
       this.conn = null;
-      if (this.role === 'guest') {
-        // L'hôte a pu simplement passer en arrière-plan : on le rappelle.
-        this.emit('onDropped', 'Liaison interrompue. Reprise en cours…');
-        this.scheduleResume();
-      } else {
-        // L'hôte reste inscrit sous le même code : l'invité peut revenir de
-        // lui-même, sans qu'aucun nouveau lien soit à transmettre.
-        this.emit('onDropped', 'Votre adversaire s’est déconnecté. Il peut revenir avec le même code.');
-      }
+      // L'hôte a pu simplement passer en arrière-plan : on le rappelle.
+      this.emit('onDropped', 'Liaison interrompue. Reprise en cours…');
+      this.scheduleResume();
     });
 
     conn.on('error', () => {
       if (!this.closing) this.emit('onDropped', 'La liaison a été interrompue.');
+    });
+  }
+
+  /**
+   * Côté hôte : une liaison parmi d'autres.
+   *
+   * Chacune vit sa vie — l'une peut tomber sans rien changer aux autres, et
+   * la partie continue autour du joueur absent, qui retrouvera sa place au
+   * retour. C'est pourquoi rien n'est démonté ici sur une fermeture : on se
+   * contente de signaler qui vient de partir.
+   */
+  attachGuest(conn) {
+    const id = conn.peer;
+    this.conns.set(id, conn);
+
+    conn.on('open', () => {
+      this.emit('onConnected', id);
+    });
+
+    conn.on('data', (message) => {
+      if (message && typeof message === 'object') this.emit('onData', message, id);
+    });
+
+    conn.on('close', () => {
+      if (this.closing) return;
+      this.conns.delete(id);
+      this.emit('onGuestGone', id);
+    });
+
+    conn.on('error', () => {
+      if (this.closing) return;
+      this.conns.delete(id);
+      this.emit('onGuestGone', id);
     });
   }
 
@@ -307,8 +394,26 @@ export class PeerSession {
     this.destroy();
   }
 
+  /** Côté invité : vers l'hôte. Côté hôte : vers tout le monde. */
   send(message) {
+    if (this.role === 'host') {
+      for (const conn of this.openConns()) conn.send(message);
+      return;
+    }
     if (this.conn?.open) this.conn.send(message);
+  }
+
+  /** Côté hôte : à un invité en particulier — son instantané, son refus. */
+  sendTo(id, message) {
+    const conn = this.conns.get(id);
+    if (conn?.open) conn.send(message);
+  }
+
+  /** Côté hôte : à tous sauf un — le relais d'un message de tchat. */
+  sendExcept(id, message) {
+    for (const conn of this.openConns()) {
+      if (conn.peer !== id) conn.send(message);
+    }
   }
 
   destroy() {
@@ -320,12 +425,21 @@ export class PeerSession {
     } catch {
       /* liaison déjà rompue */
     }
+    for (const conn of this.conns.values()) {
+      try {
+        conn.close();
+      } catch {
+        /* liaison déjà rompue */
+      }
+    }
     try {
       this.peer?.destroy();
     } catch {
       /* pair déjà détruit */
     }
     this.conn = null;
+    this.conns.clear();
+    this.capacity = MAX_GUESTS;
     this.peer = null;
   }
 }
