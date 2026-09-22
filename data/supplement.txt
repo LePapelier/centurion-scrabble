@@ -204,3 +204,51 @@ gifts
 # Absents des deux lexiques.
 skat
 skats
+
+# Signalé : le verbe LIKER, absent des deux lexiques — trop récent pour
+# Morphalou, jamais entré dans Dicollecte. La compétition l'a adopté : tout le
+# paradigme du premier groupe est valide sur 1mot.net.
+#
+# Vingt et une formes vérifiées une par une : LIKER, LIKE, LIKES, LIKEE,
+# LIKEES, LIKEZ, LIKENT, LIKONS, LIKANT, LIKA, LIKAI, LIKAS, LIKAIS, LIKAIT,
+# LIKAIENT, LIKATES, LIKIEZ, LIKASSE, LIKERA, LIKERAIT, LIKERENT. Les seize
+# autres complètent un paradigme régulier sans trou constaté.
+#
+# LIK seul est refusé — le radical n'est pas un mot.
+like
+likee
+likees
+likent
+liker
+likes
+likez
+likons
+likant
+lika
+likai
+likames
+likas
+likasse
+likassent
+likasses
+likassiez
+likassions
+likat
+likates
+likais
+likait
+likaient
+likiez
+likions
+likera
+likerai
+likeraient
+likerais
+likerait
+likeras
+likerent
+likerez
+likeriez
+likerions
+likerons
+likeront
