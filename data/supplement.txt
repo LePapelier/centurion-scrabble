@@ -252,3 +252,27 @@ likeriez
 likerions
 likerons
 likeront
+
+# Signalés refusés alors qu'ils sont valides : RYE (le whisky de seigle),
+# YET (l'abominable homme des neiges, doublet de YETI) et GHEE (le beurre
+# clarifié indien), avec leurs pluriels RYES, YETS et GHEES. Six formes,
+# toutes vérifiées une par une sur 1mot.net.
+#
+# Absents des deux lexiques : trois emprunts que la compétition a adoptés et
+# que ni Morphalou ni Dicollecte ne portent.
+rye
+ryes
+yet
+yets
+ghee
+ghees
+
+# Trouvés en vérifiant les précédents, valides et absents eux aussi : GHI et
+# GHIS, l'autre graphie du ghee ; AWALE, AWELE et leurs pluriels, les deux
+# graphies du jeu de semailles africain, croisées en cherchant WALE.
+ghi
+ghis
+awale
+awales
+awele
+aweles

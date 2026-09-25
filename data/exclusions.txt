@@ -560,3 +560,130 @@ vot
 # sont bien valides et restent. C'est le singe qui sort, pas les divinités.
 lar
 lars
+
+# Signalé en partie : REGIFLER, refusé explicitement par 1mot.net. Le verbe
+# n'existe pas en compétition, et Morphalou en portait la conjugaison
+# complète : les trente-neuf formes partent ensemble. Un infinitif refusé ne
+# laisse derrière lui aucune forme valide.
+#
+# GIFLER et toute sa conjugaison restent, évidemment : c'est le préfixe qui
+# ne prend pas.
+regifla
+regiflai
+regiflaient
+regiflais
+regiflait
+regiflames
+regiflant
+regiflas
+regiflasse
+regiflassent
+regiflasses
+regiflassiez
+regiflassions
+regiflat
+regiflates
+regifle
+regiflee
+regiflees
+regiflent
+regifler
+regiflera
+regiflerai
+regifleraient
+regiflerais
+regiflerait
+regifleras
+regiflerent
+regiflerez
+regifleriez
+regiflerions
+regiflerons
+regifleront
+regifles
+regiflez
+regifliez
+regiflions
+regiflons
+
+# Signalé en partie : DUISIS. En vérifiant, c'est tout le verbe DUIRE qui est
+# refusé — l'infinitif comme DUIS, tous deux explicitement. Morphalou en
+# portait le paradigme entier, il s'en va avec.
+#
+# Attention au piège : DUIT, DUITE, DUITS et DUITES sont bien valides, mais
+# ce sont les formes de DUITER, le verbe du tissage (DUITAS, DUITANT,
+# DUITATES le confirment). Ils restent. Les composés — CONDUIRE, SEDUIRE,
+# TRADUIRE — ne sont pas touchés : leurs formes ne commencent pas par DUIS.
+duire
+duis
+duisaient
+duisais
+duisait
+duisant
+duise
+duisent
+duises
+duisez
+duisiez
+duisimes
+duisions
+duisirent
+duisis
+duisisse
+duisissent
+duisisses
+duisissiez
+duisissions
+duisit
+duisites
+duisons
+
+# Signalés, tous refusés explicitement par 1mot.net, avec leurs pluriels :
+# AJUS, HOMIE, MINAUD, OQUE, AVAS, IPSE, RAK, MINK, GAZI et AYA. Un lot
+# d'emprunts et de troncations que Morphalou recense et que la compétition
+# ignore.
+#
+# Vérifiés au passage et laissés en place parce qu'ils sont valides : ZEF,
+# MINAUDA et toute la conjugaison de MINAUDER, RAKU, GAZIER, WALI, AWALE,
+# et AY/AYS — dont AYA n'est pas le pluriel.
+ajus
+homie
+homies
+minaud
+minauds
+oque
+oques
+avas
+ipse
+ipses
+rak
+raks
+mink
+minks
+gazi
+gazis
+aya
+ayas
+
+# Signalés, sans page sur 1mot.net : OSONE, GODAN, YLURE et leurs pluriels.
+# Tous propres à Morphalou. C'est la règle de l'absence de page, pas un refus
+# explicite — moins net, donc, mais la signature est celle des précédents.
+#
+# GODANT et GODENT, formes du verbe GODER, sont valides et restent : c'est
+# GODAN tout court qui ne mène nulle part.
+osone
+osones
+godan
+godans
+ylure
+ylures
+
+# Signalé : ZEENS. Il ne venait pas d'où je l'ai d'abord cherché — Morphalou
+# le porte accentué, ZÉEN et ZÉENS, le chêne zéen d'Afrique du Nord, et le
+# dictionnaire replie les accents. Les deux formes sont refusées par
+# 1mot.net et partent ensemble.
+#
+# La leçon vaut pour la suite : chercher un mot sans ses accents dans le
+# lexique source ne prouve rien.
+zeen
+zeens
