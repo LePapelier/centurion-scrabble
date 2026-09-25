@@ -85,6 +85,13 @@ const FELICITATION = 'Meilleur coup !';
 const REVEAL_STEP_MS = 60;
 
 /**
+ * Temps laissé au joueur pour lire « aucun coup possible » avant que son
+ * tour ne soit passé d'office. Assez pour comprendre ce qui se passe, assez
+ * court pour ne pas donner l'impression que le jeu a planté.
+ */
+const BLOCAGE_MS = 1600;
+
+/**
  * Réactions d'un seul appui. Huit, pas davantage : elles doivent tenir sur
  * une rangée à la largeur d'un téléphone, et se choisir sans lire. Elles
  * couvrent ce qu'on se dit vraiment pendant une partie — l'approbation, la
@@ -138,6 +145,8 @@ export class App {
     this.exchangeMode = false;
     this.marked = new Set();
     this.busy = false;
+    /** Une recherche de blocage est en cours : une seule à la fois. */
+    this.blocageEnCours = false;
     this.requestId = 0;
     this.pendingRequests = new Map();
     this.toastTimer = null;
@@ -254,6 +263,7 @@ export class App {
 
     this.render();
     if (this.game.current === COMPUTER && !this.game.finished) this.runComputerTurn();
+    else this.verifierBlocage();
   }
 
   buildBoard() {
@@ -1570,6 +1580,61 @@ export class App {
     this.toast('Nouvelle partie. À vous de jouer.');
   }
 
+  /**
+   * Cherche s'il reste un coup jouable, et passe le tour s'il n'y en a pas.
+   *
+   * Sans cela, un chevalet bloqué — sept consonnes en fin de partie, un
+   * plateau fermé — oblige à chercher longtemps pour ne rien trouver, puis à
+   * passer soi-même. L'énumération est celle de l'indice : c'est exactement
+   * la même question, « existe-t-il un coup ? », et elle part dans le worker
+   * pour ne pas figer l'écran.
+   *
+   * Ne se déclenche qu'au début d'un tour intact : un coup en préparation,
+   * un échange en cours ou un tour déjà joué ne sont pas des blocages.
+   */
+  verifierBlocage() {
+    if (this.game.finished || this.busy) return;
+    if (this.game.current !== HUMAN) return;
+    if (this.pending.size > 0 || this.exchangeMode) return;
+    if (this.mode !== 'solo' && !this.session?.connected) return;
+    if (this.blocageEnCours) return;
+
+    this.blocageEnCours = true;
+    const id = ++this.requestId;
+    this.pendingRequests.set(id, 'blocage');
+    this.worker.postMessage({
+      type: 'hint',
+      id,
+      board: { letters: [...this.game.board.letters], blanks: [...this.game.board.blanks] },
+      rack: [...this.game.players[HUMAN].rack],
+    });
+  }
+
+  /**
+   * Verdict du moteur sur un chevalet bloqué.
+   *
+   * Le tour a pu changer entre-temps — l'adversaire joue vite en ligne — donc
+   * on revérifie tout avant de passer quoi que ce soit.
+   */
+  async surBlocage(move) {
+    this.blocageEnCours = false;
+    if (move) return;
+    if (this.game.finished || this.busy) return;
+    if (this.game.current !== HUMAN) return;
+    if (this.pending.size > 0 || this.exchangeMode) return;
+
+    this.toast('Aucun coup possible avec ce chevalet. Tour passé.');
+    this.sons.jouer('refus');
+    await new Promise((r) => setTimeout(r, BLOCAGE_MS));
+
+    // Une dernière fois : ces deux secondes suffisent à ce que le joueur
+    // démarre un échange, ou qu'une liaison retombe.
+    if (this.game.finished || this.busy) return;
+    if (this.game.current !== HUMAN) return;
+    if (this.pending.size > 0 || this.exchangeMode) return;
+    this.passTurn();
+  }
+
   askHint() {
     const id = ++this.requestId;
     this.pendingRequests.set(id, 'hint');
@@ -1592,7 +1657,12 @@ export class App {
       this.showEnd();
       return;
     }
-    if (this.mode === 'solo' && this.game.current === COMPUTER) this.runComputerTurn();
+    if (this.mode === 'solo' && this.game.current === COMPUTER) {
+      this.runComputerTurn();
+      return;
+    }
+    // En ligne, l'hôte peut reprendre la main dès qu'un invité a joué.
+    this.verifierBlocage();
   }
 
   /**
@@ -1682,6 +1752,13 @@ export class App {
     }
 
     if (message.type === 'hint') {
+      // Même calcul que l'indice, mais demandé par le jeu et non par le
+      // joueur : il ne touche pas à `busy` et n'annonce rien s'il trouve.
+      if (kind === 'blocage') {
+        this.surBlocage(message.move);
+        return;
+      }
+
       this.busy = false;
       const move = message.move;
       if (!move) this.toast('Aucun coup possible avec ce chevalet.', 'error');
@@ -1759,6 +1836,7 @@ export class App {
     this.render();
 
     if (this.game.finished) this.showEnd();
+    else this.verifierBlocage();
   }
 
   /* ---------------------------------------------------------------- */
@@ -2401,6 +2479,7 @@ export class App {
     $('mp-dialog').close();
     this.render();
     if (this.game.finished) this.showEnd();
+    else this.verifierBlocage();
   }
 
 
@@ -2688,6 +2767,7 @@ export class App {
     this.render();
     this.toast('Retour à la partie solo.');
     if (this.game.current === COMPUTER && !this.game.finished) this.runComputerTurn();
+    else this.verifierBlocage();
   }
 
   teardownSession() {
