@@ -116,6 +116,11 @@ function gaussian() {
  * Partage le chevalet entre tuiles rendues au sac et tuiles conservées.
  * @returns {{drop: number[], keep: number[], value: number}}
  */
+/** Ramène une liste de rejets à ce que le sac peut rendre. */
+function trimDiscard(drop, bagCount) {
+  return drop.slice(0, Math.max(1, bagCount));
+}
+
 function chooseDiscard(rack, smart) {
   if (!smart) {
     const order = [...rack.keys()].sort(() => Math.random() - 0.5);
@@ -158,7 +163,9 @@ export function chooseMove(board, rack, dawg, difficulty, context) {
     maxTilesPlaced: difficulty.maxTilesPlaced,
   });
 
-  const canExchange = context.bagCount >= RACK_SIZE;
+  // Une tuile au fond du sac suffit à échanger — même règle que pour le
+  // joueur. Ce qu'on rend est alors plafonné à ce qu'on peut repiocher.
+  const canExchange = context.bagCount > 0;
 
   // Vocabulaire ordinaire : on écarte les coups reposant sur un mot court de
   // compétition.
@@ -175,7 +182,9 @@ export function chooseMove(board, rack, dawg, difficulty, context) {
   }
 
   if (moves.length === 0) {
-    if (canExchange) return { type: 'exchange', tiles: chooseDiscard(rack, difficulty.useLeave).drop };
+    if (canExchange) {
+      return { type: 'exchange', tiles: trimDiscard(chooseDiscard(rack, difficulty.useLeave).drop, context.bagCount) };
+    }
     return { type: 'pass' };
   }
 
@@ -226,8 +235,14 @@ export function chooseMove(board, rack, dawg, difficulty, context) {
     }
   }
 
-  // Un coup dérisoire alors que le sac est plein : mieux vaut se refaire.
-  if (canExchange && chosen.score < difficulty.exchangeThreshold && Math.random() < 0.6) {
+  // Un coup dérisoire alors que le sac est encore fourni : mieux vaut se
+  // refaire. En fin de sac, en revanche, échanger une ou deux tuiles ne
+  // refait pas un chevalet : on garde le coup, si petit soit-il.
+  if (
+    context.bagCount >= RACK_SIZE &&
+    chosen.score < difficulty.exchangeThreshold &&
+    Math.random() < 0.6
+  ) {
     const playValue = chosen.score + evaluateLeave(remainingRack(rack, chosen.placements));
     const discard = chooseDiscard(rack, difficulty.useLeave);
     if (discard.value > playValue) return { type: 'exchange', tiles: discard.drop };

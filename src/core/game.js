@@ -197,11 +197,26 @@ export class Game {
     return { ok: true, score: verdict.score, words: verdict.words, bingo: verdict.bingo };
   }
 
-  /** Échange des tuiles contre de nouveaux ; le tour est perdu. */
+  /**
+   * Échange des tuiles contre de nouvelles ; le tour est perdu.
+   *
+   * La règle officielle exige sept tuiles au fond du sac. Ici il en suffit
+   * d'une : sur un chevalet bloqué en fin de partie, pouvoir troquer sa
+   * dernière consonne vaut mieux que d'être condamné à passer. Le nombre de
+   * tuiles échangées ne peut pas dépasser ce que le sac contient — sinon on
+   * en rendrait plus qu'on n'en pioche et le chevalet fondrait.
+   */
   exchange(letters) {
     if (this.finished) return { ok: false, reason: 'La partie est terminée.' };
-    if (this.bag.length < RACK_SIZE) {
-      return { ok: false, reason: 'Il reste moins de sept tuiles dans le sac.' };
+    if (this.bag.length === 0) {
+      return { ok: false, reason: 'Le sac est vide.' };
+    }
+    if (letters.length > this.bag.length) {
+      const n = this.bag.length;
+      return {
+        ok: false,
+        reason: `Le sac ne contient que ${n} tuile${n > 1 ? 's' : ''}.`,
+      };
     }
     const player = this.currentPlayer;
     if (!this.takeFromRack(player, letters)) {

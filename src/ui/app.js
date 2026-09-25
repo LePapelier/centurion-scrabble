@@ -734,7 +734,7 @@ export class App {
     $('btn-shuffle').disabled = !this.canArrange();
     $('btn-hint').disabled = !myTurn;
     $('btn-more').disabled = !myTurn;
-    $('btn-exchange-wide').disabled = !myTurn || this.game.bagCount < RACK_SIZE;
+    $('btn-exchange-wide').disabled = !myTurn || this.game.bagCount === 0;
     $('btn-pass-wide').disabled = !myTurn;
     $('btn-resign-wide').disabled = this.game.finished;
 
@@ -769,7 +769,15 @@ export class App {
       return;
     }
     if (this.exchangeMode) {
-      status.textContent = `${this.marked.size} tuile${this.marked.size > 1 ? 's' : ''} sélectionnée${this.marked.size > 1 ? 's' : ''}.`;
+      const n = this.marked.size;
+      status.textContent = `${n} tuile${n > 1 ? 's' : ''} sélectionnée${n > 1 ? 's' : ''}.`;
+      // En fin de sac, le plafond n'est plus théorique : on l'annonce avant
+      // que le joueur ne coche une tuile de trop.
+      if (this.game.bagCount < RACK_SIZE) {
+        const reste = this.game.bagCount;
+        status.textContent += ` Le sac n’en rendra que ${reste}.`;
+        if (n > reste) status.classList.add('warn');
+      }
       return;
     }
     if (this.mode !== 'solo' && !this.session?.connected) {
@@ -1489,8 +1497,8 @@ export class App {
   }
 
   startExchange() {
-    if (this.game.bagCount < 7) {
-      this.toast('Le sac contient moins de sept tuiles.', 'error');
+    if (this.game.bagCount === 0) {
+      this.toast('Le sac est vide : plus rien à échanger.', 'error');
       return;
     }
     this.recall();
@@ -1513,6 +1521,13 @@ export class App {
   confirmExchange() {
     if (this.marked.size === 0) {
       this.toast('Choisissez au moins une tuile.', 'error');
+      return;
+    }
+    // On ne rend jamais plus qu'on ne peut repiocher : le chevalet doit
+    // revenir à sept.
+    if (this.marked.size > this.game.bagCount) {
+      const n = this.game.bagCount;
+      this.toast(`Le sac ne contient que ${n} tuile${n > 1 ? 's' : ''}.`, 'error');
       return;
     }
     const rack = this.game.players[HUMAN].rack;
@@ -1623,12 +1638,20 @@ export class App {
     if (this.game.current !== HUMAN) return;
     if (this.pending.size > 0 || this.exchangeMode) return;
 
-    this.toast('Aucun coup possible avec ce chevalet. Tour passé.');
+    // Tant qu'il reste une tuile au fond du sac, échanger vaut mieux que
+    // passer : on le dit et on laisse la main. Passer d'office priverait le
+    // joueur du seul coup qui lui restait.
+    if (this.game.bagCount > 0) {
+      this.toast('Aucun coup possible. Échangez des tuiles.');
+      this.sons.jouer('refus');
+      return;
+    }
+
+    this.toast('Aucun coup possible et sac vide. Tour passé.');
     this.sons.jouer('refus');
     await new Promise((r) => setTimeout(r, BLOCAGE_MS));
 
-    // Une dernière fois : ces deux secondes suffisent à ce que le joueur
-    // démarre un échange, ou qu'une liaison retombe.
+    // Une dernière fois : le tour a pu changer pendant ce délai.
     if (this.game.finished || this.busy) return;
     if (this.game.current !== HUMAN) return;
     if (this.pending.size > 0 || this.exchangeMode) return;
