@@ -276,3 +276,15 @@ awale
 awales
 awele
 aweles
+
+# Signalé refusé alors qu'il est valide : DEJ, l'abréviation familière de
+# déjeuner, avec son pluriel DEJS. Absents des deux lexiques — Morphalou ne
+# recense que « déjeuner », Dicollecte ne porte ni l'un ni l'autre.
+dej
+dejs
+
+# Croisés en vérifiant le précédent, valides et absents eux aussi : DJEUN et
+# son pluriel DJEUNS, l'autre abréviation familière que la compétition a
+# retenue. DJEUNE, en revanche, n'a pas de page et n'est pas ajouté.
+djeun
+djeuns
