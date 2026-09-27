@@ -687,3 +687,12 @@ ylures
 # lexique source ne prouve rien.
 zeen
 zeens
+
+# Signalé : KARI, le cari réunionnais, et son pluriel KARIS. Tous deux
+# refusés explicitement par 1mot.net, tous deux propres à Morphalou.
+#
+# C'est la graphie qui coince, pas le plat : CARI, CARIS, CARY et CARYS sont
+# valides et restent, comme CURRY. KARITE et KARITES aussi — l'arbre à
+# beurre n'a rien à voir. KARA et KARRI, invalides, étaient déjà absents.
+kari
+karis
