@@ -742,3 +742,46 @@ lunez
 luniez
 lunions
 lunons
+
+# Signalé : TECKA. Comme pour LUNER, c'est le verbe entier qui est refusé —
+# TECKER et TECKE le sont explicitement, TECKA aussi. Morphalou portait tout
+# le paradigme de ce « tecker » de la tecktonik, il s'en va.
+#
+# TECK et TECKS restent : le bois, vérifié valide, dont le verbe empruntait
+# les deux formes. TECKEL et TECKELS aussi, le chien, qui n'ont rien à y
+# voir, et TECKTONIK, la danse elle-même.
+tecka
+teckai
+teckaient
+teckais
+teckait
+teckames
+teckant
+teckas
+teckasse
+teckassent
+teckasses
+teckassiez
+teckassions
+teckat
+teckates
+tecke
+teckent
+tecker
+teckera
+teckerai
+teckeraient
+teckerais
+teckerait
+teckeras
+teckerent
+teckerez
+teckeriez
+teckerions
+teckerons
+teckeront
+teckes
+teckez
+teckiez
+teckions
+teckons
