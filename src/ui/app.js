@@ -184,6 +184,8 @@ export class App {
     /** Halos de mot, du plus long au plus court ; le premier vient du balisage. */
     this.halos = [];
     this.dragEndedAt = 0;
+    /** Glissement en cours : {stop}. Un rendu doit pouvoir le défaire. */
+    this.activeDrag = null;
     this.dropCell = null;
     this.dropSource = null;
 
@@ -360,6 +362,10 @@ export class App {
   }
 
   renderBoard() {
+    // Les tuiles posées sont déplaçables : les reconstruire emporterait celle
+    // qu'on tient. Un glissement parti du chevalet, lui, n'est pas concerné —
+    // c'est `renderRack` qui décide de son sort.
+    this.cancelDrag('board');
     const { letters, blanks } = this.game.board;
     const highlight = new Set(this.game.lastMoveCells);
 
@@ -524,6 +530,7 @@ export class App {
     const used = new Set([...this.pending.values()].map((p) => p.rackIndex));
     const shown = new Set();
     let entering = 0;
+    let repris = false;
 
     rack.textContent = '';
     for (let i = 0; i < 7; i++) {
@@ -555,6 +562,15 @@ export class App {
           tile.style.animationDelay = `${entering++ * 45}ms`;
         }
 
+        // Un glissement en cours survit au rendu si la tuile qu'il tient est
+        // toujours la même, à la même place : l'adversaire qui joue pendant
+        // qu'on prépare son coup ne doit pas nous l'arracher des doigts.
+        const drag = this.activeDrag;
+        if (drag?.origin.from === 'rack' && drag.origin.rackIndex === i && drag.letter === letter) {
+          drag.adopt(tile);
+          repris = true;
+        }
+
         this.attachTileDrag(tile, { from: 'rack', rackIndex: i });
         slot.append(tile);
       }
@@ -563,6 +579,10 @@ export class App {
 
     this.rackShown = shown;
     this.forceRackPop = false;
+
+    // La tuile saisie n'a pas reparu — chevalet renouvelé, tuile posée
+    // ailleurs : le glissement n'a plus d'objet et son fantôme doit partir.
+    if (this.activeDrag?.origin.from === 'rack' && !repris) this.cancelDrag('rack');
   }
 
   /**
@@ -964,7 +984,38 @@ export class App {
     let startY = 0;
     let dragging = false;
 
+    /** Vrai dès qu'un rendu a emporté la tuile : le glissement n'aboutira pas. */
+    let annule = false;
+
+    /**
+     * Efface les traces visibles du glissement, sans toucher aux écouteurs.
+     *
+     * Ceux-ci vivent sur la fenêtre et non sur la tuile, et survivent à
+     * l'annulation : une tuile peut disparaître en plein glissement — tout
+     * rendu reconstruit le chevalet — et des écouteurs posés sur elle
+     * partiraient avec. Le relâchement ne serait jamais reçu, le fantôme
+     * resterait collé à l'écran et l'original reparaîtrait dans sa case, en
+     * double sous le doigt. On les garde donc jusqu'au vrai relâchement, qui
+     * seul sait à quel instant poser le jalon anti-clic.
+     */
+    const effacer = () => {
+      // `element` a pu être remplacé par un rendu : on retire la classe de la
+      // tuile qui la porte réellement.
+      (this.activeDrag?.element ?? element).classList.remove('dragging');
+      ghost?.remove();
+      ghost = null;
+      this.clearDropHighlight();
+      if (this.activeDrag?.stop === stop) this.activeDrag = null;
+    };
+
+    /** Abandon demandé de l'extérieur, par un rendu. */
+    const stop = () => {
+      annule = true;
+      effacer();
+    };
+
     const onMove = (event) => {
+      if (annule) return;
       const dx = event.clientX - startX;
       const dy = event.clientY - startY;
       if (!dragging && Math.hypot(dx, dy) < 8) return;
@@ -995,6 +1046,20 @@ export class App {
         document.body.append(ghost);
 
         element.classList.add('dragging');
+        // Un rendu survenant maintenant doit pouvoir soit reprendre ce
+        // glissement à son compte, soit l'abandonner proprement. La lettre est
+        // retenue pour vérifier, au rendu suivant, que c'est bien la même
+        // tuile qui occupe la place.
+        this.activeDrag = {
+          stop,
+          element,
+          origin,
+          letter: origin.from === 'rack' ? this.game.players[HUMAN].rack[origin.rackIndex] : null,
+          adopt: (tile) => {
+            this.activeDrag.element = tile;
+            tile.classList.add('dragging');
+          },
+        };
       }
       ghost.style.left = `${event.clientX}px`;
       ghost.style.top = `${event.clientY}px`;
@@ -1002,28 +1067,35 @@ export class App {
     };
 
     const onUp = (event) => {
-      element.removeEventListener('pointermove', onMove);
-      element.removeEventListener('pointerup', onUp);
-      element.removeEventListener('pointercancel', onUp);
-      element.classList.remove('dragging');
+      window.removeEventListener('pointermove', onMove);
+      window.removeEventListener('pointerup', onUp);
+      window.removeEventListener('pointercancel', onUp);
 
-      if (!dragging) {
+      const glissait = dragging;
+      const abandonne = annule;
+      effacer();
+
+      // Un glissement, même abandonné en route, produit un clic au
+      // relâchement. Sans ce jalon, le plateau le prendrait pour un appui sur
+      // la case et reprendrait la tuile qu'on venait d'y poser.
+      if (glissait) this.dragEndedAt = performance.now();
+
+      if (abandonne) return;
+
+      if (!glissait) {
         // Simple appui. Sur le chevalet il vaut sélection ; sur le plateau
         // c'est le gestionnaire de clic du plateau qui s'en charge.
         if (origin.from === 'rack') this.selectRackTile(origin.rackIndex);
         return;
       }
 
-      ghost?.remove();
-      ghost = null;
-      this.clearDropHighlight();
-      // Le clic qui suit un glissement ne doit pas être réinterprété.
-      this.dragEndedAt = performance.now();
       this.dropTile(origin, event.clientX, event.clientY);
     };
 
     element.addEventListener('pointerdown', (event) => {
       if (!this.canArrange()) return;
+      // Un glissement déjà en cours n'a pas de raison de survivre au suivant.
+      this.cancelDrag();
       startX = event.clientX;
       startY = event.clientY;
       dragging = false;
@@ -1032,10 +1104,24 @@ export class App {
       } catch {
         /* pointeur déjà relâché : le suivi reste correct sans capture */
       }
-      element.addEventListener('pointermove', onMove);
-      element.addEventListener('pointerup', onUp);
-      element.addEventListener('pointercancel', onUp);
+      window.addEventListener('pointermove', onMove);
+      window.addEventListener('pointerup', onUp);
+      window.addEventListener('pointercancel', onUp);
     });
+  }
+
+  /**
+   * Abandonne le glissement en cours, s'il y en a un.
+   *
+   * Appelé avant chaque rendu : la tuile saisie est sur le point d'être
+   * détruite, et son fantôme n'aurait plus de quoi se raccrocher. Le coup
+   * n'est pas joué — on préfère perdre un geste que poser une tuile au
+   * hasard sur un chevalet qui vient de changer sous les doigts.
+   */
+  cancelDrag(kind) {
+    if (!this.activeDrag) return;
+    if (kind && this.activeDrag.origin.from !== kind) return;
+    this.activeDrag.stop();
   }
 
   /**
