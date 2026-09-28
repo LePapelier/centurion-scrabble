@@ -696,3 +696,49 @@ zeens
 # beurre n'a rien à voir. KARA et KARRI, invalides, étaient déjà absents.
 kari
 karis
+
+# Signalé : LUNA. En vérifiant, c'est tout le verbe LUNER qui est refusé —
+# l'infinitif comme LUNA, LUNAS, LUNAI, LUNAIS, LUNAIT, LUNAIENT, LUNANT,
+# LUNATE, LUNATES, LUNENT, LUNERA et LUNERONT, tous explicitement. Morphalou
+# en portait le paradigme entier, il s'en va.
+#
+# Quatre formes restent, parce qu'elles existent en dehors du verbe : LUNE et
+# LUNES, l'astre, et LUNEE et LUNEES, l'adjectif de « bien luné ». Toutes
+# quatre vérifiées valides.
+#
+# Ne sont pas touchés non plus : LUNAIRE et LUNAIRES, ALUNA et ALUNAS (le
+# verbe ALUNER, se poser sur la Lune), LUNULE. LUN et LUNS, invalides,
+# étaient déjà absents.
+luna
+lunai
+lunaient
+lunais
+lunait
+lunames
+lunant
+lunas
+lunasse
+lunassent
+lunasses
+lunassiez
+lunassions
+lunat
+lunates
+lunent
+luner
+lunera
+lunerai
+luneraient
+lunerais
+lunerait
+luneras
+lunerent
+lunerez
+luneriez
+lunerions
+lunerons
+luneront
+lunez
+luniez
+lunions
+lunons
