@@ -1881,14 +1881,17 @@ export class App {
       const attente = this.attenteOptimalite;
       this.attenteOptimalite = null;
       if (attente?.id === message.id && message.count >= MIN_COUPS_POUR_FELICITER) {
-        // Deux façons de bien jouer, deux félicitations distinctes. Le plus
-        // gros score d'abord, parce que c'est celle que le joueur cherchait ;
-        // puis, à défaut, la meilleure valeur stratégique — un coup qui
-        // rapporte moins mais laisse un chevalet dont on refera quelque chose.
-        if (attente.score >= message.score) this.feliciter();
-        else if (message.playedValue >= message.bestValue - EGALITE_STRATEGIQUE) {
+        // Deux façons de bien jouer, deux félicitations, et une hiérarchie :
+        // le coup du Centurion passe devant, y compris quand il est aussi le
+        // plus gros score — ce qui arrive souvent, un scrabble étant presque
+        // toujours les deux à la fois. C'est la distinction la plus haute,
+        // elle ne doit pas se faire coiffer par l'autre.
+        //
+        // « Meilleur coup ! » ne salue donc plus que le cas restant : le
+        // maximum de points, alors qu'un meilleur jeu existait.
+        if (message.playedValue >= message.bestValue - EGALITE_STRATEGIQUE) {
           this.feliciter(FELICITATION_STRATEGIQUE, 'strategique');
-        }
+        } else if (attente.score >= message.score) this.feliciter();
       }
       return;
     }
