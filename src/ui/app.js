@@ -82,8 +82,14 @@ const ETINCELLE_PAS_MS = 70;
 const FELICITATION = 'Meilleur coup !';
 /* L'autre façon de bien jouer : le coup qui laisse le meilleur chevalet, quitte
    à rapporter moins que le maximum. C'est le critère du Centurion, et sur la
-   durée d'une partie il pèse plus lourd que quelques points grappillés. */
-const FELICITATION_STRATEGIQUE = 'Coup stratégique !';
+   durée d'une partie il pèse plus lourd que quelques points grappillés.
+
+   Il porte donc son nom. « Coup stratégique » décrivait la manière et non le
+   rang — on pouvait le lire comme un compliment sur le style, alors qu'il
+   s'agit bien du meilleur coup de la position. Le Centurion, c'est le niveau
+   qui ne laisse rien passer : dire qu'on a joué le sien, c'est dire qu'on a
+   trouvé ce que joue la machine la plus forte. */
+const FELICITATION_STRATEGIQUE = 'Le coup du Centurion !';
 /* Les valeurs stratégiques sont des flottants : on ne compare jamais deux
    nombres de ce genre au dernier bit près. */
 const EGALITE_STRATEGIQUE = 0.01;

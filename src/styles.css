@@ -1494,6 +1494,11 @@ svg {
   bottom: calc(172px + var(--safe-bottom));
   transform: translateX(-50%);
   z-index: 70;
+  /* `left: 50%` ne laisse au message que la moitié droite de l'écran pour se
+     mettre en page — le `transform` ne fait que le recentrer ensuite, trop
+     tard. Sans `max-content`, « MAISONS, SOUTEZ +41 » se repliait déjà en deux
+     lignes sur un téléphone. La largeur reste bornée juste en dessous. */
+  width: max-content;
   max-width: calc(100vw - 32px);
   padding: 11px 18px;
   border-radius: 6px;
