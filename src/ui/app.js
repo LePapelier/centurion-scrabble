@@ -80,6 +80,13 @@ const ETINCELLE_PAS_MS = 70;
    tuiles qui s'allument. Et sur un téléphone, une phrase plus longue s'étale
    sur trois lignes et n'a plus rien d'une petite tape dans le dos. */
 const FELICITATION = 'Meilleur coup !';
+/* L'autre façon de bien jouer : le coup qui laisse le meilleur chevalet, quitte
+   à rapporter moins que le maximum. C'est le critère du Centurion, et sur la
+   durée d'une partie il pèse plus lourd que quelques points grappillés. */
+const FELICITATION_STRATEGIQUE = 'Coup stratégique !';
+/* Les valeurs stratégiques sont des flottants : on ne compare jamais deux
+   nombres de ce genre au dernier bit près. */
+const EGALITE_STRATEGIQUE = 0.01;
 
 /** Décalage entre deux tuiles lors de la révélation d'un coup. */
 const REVEAL_STEP_MS = 60;
@@ -1523,6 +1530,8 @@ export class App {
     const depart = {
       board: { letters: [...this.game.board.letters], blanks: [...this.game.board.blanks] },
       rack: [...this.game.players[HUMAN].rack],
+      placements: this.placements(),
+      bagCount: this.game.bagCount,
     };
 
     if (this.mode === 'guest') {
@@ -1537,7 +1546,7 @@ export class App {
       this.sendIntent({ t: 'play', placements: this.placements() });
       // L'hôte applique le même dictionnaire et la même validation : un coup
       // que l'invité accepte ne sera pas refusé là-bas.
-      this.jugerOptimalite(depart, verdict.score);
+      this.jugerOptimalite(depart, verdict.score, verdict.bingo);
       return;
     }
 
@@ -1561,7 +1570,7 @@ export class App {
     );
     this.sons.jouer(result.bingo ? 'scrabble' : 'coup');
     if (result.bingo) this.replay(this.boardEl, 'bingo');
-    this.jugerOptimalite(depart, result.score);
+    this.jugerOptimalite(depart, result.score, result.bingo);
 
     this.save();
     this.render();
@@ -1775,23 +1784,34 @@ export class App {
   }
 
   /**
-   * Demande au moteur si le coup qu'on vient de jouer était le meilleur
-   * possible, et félicite le cas échéant.
+   * Demande au moteur ce que valait le coup qu'on vient de jouer, et félicite
+   * le cas échéant.
    *
    * Le calcul est le même que celui de l'indice — l'énumération complète des
    * coups légaux — donc il part dans le worker. Il ne touche pas à `busy` :
    * c'est une vérification d'arrière-plan, elle ne doit rien bloquer.
+   *
+   * Le coup joué part avec la demande : c'est le worker qui le mesure, avec le
+   * même barème que les autres. Comparer ici une valeur calculée là-bas
+   * reviendrait à comparer deux échelles différentes.
    */
-  jugerOptimalite(depart, score) {
+  jugerOptimalite(depart, score, bingo) {
     const id = ++this.requestId;
     this.pendingRequests.set(id, 'best');
     this.attenteOptimalite = { id, score };
-    this.worker.postMessage({ type: 'best', id, board: depart.board, rack: depart.rack });
+    this.worker.postMessage({
+      type: 'best',
+      id,
+      board: depart.board,
+      rack: depart.rack,
+      bagCount: depart.bagCount,
+      played: { score, bingo: Boolean(bingo), placements: depart.placements },
+    });
   }
 
   /** Salue un coup optimal. */
-  feliciter() {
-    this.toast(FELICITATION, 'best');
+  feliciter(texte = FELICITATION, variante = '') {
+    this.toast(texte, `best ${variante}`.trim());
     this.sons.jouer('optimal');
     this.etinceler();
     // L'adversaire enchaîne aussitôt et son propre message chasserait
@@ -1854,8 +1874,15 @@ export class App {
     if (message.type === 'best') {
       const attente = this.attenteOptimalite;
       this.attenteOptimalite = null;
-      if (attente?.id === message.id && message.count >= MIN_COUPS_POUR_FELICITER && attente.score >= message.score) {
-        this.feliciter();
+      if (attente?.id === message.id && message.count >= MIN_COUPS_POUR_FELICITER) {
+        // Deux façons de bien jouer, deux félicitations distinctes. Le plus
+        // gros score d'abord, parce que c'est celle que le joueur cherchait ;
+        // puis, à défaut, la meilleure valeur stratégique — un coup qui
+        // rapporte moins mais laisse un chevalet dont on refera quelque chose.
+        if (attente.score >= message.score) this.feliciter();
+        else if (message.playedValue >= message.bestValue - EGALITE_STRATEGIQUE) {
+          this.feliciter(FELICITATION_STRATEGIQUE, 'strategique');
+        }
       }
       return;
     }

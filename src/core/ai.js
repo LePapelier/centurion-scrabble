@@ -252,18 +252,60 @@ export function chooseMove(board, rack, dawg, difficulty, context) {
 }
 
 /**
- * Le meilleur score atteignable depuis cette position, et le nombre de coups
- * légaux qui s'offraient.
+ * Valeur stratégique d'un coup : ce qu'il rapporte, plus ce qu'il laisse.
  *
- * Sert à saluer un coup optimal. Le compte accompagne le score parce qu'on ne
- * félicite pas quelqu'un qui n'avait pas le choix : trouver le meilleur de
- * trois coups possibles n'est pas un exploit.
+ * C'est le critère du Centurion, sans son aléa : les points du coup, la
+ * valeur du chevalet qu'il laisse derrière lui, et une pénalité pour un
+ * joker brûlé hors scrabble. En fin de sac, plus rien à garder — vider son
+ * chevalet prime.
+ *
+ * Le poids du reliquat vaut 1, celui du niveau maximal : on juge le joueur
+ * à l'aune du meilleur jeu possible, pas à celle de son adversaire du jour.
  */
-export function bestScore(board, rack, dawg) {
+export function moveValue(rack, move, endgame) {
+  if (endgame) return move.score + move.placements.length * 2;
+
+  let value = move.score + evaluateLeave(remainingRack(rack, move.placements));
+  const blanksUsed = move.placements.filter((p) => p.blank).length;
+  if (blanksUsed > 0 && !move.bingo) value -= blanksUsed * 12;
+  return value;
+}
+
+/**
+ * Le verdict porté sur le coup que le joueur vient de jouer : le meilleur
+ * score atteignable depuis cette position, la meilleure valeur stratégique,
+ * et ce que valait le coup joué selon ce même barème.
+ *
+ * Les trois sortent d'une seule énumération : elle coûte cher, et elle porte
+ * sur la même position. Le coup joué est mesuré ici, du même côté du worker
+ * que les autres, parce que c'est la seule façon de comparer sans se tromper
+ * d'échelle. Et on compare des valeurs, non des coups : il y a souvent
+ * plusieurs façons de bien jouer, elles comptent toutes.
+ *
+ * Le compte des coups légaux accompagne le verdict parce qu'on ne félicite
+ * pas quelqu'un qui n'avait pas le choix : trouver le meilleur de trois coups
+ * possibles n'est pas un exploit.
+ *
+ * @param {{score:number, bingo:boolean, placements:object[]}} played coup joué
+ * @param {boolean} endgame le sac était-il vide avant ce coup
+ */
+export function judgeMove(board, rack, dawg, played, endgame) {
   const moves = generateMoves(board, rack, dawg);
-  let best = 0;
-  for (const move of moves) if (move.score > best) best = move.score;
-  return { score: best, count: moves.length };
+
+  let score = 0;
+  let bestValue = -Infinity;
+  for (const move of moves) {
+    if (move.score > score) score = move.score;
+    const value = moveValue(rack, move, endgame);
+    if (value > bestValue) bestValue = value;
+  }
+
+  return {
+    score,
+    count: moves.length,
+    bestValue,
+    playedValue: moves.length === 0 ? -Infinity : moveValue(rack, played, endgame),
+  };
 }
 
 /** Meilleur coup absolu — utilisé par le bouton « indice ». */

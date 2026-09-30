@@ -1557,6 +1557,21 @@ svg {
   to { transform: translateX(130%); }
 }
 
+/* Le coup le plus stratégique — pas forcément le plus gros score. Même
+   traitement que l'or, mais froid : c'est une félicitation de même rang, et
+   le joueur doit voir du premier coup d'œil qu'on ne salue pas la même
+   chose. */
+.toast.best.strategique {
+  background: linear-gradient(180deg, #1d4a56, #143440);
+  border-color: #6fc4d8;
+  color: #d8f4fb;
+  box-shadow: var(--shadow), 0 0 0 1px rgb(111 196 216 / 0.55), 0 0 18px rgb(111 196 216 / 0.28);
+}
+
+.toast.best.strategique::after {
+  background: linear-gradient(105deg, transparent 38%, rgb(210 244 255 / 0.26) 50%, transparent 62%);
+}
+
 /* Coup optimal : les tuiles du coup s'allument l'une après l'autre. Les deux
    effets vivent sur les pseudo-éléments de la tuile et non sur elle : elle porte
    déjà sa propre animation de pose, et deux animations ne peuvent pas se
