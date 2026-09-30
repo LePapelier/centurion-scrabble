@@ -810,3 +810,14 @@ aevias
 wili
 willi
 willis
+
+# Signalé : MECA, l'abréviation familière de mécanique. Refusé explicitement
+# par 1mot.net, comme MECAS — ce dernier était déjà absent.
+#
+# Morphalou le porte accentué, « méca », et le dictionnaire replie les
+# accents : c'est la même mécanique que ZÉEN, à surveiller à chaque fois.
+#
+# Rien à voir avec DEJ, ajouté la semaine dernière : les deux sont des
+# abréviations familières, mais la compétition a retenu l'une et pas l'autre.
+# MEC, MECS, MECANO, MECANIQUE, MECHA restent, tous valides.
+meca

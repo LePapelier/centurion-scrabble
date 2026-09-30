@@ -294,3 +294,8 @@ djeuns
 # un L, que la compétition accepte aussi.
 willaya
 willayas
+
+# Croisés en vérifiant MECA : MECQUE et MECQUES, le lieu de pèlerinage passé
+# en nom commun — « la mecque du surf ». Valides et absents des deux lexiques.
+mecque
+mecques
