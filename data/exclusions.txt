@@ -795,3 +795,18 @@ teckons
 # étaient absents ; AVE, AVIVA et EVIDA, valides, sont bien là.
 aevia
 aevias
+
+# Signalé : WILI, la fiancée-fantôme de Giselle. Refusé explicitement par
+# 1mot.net, comme son pluriel WILIS — lequel était déjà absent, curieuse
+# asymétrie de Morphalou, qui portait le singulier sans le pluriel.
+#
+# WILLIS, l'autre graphie, est refusé lui aussi et part avec. WILLI n'a pas
+# de page : c'est l'absence, pas un refus, mais toute la famille voisine est
+# refusée (WILL, WILLY, WILLIE, WILLA, WIL, WILS, WILE, WILA), et les trois
+# sont propres à Morphalou.
+#
+# WILAYA, WILAYAS et WILLIAMS restent, vérifiés valides. WILLIAM seul, lui,
+# est invalide et était déjà absent.
+wili
+willi
+willis

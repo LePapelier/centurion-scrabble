@@ -288,3 +288,9 @@ dejs
 # retenue. DJEUNE, en revanche, n'a pas de page et n'est pas ajouté.
 djeun
 djeuns
+
+# Croisés en vérifiant WILI : WILLAYA et WILLAYAS, l'autre graphie de wilaya,
+# valides et absentes des deux lexiques. Morphalou ne porte que la graphie à
+# un L, que la compétition accepte aussi.
+willaya
+willayas
