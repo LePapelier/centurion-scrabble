@@ -821,3 +821,26 @@ willis
 # abréviations familières, mais la compétition a retenu l'une et pas l'autre.
 # MEC, MECS, MECANO, MECANIQUE, MECHA restent, tous valides.
 meca
+
+# Signalés en partie : WEKA et son pluriel WEKAS, le râle coureur de
+# Nouvelle-Zélande. Signature habituelle du faux ami — présents dans
+# Morphalou, absents de Dicollecte.
+#
+# 1mot.net refuse explicitement WEKAS, et la liste ODS des mots de quatre
+# lettres commençant par WE n'en compte que trois : WEBS, WECH et WESH.
+# WEKA n'y est pas. Le nom d'oiseau exotique est resté un nom d'oiseau
+# exotique — la compétition ne l'a pas lexicalisé.
+weka
+wekas
+
+# Signalé en partie : VITEX, le nom de genre latin de l'arbuste. Présent dans
+# Morphalou, absent de Dicollecte, et refusé explicitement par 1mot.net.
+#
+# C'est le cas d'école du nom scientifique que le jeu confond avec un mot :
+# le français courant dit GATTILIER, qui est valide et reste en place. Le
+# latin des botanistes, lui, n'entre pas à l'ODS.
+#
+# Rien d'autre à écarter autour : VITE, VITES, VITEMENT, VITELOTTE,
+# VITELLUS et tout le paradigme de VITRER restent, tous valides. Morphalou
+# ne porte d'ailleurs pas de pluriel VITEXS, déjà absent.
+vitex

@@ -309,3 +309,13 @@ mecques
 # qu'un seul, WAX lui-même. On n'ajoute donc surtout pas le pluriel, si
 # naturel qu'il paraisse à côté de JAJAS ou de DEJS.
 wax
+
+# Croisés en vérifiant WEKA : WECH et WESH, les deux interjections que la
+# compétition a retenues. Valides, et absentes des deux lexiques — c'est en
+# dressant la liste ODS des mots de quatre lettres en WE- qu'elles sont
+# apparues, aux côtés du seul WEBS que le jeu connaissait.
+#
+# Invariables toutes les deux, comme WAX : WECHS et WESHS ne sont pas
+# valides. On n'ajoute donc que les formes simples.
+wech
+wesh
