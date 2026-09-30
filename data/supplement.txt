@@ -299,3 +299,13 @@ willayas
 # en nom commun — « la mecque du surf ». Valides et absents des deux lexiques.
 mecque
 mecques
+
+# Signalé refusé alors qu'il est valide : WAX, le tissu imprimé d'Afrique de
+# l'Ouest — « une robe en wax ». Absent des deux lexiques : Morphalou ne le
+# recense pas, Dicollecte ne porte aucun mot en WAX-.
+#
+# Invariable, et c'est le piège : WAXS n'a pas de page, pas plus que WAXE,
+# WAXES, WAXER ou WAXEZ. La liste des mots débutant par WAX n'en contient
+# qu'un seul, WAX lui-même. On n'ajoute donc surtout pas le pluriel, si
+# naturel qu'il paraisse à côté de JAJAS ou de DEJS.
+wax
