@@ -785,3 +785,13 @@ teckez
 teckiez
 teckions
 teckons
+
+# Signalé : AEVIA et son pluriel AEVIAS. Aucune page sur 1mot.net après trois
+# recherches, et l'entrée est propre à Morphalou — la signature de PREMIC,
+# RAMPIN, PUSZTA, HYAS, OSONE et GODAN. C'est la règle de l'absence de page,
+# pas un refus explicite : preuve plus faible, mais constante.
+#
+# Le voisinage était déjà correct : AVIA, AVIE, EVIA et AVIDA, invalides,
+# étaient absents ; AVE, AVIVA et EVIDA, valides, sont bien là.
+aevia
+aevias
