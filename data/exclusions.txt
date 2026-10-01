@@ -844,3 +844,22 @@ wekas
 # VITELLUS et tout le paradigme de VITRER restent, tous valides. Morphalou
 # ne porte d'ailleurs pas de pluriel VITEXS, déjà absent.
 vitex
+
+# Signalé en partie : JUPER. Refusé explicitement par 1mot.net, comme
+# JUPERAIS, JUPAIT, JUPEE et JUPET — tous déjà absents.
+#
+# Le verbe existe pourtant en français : japper une jupe sur un kayak, et au
+# pronominal se vêtir d'une jupe. Mais la compétition ne l'a pas retenu, et
+# c'est la seule chose qui compte ici. Signature habituelle : présent dans
+# Morphalou, absent de Dicollecte.
+#
+# Un seul mot à retirer, et c'est inhabituel pour un verbe : sa conjugaison
+# n'était pas entrée avec lui. Morphalou n'en portait que l'infinitif, d'où
+# l'état bancal qu'a trouvé le joueur — JUPER accepté, JUPA, JUPEZ, JUPENT
+# et JUPERA refusés. JUPE, JUPES et JUPONS restent, valides comme noms.
+#
+# Rien d'autre à toucher autour : JUPIER, JUPIERE, JUPETTE et JUPITER sont
+# valides, vérifiés un par un, et déjà en place. JUPERET et JUPAILLE n'ont
+# pas de verdict — la recherche ne remonte pas leur page — ils restent donc
+# tels quels plutôt que d'être écartés sur une intuition.
+juper
