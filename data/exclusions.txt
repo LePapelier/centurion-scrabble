@@ -919,3 +919,71 @@ zarfs
 # restent — la jale est une grande cuve.
 jalet
 jalets
+
+# ------------------------------------------------------------------------
+# Les voisins des mots signalés, écartés d'un bloc
+# ------------------------------------------------------------------------
+#
+# Jusqu'ici on n'écartait que le mot vu en partie. À la demande du joueur, on
+# écarte désormais aussi ses voisins de même statut : acceptés par le jeu,
+# absents de l'ODS. Autant les retirer d'un coup que d'attendre de tomber
+# dessus un par un.
+#
+# Le voisinage est celui qu'on avait listé en traitant chaque signalement —
+# le préfixe effectivement examiné, pas davantage. Élargir au préfixe de
+# trois lettres a été essayé et abandonné : VIT- à lui seul emportait 136
+# mots, dont les paradigmes complets de VITAMINISER et de VITRIOLISER, qui
+# sont de vrais verbes. Le lexique reste un lexique de langue, plus large que
+# l'ODS ; on ne le rabote que là où le jeu a déjà fait trébucher.
+#
+# Ces trente-six entrées reposent sur la seule absence de l'ODS 8, qui a une
+# édition de retard — c'est ce qui avait fait manquer WESH. Si l'une d'elles
+# se révèle ajoutée à l'ODS 9, elle se restaure en retirant sa ligne.
+
+# JUP- (signalé : JUPER). Dérivés que seul Morphalou porte.
+juponesque
+juponnage
+juponnages
+juponnaille
+juponnard
+juponnement
+juponnerie
+juponnier
+juponniere
+
+# PREDO- (signalé : PREDONNE). PREDOMINEE et PREDOMINEES méritent une note :
+# prédominer est intransitif, il n'a donc pas de participe passé accordé.
+# L'ODS a raison de les refuser, et le jeu les acceptait.
+predominee
+predominees
+predorsal
+predorsale
+predorsales
+predorsaux
+predoseur
+predoseurs
+
+# ADJA- (signalé : ADJA).
+adjacence
+adjacences
+
+# ZAR- (signalé : ZARF). Ceux qu'on avait annoncé laisser en place.
+zaratite
+zaratites
+zart
+zarts
+
+# JAL- (signalé : JALET).
+jalage
+jalages
+jalapine
+jaleo
+jaleos
+jalonnage
+jalonnages
+jalonnette
+jalonnettes
+jalousete
+jalousite
+jalpaite
+jalpaites

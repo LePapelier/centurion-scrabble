@@ -358,3 +358,8 @@ zaraguinas
 # vérifié, le ñ se repliant sur n comme les accents.
 jalapeno
 jalapenos
+
+# Trouvés en passant les voisinages au crible : JUPITER et JUPITERS, le dieu
+# devenu nom commun, valides et absents des deux lexiques.
+jupiter
+jupiters
