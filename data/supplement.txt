@@ -352,3 +352,9 @@ zarma
 zarmas
 zaraguina
 zaraguinas
+
+# Croisés en vérifiant JALET : JALAPENO et JALAPENOS, le piment mexicain.
+# Valides, et absents des deux lexiques — pas même sous la graphie à tilde,
+# vérifié, le ñ se repliant sur n comme les accents.
+jalapeno
+jalapenos

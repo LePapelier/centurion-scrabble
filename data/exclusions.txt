@@ -908,3 +908,14 @@ adjas
 # la règle qu'on n'écarte que ce qui a été vu en partie.
 zarf
 zarfs
+
+# Signalé en partie : JALET et son pluriel JALETS, le caillou que lançait
+# l'arbalète à jalet. Refusés explicitement par 1mot.net, et absents de
+# l'ODS 8 comme de Dicollecte.
+#
+# Celui-là méritait d'être recoupé plutôt qu'écarté sur la seule signature :
+# c'est un vrai mot de la langue, littéraire et ancien, le genre que la
+# compétition retient souvent. Pas ici. JALE et JALES, eux, sont valides et
+# restent — la jale est une grande cuve.
+jalet
+jalets
