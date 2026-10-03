@@ -885,3 +885,13 @@ predonne
 # JUPON, JUPONS et tout le paradigme de JUPONNER.
 juperet
 jupaille
+
+# Signalé en partie : ADJA et son pluriel ADJAS, le peuple et la langue du
+# Bénin et du Togo. Signature habituelle — présents dans Morphalou, absents
+# de Dicollecte — et absents de l'ODS, où les seuls mots en ADJA- sont
+# ADJACENT et sa famille, et ADJAR et la sienne.
+#
+# Même histoire que WEKA : l'ethnonyme exotique que le lexique de langue
+# recense et que la compétition n'a pas retenu.
+adja
+adjas

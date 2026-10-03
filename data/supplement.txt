@@ -319,3 +319,15 @@ wax
 # valides. On n'ajoute donc que les formes simples.
 wech
 wesh
+
+# Croisés en vérifiant ADJA : ADJAR et ADJARE, de l'Adjarie en Géorgie, avec
+# leurs pluriels ADJARS et ADJARES. Valides, et absents des deux lexiques.
+#
+# Le jeu faisait exactement l'inverse de ce qu'il fallait sur ce voisinage —
+# il acceptait ADJA, qui n'existe pas, et refusait les quatre formes qui
+# existent. C'est la deuxième fois, après WEKA et WECH/WESH, qu'un mot
+# signalé en cache un autre à l'envers.
+adjar
+adjare
+adjars
+adjares
