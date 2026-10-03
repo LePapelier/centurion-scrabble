@@ -331,3 +331,24 @@ adjar
 adjare
 adjars
 adjares
+
+# Croisés en vérifiant ZARF, et c'est la plus grosse récolte jusqu'ici : dix
+# mots valides que le jeu refusait, tous absents des deux lexiques sources.
+#
+# ZARB et ZARBI, « bizarre » en verlan, avec le féminin ZARBIE et les
+# pluriels ZARBS, ZARBIS, ZARBIES — le ZARB est aussi la percussion iranienne.
+# ZARMA et ZARMAS, le peuple du Niger. ZARAGUINA et ZARAGUINAS, les coupeurs
+# de route d'Afrique centrale.
+#
+# ZARBI surtout manquait : c'est du français courant, pas du vocabulaire de
+# compétition.
+zarb
+zarbs
+zarbi
+zarbis
+zarbie
+zarbies
+zarma
+zarmas
+zaraguina
+zaraguinas

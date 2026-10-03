@@ -895,3 +895,16 @@ jupaille
 # recense et que la compétition n'a pas retenu.
 adja
 adjas
+
+# Signalé en partie : ZARF et son pluriel ZARFS, le porte-gobelet du café
+# turc. Signature habituelle — présent dans Morphalou, absent de Dicollecte —
+# et absent de l'ODS, où aucun mot de quatre lettres en Z- n'est ZARF.
+#
+# C'est un mot du Scrabble anglais, où il est fameux pour placer un Z et un F.
+# Le lexique de langue l'a recensé, la compétition francophone non.
+#
+# ZARATITE, ZARATITES, ZART et ZARTS partagent le même statut — acceptés par
+# le jeu, absents de l'ODS 8 — mais n'ont pas été signalés : ils restent, par
+# la règle qu'on n'écarte que ce qui a été vu en partie.
+zarf
+zarfs
