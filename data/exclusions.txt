@@ -987,3 +987,84 @@ jalousete
 jalousite
 jalpaite
 jalpaites
+
+# GYR- (signalé : GYR), soixante et une entrées.
+#
+# GYR et GYRS d'abord, le faucon gerfaut abrégé : refusé explicitement par
+# 1mot.net, et absent de la liste ODS des mots de trois lettres en G-, qui
+# compte GYM et GUR mais pas lui.
+#
+# Avec eux tout le paradigme de GYRER, que 1mot.net refuse aussi — trente-cinq
+# formes conjuguées d'un verbe que la compétition ne connaît pas. C'est le
+# cinquième verbe fantôme de la série, après REGIFLER, DUIRE, LUNER et TECKER.
+#
+# Le piège de LUNE/LUNES se tend ici aussi, et le filtre le désamorce tout
+# seul : GYRE et GYRES sont à la fois des formes de ce verbe et le nom du
+# grand tourbillon océanique, valide. Comme on n'écarte que ce qui manque à
+# l'ODS, ils restent sans qu'on ait à y penser. GYRIN et GYRINS de même.
+# C'est l'avantage de couper sur une liste plutôt que sur un motif.
+#
+# Le reste est le vocabulaire savant en GYRO- que le lexique de langue
+# recense et que l'ODS n'a pas retenu — il en garde pourtant beaucoup :
+# GYROPHARE, GYROSCOPE, GYROMITRE, GYROVAGUE, GYROBUS et vingt autres.
+gyr
+gyra
+gyrai
+gyraient
+gyrais
+gyrait
+gyrames
+gyrant
+gyras
+gyrasse
+gyrassent
+gyrasses
+gyrassiez
+gyrassions
+gyrat
+gyrates
+gyrateur
+gyrateurs
+gyratrix
+gyraviation
+gyravion
+gyrencephalie
+gyrent
+gyrer
+gyrera
+gyrerai
+gyreraient
+gyrerais
+gyrerait
+gyreras
+gyrerent
+gyrerez
+gyreriez
+gyrerions
+gyrerons
+gyreront
+gyrez
+gyriez
+gyrinide
+gyrinides
+gyrions
+gyrobicoupole
+gyrobicoupoles
+gyrocarpe
+gyrocarpees
+gyrocotyle
+gyrocotyles
+gyrodactyle
+gyrodactyles
+gyrodyne
+gyrofrequence
+gyrolite
+gyrolites
+gyromancie
+gyromancies
+gyrons
+gyrophaena
+gyrophaenas
+gyroplane
+gyroptere
+gyrs

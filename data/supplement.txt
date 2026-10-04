@@ -363,3 +363,12 @@ jalapenos
 # devenu nom commun, valides et absents des deux lexiques.
 jupiter
 jupiters
+
+# Trouvés en passant GYR- au crible : cinq valides que le jeu refusait.
+# GYRATION et GYRATIONS, GYROPODE et GYROPODES, et GYROS — le sandwich grec,
+# invariable, qui n'a pas de singulier GYRO : 1mot.net le refuse.
+gyration
+gyrations
+gyropode
+gyropodes
+gyros
