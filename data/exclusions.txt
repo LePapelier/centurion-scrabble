@@ -1068,3 +1068,24 @@ gyrophaenas
 gyroplane
 gyroptere
 gyrs
+
+# Signalé en partie : UQUE. Refusé explicitement par 1mot.net, absent de
+# Dicollecte, et l'ODS ne compte aucun mot commençant par UQU.
+#
+# Le voisinage par préfixe était vide — UQU- ne contenait que UQUE lui-même —
+# alors on a pris le vrai voisinage de jeu : les mots de quatre lettres en U-,
+# ceux que l'ordinateur peut poser. Sept partagent le même statut, tous des
+# curiosités que seul Morphalou recense : ULEX et UNIO sont des noms de genre
+# latins, comme VITEX l'était ; USIA est l'essence des philosophes grecs ;
+# UTAS, UCAS, ULAS et URFS sont des pluriels d'abréviations ou d'emprunts.
+#
+# UTAS et ULEX sont refusés explicitement eux aussi — pour ULEX, la seule
+# chose qui finisse ainsi dans l'ODS est CULEX.
+uque
+ucas
+ulas
+ulex
+unio
+urfs
+usia
+utas

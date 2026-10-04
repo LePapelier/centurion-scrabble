@@ -372,3 +372,11 @@ gyrations
 gyropode
 gyropodes
 gyros
+
+# Trouvés en passant les quatre lettres en U- au crible : trois valides que
+# le jeu refusait. UGNI, le cépage du cognac ; UMMA, la communauté des
+# croyants ; UTES, le pluriel du pick-up australien, dont le singulier UTE
+# était déjà là.
+ugni
+umma
+utes
