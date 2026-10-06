@@ -1172,3 +1172,31 @@ khanoun
 khanouns
 khasi
 khasis
+
+# ORD- (signalé : ORD), seize entrées. ORD et son féminin ORDE — l'ancien mot
+# pour « sale » — sont refusés explicitement par 1mot.net, et l'ODS ne compte
+# ni l'un ni l'autre parmi ses mots de trois lettres en O-, qui portent ORE
+# et ORS.
+#
+# Avec eux les dérivés que seul Morphalou recense : ORDANCHITE, ORDINATIF,
+# ORDONNANCEUR, ORDONNANCIERE, ORDURER, ORDUREUSE, ORDUREUX, ORDURICOLE,
+# ORDURIEREMENT et leurs flexions.
+#
+# ORDURIER, ORDURIERE et leurs pluriels restent, vérifiés valides, de même
+# que ORDRE, ORDO et tout ORDONNANCER.
+ord
+ordanchite
+ordanchites
+orde
+ordes
+ordinatif
+ordonnanceur
+ordonnanceurs
+ordonnanciere
+ordonnancieres
+ords
+ordurer
+ordureuse
+ordureux
+orduricole
+ordurierement

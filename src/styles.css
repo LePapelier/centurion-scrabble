@@ -1029,7 +1029,11 @@ svg {
   bottom: 0;
   left: 50%;
   width: calc(100cqw / var(--tuile-ratio));
-  transform: translateX(-50%);
+  /* Centrée par une marge négative, surtout pas par un `transform` : la tuile
+     est animée à la pose, et chaque image de `land` repose `transform`, ce qui
+     effaçait le centrage. La tuile sautait d'une demi-largeur pendant toute
+     sa chute. */
+  margin-left: calc(-50cqw / var(--tuile-ratio));
   display: grid;
   place-items: center;
   border-radius: calc(100cqw * var(--tuile-arrondi) / var(--tuile-ratio));
@@ -1363,7 +1367,7 @@ svg {
 .drag-ghost > .tile {
   left: 0;
   width: 100%;
-  transform: none;
+  margin-left: 0;
 }
 
 /* --- Actions ------------------------------------------------------ */

@@ -415,3 +415,15 @@ khariji
 kharijis
 kharijite
 kharijites
+
+# Trouvés en passant ORD- au crible : ORDINATICIEN et sa famille, que les
+# deux lexiques sources avaient oubliée.
+#
+# Le crible signalait aussi ORDONNANCASSIONS et ORDONNANCERAIENT comme
+# manquants. Ils ne le sont pas : ils font seize lettres, et la construction
+# s'arrête à quinze — la largeur du plateau. Un mot plus long ne peut être
+# posé nulle part. On ne les ajoute donc pas.
+ordinaticien
+ordinaticienne
+ordinaticiennes
+ordinaticiens
