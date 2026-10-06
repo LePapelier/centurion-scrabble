@@ -79,8 +79,8 @@ const THEMES = [
   {
     id: 'verre',
     name: 'Verre',
-    blurb: 'Panneaux et tuiles dépolis.',
-    swatch: ['#16475f', '#9fc6d8', '#eaf6fc'],
+    blurb: 'Ciel, eau et verre lustré.',
+    swatch: ['#1b7fa6', '#6ce8a8', '#eafaff'],
   },
 ];
 const NAME_KEY = 'centurion-scrabble/nom';
@@ -211,7 +211,11 @@ export class App {
     } catch {
       /* stockage indisponible : on garde le réglage par défaut */
     }
-    this.sons = new Sons(sonActif);
+    /* Le thème est déjà posé sur `<html>` par le script de l'en-tête : on le
+       lit là plutôt que de relire le stockage, et le son part de la bonne
+       matière dès le premier claquement. */
+    this.theme = document.documentElement.dataset.theme || 'classique';
+    this.sons = new Sons(sonActif, this.theme);
     this.sons.surveiller();
 
     /** Coup en attente d'un verdict d'optimalité : {id, score}. */
@@ -424,6 +428,8 @@ export class App {
     // Le thème par défaut n'écrit pas d'attribut : il est le `:root` nu.
     if (id === 'classique') racine.removeAttribute('data-theme');
     else racine.setAttribute('data-theme', id);
+    // La matière du décor s'entend aussi : le timbre suit.
+    this.sons.setTimbre(id);
     try {
       localStorage.setItem(THEME_KEY, id);
     } catch {

@@ -55,6 +55,26 @@
      tuile d'ivoire sur feutre et une tuile de verre dépoli n'ont pas la même
      matière. Elles restent dans tous les cas franches et contrastées : c'est
      ce qu'on lit en permanence. */
+  /* Le panneau des menus. Il gardait son parchemin dans tous les décors,
+     ce qui faisait du jeu deux choses différentes selon qu'on jouait ou
+     qu'on réglait. */
+  --panneau: linear-gradient(172deg, #f5ecd3 0%, #eee0bd 60%, #e6d4a8 100%);
+  --panneau-texte: #2b1f12;
+  --panneau-texte-dim: #6e5b42;
+  --panneau-surface: rgb(90 60 25 / 0.07);
+  --panneau-surface-2: rgb(90 60 25 / 0.1);
+  --panneau-filet: rgb(90 60 25 / 0.28);
+  --panneau-valid: #2f7d55;
+  --panneau-gold: #9a7424;
+  --panneau-danger: #a8331f;
+  --panneau-titre: #7a2418;
+  /* Double filet d'encadrement puis lueur interne, repris tels quels par
+     chaque décor avec ses propres métaux. */
+  --panneau-cadre:
+    inset 0 0 0 6px #f3e8cc,
+    inset 0 0 0 7px #b99a5b,
+    inset 0 0 40px rgb(120 80 30 / 0.18);
+
   --tuile-face: linear-gradient(165deg, #fdf3dd 0%, var(--tile) 55%, var(--tile-edge) 100%);
   --tuile-joker: linear-gradient(165deg, #f6efff 0%, var(--tile-blank) 100%);
   --tuile-relief: inset 0 -1.5px 0 rgb(0 0 0 / 0.18);
@@ -134,6 +154,22 @@ html[data-theme='centurion'] {
     inset 0 1px 0 rgb(255 255 255 / 0.6),
     inset 0 -2px 0 rgb(90 60 20 / 0.22);
 
+  /* Tablette de marbre, filets de bronze. */
+  --panneau: linear-gradient(172deg, #f4ead2 0%, #e6d8b6 60%, #d4c096 100%);
+  --panneau-texte: #332009;
+  --panneau-texte-dim: #74582e;
+  --panneau-surface: rgb(110 70 20 / 0.08);
+  --panneau-surface-2: rgb(110 70 20 / 0.12);
+  --panneau-filet: rgb(110 70 20 / 0.32);
+  --panneau-valid: #2c6f4d;
+  --panneau-gold: #8a6420;
+  --panneau-danger: #9e2b25;
+  --panneau-titre: #8a2b1d;
+  --panneau-cadre:
+    inset 0 0 0 6px #f6edd6,
+    inset 0 0 0 7px #a97c2c,
+    inset 0 0 40px rgb(120 70 20 / 0.2);
+
   --cell: #2b1a12;
   --cell-line: #3a251a;
   /* Verdigris pour les lettres, pourpre et sang pour les mots : la palette
@@ -190,6 +226,23 @@ html[data-theme='espace'] {
     inset 0 1px 0 rgb(255 255 255 / 0.85),
     inset 0 -2px 0 rgb(40 52 92 / 0.28);
 
+  /* Hublot : panneau sombre, filets d'acier, texte clair. Un parchemin dans
+     l'espace n'aurait aucun sens. */
+  --panneau: linear-gradient(172deg, #1d2748 0%, #161e3a 60%, #10162c 100%);
+  --panneau-texte: #eaeefb;
+  --panneau-texte-dim: #9aa6cc;
+  --panneau-surface: rgb(190 205 255 / 0.08);
+  --panneau-surface-2: rgb(190 205 255 / 0.13);
+  --panneau-filet: rgb(190 205 255 / 0.22);
+  --panneau-valid: #4fe0c6;
+  --panneau-gold: #ffd77a;
+  --panneau-danger: #f08a5d;
+  --panneau-titre: #ffd77a;
+  --panneau-cadre:
+    inset 0 0 0 6px rgb(120 140 200 / 0.14),
+    inset 0 0 0 7px rgb(150 170 230 / 0.3),
+    inset 0 0 50px rgb(80 120 220 / 0.18);
+
   --cell: #141c3a;
   --cell-line: #1e2850;
   --dl: #27518f;
@@ -198,76 +251,120 @@ html[data-theme='espace'] {
   --tw: #a53a74;
 }
 
-/* --- Verre : panneaux dépolis sur fond coloré --------------------- */
+/* --- Verre : Frutiger Aero, ciel, eau et vernis -------------------- */
 html[data-theme='verre'] {
-  --bg: #091a2b;
-  --felt: #16475f;
-  /* Un fond franchement coloré, sans quoi le dépoli n'a rien à laisser
-     passer : du verre devant du noir reste du noir. */
+  --bg: #0a3a52;
+  --felt: #1b86a8;
+  /* Ciel en haut, eau verte en bas. La lumière est posée au-dessus du cadre,
+     centrée et hors champ : au coin supérieur gauche, elle tombait en plein
+     sur le bandeau des scores et les effaçait. */
   --fond:
-    radial-gradient(46% 34% at 14% 16%, rgb(64 196 220 / 0.5) 0%, transparent 70%),
-    radial-gradient(44% 34% at 86% 24%, rgb(150 96 230 / 0.45) 0%, transparent 72%),
-    radial-gradient(52% 40% at 62% 86%, rgb(235 150 70 / 0.34) 0%, transparent 74%),
-    linear-gradient(165deg, #10324a 0%, var(--bg) 100%);
-  --grain: none;
-  --cadre: linear-gradient(158deg, rgb(255 255 255 / 0.3) 0%, rgb(255 255 255 / 0.12) 45%, rgb(255 255 255 / 0.06) 100%);
-  --creux: rgb(4 16 26 / 0.3);
-  --porte: linear-gradient(180deg, rgb(255 255 255 / 0.26) 0%, rgb(255 255 255 / 0.12) 55%, rgb(255 255 255 / 0.06) 100%);
-  --levre: linear-gradient(180deg, rgb(255 255 255 / 0.34) 0%, rgb(255 255 255 / 0.14) 55%, rgb(255 255 255 / 0.05) 100%);
+    radial-gradient(72% 46% at 50% -10%, rgb(196 247 255 / 0.55) 0%, transparent 72%),
+    radial-gradient(58% 42% at 84% 98%, rgb(108 232 168 / 0.42) 0%, transparent 74%),
+    radial-gradient(48% 34% at 10% 88%, rgb(64 196 220 / 0.3) 0%, transparent 72%),
+    linear-gradient(178deg, #2ba9cb 0%, #1b7fa6 36%, #0f5476 70%, var(--bg) 100%);
+  /* Des bulles, pas du grain : le motif se répète comme le feutre, mais ce
+     qu'il sème sont des gouttes, chacune avec son reflet. */
+  --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cg fill='none'%3E%3Ccircle cx='54' cy='72' r='17' fill='%23fff' opacity='.07'/%3E%3Ccircle cx='48' cy='64' r='5' fill='%23fff' opacity='.16'/%3E%3Ccircle cx='212' cy='38' r='11' fill='%23fff' opacity='.06'/%3E%3Ccircle cx='208' cy='33' r='3.5' fill='%23fff' opacity='.15'/%3E%3Ccircle cx='136' cy='196' r='23' fill='%23fff' opacity='.05'/%3E%3Ccircle cx='127' cy='184' r='7' fill='%23fff' opacity='.14'/%3E%3Ccircle cx='265' cy='168' r='9' fill='%23fff' opacity='.07'/%3E%3Ccircle cx='262' cy='164' r='3' fill='%23fff' opacity='.16'/%3E%3Ccircle cx='32' cy='244' r='13' fill='%23fff' opacity='.06'/%3E%3Ccircle cx='27' cy='238' r='4' fill='%23fff' opacity='.15'/%3E%3C/g%3E%3C/svg%3E");
 
-  --surface: rgb(255 255 255 / 0.13);
-  --surface-2: rgb(255 255 255 / 0.18);
-  --line: rgb(255 255 255 / 0.32);
-  --text: #f4fafe;
-  --text-dim: #c0d6e4;
-  --accent: #ff6b6b;
-  --accent-dark: #c43d4e;
-  --valid: #6ff0b8;
-  --valid-dark: #1f7a5a;
+  /* Le vernis de l'époque : moitié haute claire, cassure nette au milieu,
+     moitié basse plus sourde. C'est ce liseré dur qui fait l'effet, bien plus
+     qu'un dégradé continu. */
+  --cadre:
+    linear-gradient(180deg,
+      rgb(255 255 255 / 0.52) 0%,
+      rgb(255 255 255 / 0.26) 49.9%,
+      rgb(255 255 255 / 0.09) 50%,
+      rgb(255 255 255 / 0.2) 100%);
+  --creux: rgb(4 32 48 / 0.3);
+  --porte:
+    linear-gradient(180deg,
+      rgb(255 255 255 / 0.5) 0%,
+      rgb(255 255 255 / 0.24) 49.9%,
+      rgb(255 255 255 / 0.08) 50%,
+      rgb(255 255 255 / 0.18) 100%);
+  --levre:
+    linear-gradient(180deg, rgb(255 255 255 / 0.42) 0%, rgb(255 255 255 / 0.14) 55%, rgb(255 255 255 / 0.06) 100%);
+
+  --surface: rgb(255 255 255 / 0.14);
+  --surface-2: rgb(255 255 255 / 0.2);
+  --line: rgb(255 255 255 / 0.36);
+  --text: #f7fdff;
+  --text-dim: #bfe2ef;
+  --accent: #ff7a59;
+  --accent-dark: #c6462c;
+  --valid: #76f0b4;
+  --valid-dark: #1d8a60;
   --gold: #ffd98a;
+  --danger: #ff9a62;
 
-  /* La tuile est du verre elle aussi, mais du verre épais : assez opaque pour
-     que la lettre se détache, assez clair pour que le fond coloré se devine
-     au travers. Pas de flou propre — le plateau derrière est déjà dépoli, et
-     un `backdrop-filter` par tuile se paierait cher sur un téléphone. */
-  --tile: rgb(255 255 255 / 0.82);
-  --tile-blank: rgb(228 214 255 / 0.84);
-  --tile-edge: rgb(188 219 236 / 0.72);
-  --tile-text: #0e2432;
+  /* La tuile est une pastille vernie : le même liseré de vernis que le cadre,
+     sur un blanc assez franc pour que la lettre ne discute pas. */
+  --tile: rgb(255 255 255 / 0.95);
+  --tile-blank: rgb(232 220 255 / 0.95);
+  --tile-edge: rgb(188 226 242 / 0.9);
+  --tile-text: #0c2d3e;
   --tuile-face:
-    linear-gradient(165deg, rgb(255 255 255 / 0.92) 0%, rgb(236 248 254 / 0.8) 52%, rgb(190 221 238 / 0.7) 100%);
+    linear-gradient(180deg,
+      rgb(255 255 255 / 0.98) 0%,
+      rgb(233 250 255 / 0.95) 49.9%,
+      rgb(196 234 248 / 0.94) 50%,
+      rgb(228 249 255 / 0.96) 100%);
   --tuile-joker:
-    linear-gradient(165deg, rgb(250 246 255 / 0.92) 0%, rgb(212 196 246 / 0.78) 100%);
+    linear-gradient(180deg,
+      rgb(252 249 255 / 0.98) 0%,
+      rgb(236 226 255 / 0.95) 49.9%,
+      rgb(210 193 246 / 0.94) 50%,
+      rgb(238 230 255 / 0.96) 100%);
   --tuile-relief:
-    inset 0 1px 0 rgb(255 255 255 / 0.9),
-    inset 0 0 0 1px rgb(255 255 255 / 0.45),
-    inset 0 -1.5px 0 rgb(20 60 85 / 0.18);
-  --tuile-relief-main:
-    0 2px 6px rgb(6 26 40 / 0.35),
     inset 0 1px 0 rgb(255 255 255 / 0.95),
     inset 0 0 0 1px rgb(255 255 255 / 0.5),
-    inset 0 -2px 0 rgb(20 60 85 / 0.14);
+    inset 0 -1.5px 0 rgb(12 60 85 / 0.16);
+  --tuile-relief-main:
+    0 2px 5px rgb(4 34 52 / 0.32),
+    inset 0 1px 0 rgb(255 255 255 / 1),
+    inset 0 0 0 1px rgb(255 255 255 / 0.55),
+    inset 0 -2px 0 rgb(12 60 85 / 0.12);
 
-  /* Cases translucides : c'est le fond coloré qui les traverse, pas une
-     teinte posée dessus. */
-  --cell: rgb(255 255 255 / 0.1);
-  --cell-line: rgb(255 255 255 / 0.2);
-  --dl: rgb(74 162 224 / 0.52);
-  --tl: rgb(46 108 186 / 0.6);
-  --dw: rgb(206 104 158 / 0.5);
-  --tw: rgb(232 96 82 / 0.56);
+  /* Panneau de verre lustré, texte sombre : le dialogue de l'époque. */
+  --panneau:
+    linear-gradient(180deg,
+      rgb(255 255 255 / 0.95) 0%,
+      rgb(236 250 255 / 0.9) 49.9%,
+      rgb(206 236 248 / 0.88) 50%,
+      rgb(234 250 255 / 0.93) 100%);
+  --panneau-texte: #0b2c3c;
+  --panneau-texte-dim: #46788c;
+  --panneau-surface: rgb(10 70 100 / 0.07);
+  --panneau-surface-2: rgb(10 70 100 / 0.11);
+  --panneau-filet: rgb(10 70 100 / 0.26);
+  --panneau-valid: #137a52;
+  --panneau-gold: #9a6f12;
+  --panneau-danger: #b33b1e;
+  --panneau-titre: #0d5a7a;
+  --panneau-cadre:
+    inset 0 0 0 6px rgb(255 255 255 / 0.6),
+    inset 0 0 0 7px rgb(120 190 215 / 0.65),
+    inset 0 0 40px rgb(80 170 210 / 0.18);
+
+  --cell: rgb(255 255 255 / 0.12);
+  --cell-line: rgb(255 255 255 / 0.24);
+  --dl: rgb(74 180 232 / 0.6);
+  --tl: rgb(40 128 200 / 0.66);
+  --dw: rgb(214 110 170 / 0.56);
+  --tw: rgb(244 118 86 / 0.62);
 }
 
 /* Le dépoli lui-même. Il n'est posé que sur ce thème : `backdrop-filter`
    force la composition de chaque panneau, et c'est cher sur un téléphone.
-   Les tuiles en sont exclues — elles restent franches et opaques. */
+   Les tuiles en sont exclues — elles sont déjà vernies et presque opaques. */
 html[data-theme='verre'] .board,
 html[data-theme='verre'] .rack,
 html[data-theme='verre'] .sheet,
 html[data-theme='verre'] .score-card,
 html[data-theme='verre'] .toast {
-  backdrop-filter: blur(16px) saturate(150%);
-  -webkit-backdrop-filter: blur(16px) saturate(150%);
+  backdrop-filter: blur(14px) saturate(150%);
+  -webkit-backdrop-filter: blur(14px) saturate(150%);
 }
 
 * {
@@ -1525,28 +1622,26 @@ svg {
    redéfinies (encre brune sur papier) : tout ce qui s'appuie dessus bascule
    sans règle dédiée. */
 .sheet {
-  --surface: rgb(90 60 25 / 0.07);
-  --surface-2: rgb(90 60 25 / 0.1);
-  --line: rgb(90 60 25 / 0.28);
-  --text: #2b1f12;
-  --text-dim: #6e5b42;
-  --valid: #2f7d55;
-  --gold: #9a7424;
-  --danger: #a8331f;
+  /* Le panneau redéfinit la palette pour ce qu'il contient : il est posé sur
+     le jeu, pas dedans. Les valeurs viennent du thème. */
+  --surface: var(--panneau-surface);
+  --surface-2: var(--panneau-surface-2);
+  --line: var(--panneau-filet);
+  --text: var(--panneau-texte);
+  --text-dim: var(--panneau-texte-dim);
+  --valid: var(--panneau-valid);
+  --gold: var(--panneau-gold);
+  --danger: var(--panneau-danger);
 
   width: min(420px, calc(100vw - 24px));
   margin: auto;
   padding: 24px 22px 16px;
   border: 0;
   border-radius: 3px;
-  background: linear-gradient(172deg, #f5ecd3 0%, #eee0bd 60%, #e6d4a8 100%);
+  background: var(--panneau);
   color: var(--text);
   /* Double filet d'encadrement, puis ombre portée sur la table. */
-  box-shadow:
-    inset 0 0 0 6px #f3e8cc,
-    inset 0 0 0 7px #b99a5b,
-    inset 0 0 40px rgb(120 80 30 / 0.18),
-    0 24px 60px rgb(0 0 0 / 0.6);
+  box-shadow: var(--panneau-cadre), 0 24px 60px rgb(0 0 0 / 0.6);
 }
 
 .sheet[open] {
@@ -1586,7 +1681,10 @@ svg {
   font-family: var(--display);
   font-size: 1.25rem;
   font-weight: 700;
-  color: #7a2418;
+  /* Le titre suivait le parchemin, en rouge sombre, dans tous les décors : il
+     disparaissait sur le panneau sombre d'Espace. Il prend la couleur de
+     titre du thème. */
+  color: var(--panneau-titre);
   text-align: center;
 }
 
@@ -1610,12 +1708,22 @@ svg {
   transition: background 0.15s;
 }
 
-.sheet-item:hover { background: #26313e; }
+.sheet-item:hover { background: var(--panneau-surface-2); }
 .sheet-item.danger { color: var(--danger); }
 
 .sheet .btn-ghost {
   width: 100%;
   margin-top: 4px;
+  /* Le panneau des réglages a doublé de hauteur en accueillant les thèmes :
+     sur un écran court il faut le faire défiler, et « Fermer » partait hors
+     de vue. Il reste collé en bas de la zone visible. Le fond reprend celui
+     du panneau pour que le contenu ne transparaisse pas dessous. */
+  position: sticky;
+  bottom: -16px;
+  z-index: 1;
+  padding-block: 10px;
+  background: var(--panneau);
+  background-attachment: local;
 }
 
 .letter-grid {

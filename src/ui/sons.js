@@ -45,9 +45,35 @@ const PENTATONIQUE = [
   4186.01, 4698.64, 5274.04,
 ];
 
+/**
+ * Un timbre par décor : la matière du jeu s'entend autant qu'elle se voit.
+ *
+ * Plutôt que de réécrire les vingt bruitages quatre fois, chaque timbre agit
+ * sur les deux seuls endroits qui produisent du son — le claquement filtré et
+ * la note — par de simples facteurs. Les intentions écrites dans `jouer` (ce
+ * qui est sourd, ce qui monte, ce qui se remarque) restent donc intactes d'un
+ * décor à l'autre ; seule la matière change.
+ *
+ * `q` est la résonance du filtre : plus elle est haute, plus le bruit blanc
+ * ressort autour d'une seule fréquence. C'est ce qui sépare le bois mat, qui
+ * ne résonne pas, du bronze et du verre, qui tintent.
+ */
+export const TIMBRES = {
+  // Bois : le son d'origine, laissé tel quel. Tous les facteurs valent un.
+  classique: { claqueFreq: 1, claqueQ: 1, claqueDuree: 1, claqueVolume: 1, noteFreq: 1, noteDuree: 1, noteVolume: 1, noteForme: null },
+  // Bronze et pierre : plus grave, ça résonne et ça traîne.
+  centurion: { claqueFreq: 0.65, claqueQ: 2.4, claqueDuree: 1.4, claqueVolume: 1, noteFreq: 0.75, noteDuree: 1.6, noteVolume: 0.95, noteForme: 'triangle' },
+  // Vide : rien ne claque dans l'espace. Un ping clair qui s'éteint longtemps,
+  // et des sinusoïdes, sans la moindre aspérité.
+  espace: { claqueFreq: 1.35, claqueQ: 6, claqueDuree: 2, claqueVolume: 0.65, noteFreq: 1, noteDuree: 2, noteVolume: 0.9, noteForme: 'sine' },
+  // Verre et eau : court, très clair, cristallin.
+  verre: { claqueFreq: 1.9, claqueQ: 9, claqueDuree: 1.4, claqueVolume: 0.7, noteFreq: 1.5, noteDuree: 1.3, noteVolume: 0.85, noteForme: 'sine' },
+};
+
 export class Sons {
-  constructor(actifs = true) {
+  constructor(actifs = true, timbre = 'classique') {
     this.actifs = actifs;
+    this.timbre = TIMBRES[timbre] ?? TIMBRES.classique;
     /** @type {AudioContext|null} créé au premier geste, jamais avant. */
     this.ctx = null;
     this.maitre = null;
@@ -127,9 +153,19 @@ export class Sons {
    * La fréquence du filtre fait toute la matière — bas, c'est une tuile lourd
    * sur le plateau ; haut, c'est une tuile qu'on effleure.
    */
+  /** Change de matière. Le prochain son joué sonnera du nouveau décor. */
+  setTimbre(nom) {
+    this.timbre = TIMBRES[nom] ?? TIMBRES.classique;
+  }
+
   claquer({ freq = 1400, duree = 0.06, volume = 0.3, retard = 0, q = 1.4 }) {
     const ctx = this.ctx;
     const t = ctx.currentTime + retard;
+    const timbre = this.timbre;
+    freq *= timbre.claqueFreq;
+    duree *= timbre.claqueDuree;
+    volume *= timbre.claqueVolume;
+    q *= timbre.claqueQ;
 
     const source = ctx.createBufferSource();
     source.buffer = this.bruit;
@@ -154,6 +190,11 @@ export class Sons {
   note({ freq, duree = 0.18, volume = 0.16, retard = 0, forme = 'triangle' }) {
     const ctx = this.ctx;
     const t = ctx.currentTime + retard;
+    const timbre = this.timbre;
+    freq *= timbre.noteFreq;
+    duree *= timbre.noteDuree;
+    volume *= timbre.noteVolume;
+    forme = timbre.noteForme ?? forme;
 
     const osc = ctx.createOscillator();
     osc.type = forme;
