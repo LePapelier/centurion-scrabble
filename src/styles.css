@@ -128,36 +128,28 @@ svg {
 /* Structure                                                           */
 /* ------------------------------------------------------------------ */
 
-/* Forme d'une tuile, partagée par le plateau, le chevalet et la tuile tenue
-   au glissement.
+/* Forme d'une tuile, partagée par le plateau et le chevalet.
 
-   `--tuile` est le côté d'une case du plateau, en pixels ; le script le mesure
-   et le publie sur la racine (voir `suivreTailleTuile`). Le CSS seul ne peut
-   pas le calculer : plateau et chevalet vivent dans deux conteneurs
-   différents, et le premier se dimensionne sur une hauteur que le second ne
-   peut pas lire.
-
-   La valeur de repli ne sert qu'à la toute première image, avant la mesure. */
+   Les deux ne font pas la même taille — le chevalet les veut plus grosses,
+   assez pour les attraper au doigt — mais ils en gardent les proportions.
+   Chaque tuile tient donc sa forme de sa propre largeur, par les unités de
+   conteneur : la case du plateau et l'emplacement du chevalet sont tous deux
+   des conteneurs, et `cqw` y désigne la largeur de l'un ou de l'autre. */
 :root {
-  --tuile: 24px;
   /* Hauteur divisée par largeur. Une tuile de Scrabble n'est pas un carré
-     parfait : elle est un peu plus haute que large. La tuile se loge donc en
-     hauteur dans sa case et laisse paraître un filet de plateau de chaque
-     côté — comme sur un vrai plateau. */
+     parfait : elle est un peu plus haute que large. Sur le plateau, elle se
+     loge en hauteur dans sa case et laisse paraître un filet de chaque côté. */
   --tuile-ratio: 1.06;
-  /* Arrondi exprimé en fraction du côté, et non en pixels : sinon le même
-     rayon s'applique à une tuile de 20 px sur téléphone et de 40 px sur
-     écran large, et la tuile paraît deux fois plus ronde en bas. */
+  /* Arrondi en fraction de la largeur de la tuile, et non en pixels : sinon
+     le même rayon s'applique à une tuile de 20 px et à une de 40 px, et la
+     petite paraît deux fois plus ronde. */
   --tuile-arrondi: 0.085;
-
-  --tuile-l: calc(var(--tuile) / var(--tuile-ratio));
-  --tuile-h: var(--tuile);
-  --tuile-r: calc(var(--tuile-l) * var(--tuile-arrondi));
   /* La lettre occupe 64,7 % de la largeur de la tuile, la valeur 47,6 % de la
-     lettre. Une seule formule pour les deux endroits : c'est ce qui garantit
-     qu'une tuile du chevalet et une tuile posée sont identiques. */
-  --tuile-police: calc(var(--tuile-l) * 0.647);
+     lettre. Mêmes nombres des deux côtés : c'est ce qui fait qu'une tuile du
+     chevalet et une tuile posée se ressemblent malgré leur taille. */
+  --tuile-lettre: 0.647;
 }
+
 
 .app {
   /* Le plateau est carré : sa taille est bornée par la largeur disponible et
@@ -630,6 +622,12 @@ svg {
   position: relative;
   display: grid;
   place-items: center;
+  /* Conteneur : c'est ce qui permet à la tuile de tirer sa forme — largeur,
+     arrondi, corps de la lettre — de la case plutôt que du plateau entier.
+     La case garde sa propre taille de texte, qui se mesure sur le plateau :
+     un élément n'interroge jamais son propre conteneur, seulement celui de
+     ses ancêtres. */
+  container-type: inline-size;
   border-radius: 2.5px;
   background: var(--cell);
   font-size: 2.35cqw;
@@ -809,14 +807,14 @@ svg {
   top: 0;
   bottom: 0;
   left: 50%;
-  width: calc(100% / var(--tuile-ratio));
+  width: calc(100cqw / var(--tuile-ratio));
   transform: translateX(-50%);
   display: grid;
   place-items: center;
-  border-radius: var(--tuile-r);
+  border-radius: calc(100cqw * var(--tuile-arrondi) / var(--tuile-ratio));
   background: linear-gradient(165deg, #fdf3dd 0%, var(--tile) 55%, var(--tile-edge) 100%);
   color: var(--tile-text);
-  font-size: var(--tuile-police);
+  font-size: calc(100cqw * var(--tuile-lettre) / var(--tuile-ratio));
   font-weight: 700;
   line-height: 1;
   box-shadow: inset 0 -1.5px 0 rgb(0 0 0 / 0.18);
@@ -996,13 +994,11 @@ svg {
 .rack {
   position: relative;
   display: grid;
-  /* Sept colonnes à la taille d'une tuile, et non sept parts de la largeur
-     disponible : le porte-lettres se resserre sur ses tuiles et se centre
-     sous le plateau, comme un vrai. */
-  grid-template-columns: repeat(7, var(--tuile-l));
-  justify-content: center;
-  width: fit-content;
-  margin: 0 auto;
+  /* Sept parts de la largeur disponible. Les tuiles sont volontairement plus
+     grosses que celles du plateau : à la taille d'une case, elles tombaient à
+     vingt pixels de large sur un téléphone, trop peu pour être attrapées au
+     doigt. Elles en gardent la forme, pas la taille. */
+  grid-template-columns: repeat(7, 1fr);
   gap: 5px;
   padding: 7px 8px 15px;
   border-radius: 7px 7px 10px 10px;
@@ -1035,13 +1031,10 @@ svg {
 .rack-slot {
   position: relative;
   z-index: 1;
-  /* Même taille qu'une case du plateau. Le chevalet répartissait sept tuiles
-     sur la largeur du plateau, qui en loge quinze : elles sortaient deux fois
-     trop grandes, et une tuile changeait de taille en passant du chevalet au
-     plateau. */
-  width: var(--tuile-l);
-  height: var(--tuile-h);
-  border-radius: calc(var(--tuile-r) * 1.25);
+  container-type: inline-size;
+  /* La forme d'une tuile, pas celle d'un carré. */
+  aspect-ratio: 1 / var(--tuile-ratio);
+  border-radius: calc(100cqw * var(--tuile-arrondi) * 1.25);
   background: rgb(38 24 12 / 0.55);
   box-shadow: inset 0 2px 4px rgb(0 0 0 / 0.5), inset 0 -1px 0 rgb(255 255 255 / 0.06);
 }
@@ -1051,13 +1044,13 @@ svg {
   inset: 0;
   display: grid;
   place-items: center;
-  border-radius: var(--tuile-r);
+  border-radius: calc(100cqw * var(--tuile-arrondi));
   background: linear-gradient(165deg, #fdf3dd 0%, var(--tile) 55%, var(--tile-edge) 100%);
   color: var(--tile-text);
-  /* La même formule que sur le plateau, et non plus une proportion du
-     chevalet : une tuile prise au chevalet et posée sur le plateau ne change
-     plus ni de taille, ni d'arrondi, ni de corps de lettre. */
-  font-size: var(--tuile-police);
+  /* Les mêmes fractions que sur le plateau, appliquées à la largeur d'ici :
+     la tuile est plus grosse, mais sa lettre et son arrondi y tiennent la
+     même place. */
+  font-size: calc(100cqw * var(--tuile-lettre));
   font-weight: 700;
   line-height: 1;
   box-shadow: 0 2px 0 rgb(0 0 0 / 0.35), inset 0 -2px 0 rgb(0 0 0 / 0.12);
