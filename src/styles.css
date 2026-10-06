@@ -50,6 +50,16 @@
      les blocs `[data-theme]`. */
   --fond: radial-gradient(110% 80% at 50% 30%, var(--felt) 0%, #0f3122 55%, var(--bg) 100%);
   --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .55 0 0 0 -.2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  /* La face d'une tuile : son dégradé, celui du joker, et le relief gravé
+     dessus. Un thème les reprend comme il reprend le fond ou le cadre — une
+     tuile d'ivoire sur feutre et une tuile de verre dépoli n'ont pas la même
+     matière. Elles restent dans tous les cas franches et contrastées : c'est
+     ce qu'on lit en permanence. */
+  --tuile-face: linear-gradient(165deg, #fdf3dd 0%, var(--tile) 55%, var(--tile-edge) 100%);
+  --tuile-joker: linear-gradient(165deg, #f6efff 0%, var(--tile-blank) 100%);
+  --tuile-relief: inset 0 -1.5px 0 rgb(0 0 0 / 0.18);
+  --tuile-relief-main: 0 2px 0 rgb(0 0 0 / 0.35), inset 0 -2px 0 rgb(0 0 0 / 0.12);
+
   --cadre: linear-gradient(158deg, #9a7350 0%, #7c5a37 40%, #5a3f24 100%);
   --creux: #0c1f16;
   --porte: linear-gradient(180deg, #8d6844 0%, #7c5a37 38%, #6a4b2c 62%, #553b21 100%);
@@ -65,7 +75,7 @@
 /* Thèmes                                                              */
 /* ------------------------------------------------------------------ */
 
-/* Trois décors pour le même jeu.
+/* Quatre décors pour le même jeu.
 
    Les sélecteurs sont ancrés sur `html` à dessein : le sélecteur de thème
    porte `data-theme` sur chacun de ses boutons, et sans cette ancre chaque
@@ -75,8 +85,64 @@
    communes. Le thème se pose sur `<html>`, et un script minuscule dans l'en-tête
    le rétablit avant la première image pour éviter le clignotement.
 
-   Les tuiles restent opaques et contrastées dans les trois : c'est ce qu'on
-   lit en permanence, et un décor ne doit jamais se payer en lisibilité. */
+   Chacun va jusqu'aux tuiles : la matière d'une tuile fait autant le décor
+   que le fond. Mais toutes restent très lisibles — c'est ce qu'on regarde en
+   permanence, et un décor ne doit jamais se payer en lisibilité.
+
+   Le thème par défaut, Classique, est le `:root` nu plus haut : feutre vert,
+   bois, ivoire. Il ne porte pas d'attribut. */
+
+/* --- Centurion : marbre, bronze et pourpre impériale --------------- */
+html[data-theme='centurion'] {
+  --bg: #170d0a;
+  --felt: #3a1a14;
+  /* Lumière de torche sur de la pierre sombre, et non plus l'éclairage égal
+     d'une lampe de table. */
+  --fond:
+    radial-gradient(60% 42% at 50% 8%, rgb(226 158 72 / 0.22) 0%, transparent 70%),
+    radial-gradient(120% 92% at 50% 38%, var(--felt) 0%, #2a110d 52%, var(--bg) 100%);
+  --cadre: linear-gradient(158deg, #d8a84c 0%, #a97c2c 38%, #6d4a16 100%);
+  --creux: #140d09;
+  --porte: linear-gradient(180deg, #c99a44 0%, #a67a2b 38%, #85601f 62%, #5c4115 100%);
+  --levre: linear-gradient(180deg, #e0b662 0%, #b08431 55%, #6a4b18 100%);
+
+  --surface: rgb(26 12 8 / 0.55);
+  --surface-2: rgb(26 12 8 / 0.7);
+  --line: rgb(226 184 87 / 0.22);
+  --text: #f6ead2;
+  --text-dim: #c3a480;
+  --accent: #b4302a;
+  --accent-dark: #7a1d19;
+  --valid: #6fc79a;
+  --valid-dark: #2d6b4c;
+  --gold: #e2b857;
+  --danger: #d9743a;
+
+  /* Travertin : une pierre claire veinée de chaud, le chiffre gravé. */
+  --tile: #ead9b6;
+  --tile-blank: #e5d2e8;
+  --tile-edge: #c4ab79;
+  --tile-text: #3a2613;
+  --tuile-face:
+    linear-gradient(165deg, #faf2de 0%, #ebdcba 52%, #cdb78c 100%);
+  --tuile-joker: linear-gradient(165deg, #f7effa 0%, #ddc9e4 100%);
+  --tuile-relief:
+    inset 0 1px 0 rgb(255 255 255 / 0.55),
+    inset 0 -1.5px 0 rgb(90 60 20 / 0.3);
+  --tuile-relief-main:
+    0 2px 0 rgb(60 38 12 / 0.45),
+    inset 0 1px 0 rgb(255 255 255 / 0.6),
+    inset 0 -2px 0 rgb(90 60 20 / 0.22);
+
+  --cell: #2b1a12;
+  --cell-line: #3a251a;
+  /* Verdigris pour les lettres, pourpre et sang pour les mots : la palette
+     d'un étendard, pas celle d'un plateau de salon. */
+  --dl: #3c6f62;
+  --tl: #27514a;
+  --dw: #6d2d58;
+  --tw: #9e2b25;
+}
 
 /* --- Espace : nébuleuse, étoiles, cadre d'acier ------------------- */
 html[data-theme='espace'] {
@@ -106,12 +172,23 @@ html[data-theme='espace'] {
   --gold: #ffd77a;
   --danger: #f08a5d;
 
-  /* Pierre de lune plutôt qu'ivoire : la tuile reste claire et très lisible,
-     mais prend le froid du décor. */
+  /* Pierre de lune plutôt qu'ivoire : claire et très lisible, mais froide,
+     avec une arête éclairée comme un caillou sous une lampe lointaine. */
   --tile: #e4e9f6;
   --tile-blank: #ded4ff;
-  --tile-edge: #b4bed6;
-  --tile-text: #1a2138;
+  --tile-edge: #aab6d2;
+  --tile-text: #141b30;
+  --tuile-face:
+    linear-gradient(165deg, #fbfcff 0%, #dfe6f6 50%, #aeb9d6 100%);
+  --tuile-joker: linear-gradient(165deg, #f6f2ff 0%, #cfc4f0 100%);
+  --tuile-relief:
+    inset 0 1px 0 rgb(255 255 255 / 0.8),
+    inset 0 -1.5px 0 rgb(40 52 92 / 0.35);
+  --tuile-relief-main:
+    0 2px 0 rgb(14 20 42 / 0.55),
+    0 0 10px rgb(150 180 255 / 0.22),
+    inset 0 1px 0 rgb(255 255 255 / 0.85),
+    inset 0 -2px 0 rgb(40 52 92 / 0.28);
 
   --cell: #141c3a;
   --cell-line: #1e2850;
@@ -148,6 +225,28 @@ html[data-theme='verre'] {
   --valid: #6ff0b8;
   --valid-dark: #1f7a5a;
   --gold: #ffd98a;
+
+  /* La tuile est du verre elle aussi, mais du verre épais : assez opaque pour
+     que la lettre se détache, assez clair pour que le fond coloré se devine
+     au travers. Pas de flou propre — le plateau derrière est déjà dépoli, et
+     un `backdrop-filter` par tuile se paierait cher sur un téléphone. */
+  --tile: rgb(255 255 255 / 0.82);
+  --tile-blank: rgb(228 214 255 / 0.84);
+  --tile-edge: rgb(188 219 236 / 0.72);
+  --tile-text: #0e2432;
+  --tuile-face:
+    linear-gradient(165deg, rgb(255 255 255 / 0.92) 0%, rgb(236 248 254 / 0.8) 52%, rgb(190 221 238 / 0.7) 100%);
+  --tuile-joker:
+    linear-gradient(165deg, rgb(250 246 255 / 0.92) 0%, rgb(212 196 246 / 0.78) 100%);
+  --tuile-relief:
+    inset 0 1px 0 rgb(255 255 255 / 0.9),
+    inset 0 0 0 1px rgb(255 255 255 / 0.45),
+    inset 0 -1.5px 0 rgb(20 60 85 / 0.18);
+  --tuile-relief-main:
+    0 2px 6px rgb(6 26 40 / 0.35),
+    inset 0 1px 0 rgb(255 255 255 / 0.95),
+    inset 0 0 0 1px rgb(255 255 255 / 0.5),
+    inset 0 -2px 0 rgb(20 60 85 / 0.14);
 
   /* Cases translucides : c'est le fond coloré qui les traverse, pas une
      teinte posée dessus. */
@@ -934,12 +1033,12 @@ svg {
   display: grid;
   place-items: center;
   border-radius: calc(100cqw * var(--tuile-arrondi) / var(--tuile-ratio));
-  background: linear-gradient(165deg, #fdf3dd 0%, var(--tile) 55%, var(--tile-edge) 100%);
+  background: var(--tuile-face);
   color: var(--tile-text);
   font-size: calc(100cqw * var(--tuile-lettre) / var(--tuile-ratio));
   font-weight: 700;
   line-height: 1;
-  box-shadow: inset 0 -1.5px 0 rgb(0 0 0 / 0.18);
+  box-shadow: var(--tuile-relief);
 }
 
 /* Le joker ne porte jamais de valeur : un vrai tuile vierge n'en a pas de
@@ -954,7 +1053,7 @@ svg {
    et rien ne le distinguerait plus d'une lettre ordinaire — sinon le chiffre
    manquant, trop discret au milieu d'un mot. */
 .tile.blank {
-  background: linear-gradient(165deg, #f6efff 0%, var(--tile-blank) 100%);
+  background: var(--tuile-joker);
 }
 
 /* La lettre est centrée dans la zone qui exclut le coin de la valeur : les
@@ -1170,7 +1269,7 @@ svg {
   display: grid;
   place-items: center;
   border-radius: calc(100cqw * var(--tuile-arrondi));
-  background: linear-gradient(165deg, #fdf3dd 0%, var(--tile) 55%, var(--tile-edge) 100%);
+  background: var(--tuile-face);
   color: var(--tile-text);
   /* Les mêmes fractions que sur le plateau, appliquées à la largeur d'ici :
      la tuile est plus grosse, mais sa lettre et son arrondi y tiennent la
@@ -1178,7 +1277,7 @@ svg {
   font-size: calc(100cqw * var(--tuile-lettre));
   font-weight: 700;
   line-height: 1;
-  box-shadow: 0 2px 0 rgb(0 0 0 / 0.35), inset 0 -2px 0 rgb(0 0 0 / 0.12);
+  box-shadow: var(--tuile-relief-main);
   transition: transform 0.12s, box-shadow 0.12s;
 }
 
@@ -1533,7 +1632,7 @@ svg {
   padding: 0 9% 7% 0;
   border-radius: 4px;
   /* La fenêtre montre la tuile telle qu'elle sera posée : teinte de joker comprise. */
-  background: linear-gradient(165deg, #f6efff 0%, var(--tile-blank) 100%);
+  background: var(--tuile-joker);
   color: var(--tile-text);
   font-weight: 700;
   font-size: 1.15rem;
@@ -1877,7 +1976,7 @@ svg {
   width: 64px;
   height: 64px;
   border-radius: 14px;
-  background: linear-gradient(165deg, #fdf3dd 0%, var(--tile) 55%, var(--tile-edge) 100%);
+  background: var(--tuile-face);
   color: var(--tile-text);
   font-size: 2rem;
   font-weight: 800;

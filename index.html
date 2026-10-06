@@ -18,8 +18,19 @@
          page s'afficherait une fraction de seconde dans le thème par défaut
          avant de basculer. */
       try {
-        var t = localStorage.getItem('centurion-scrabble/theme');
-        if (t && t !== 'centurion') document.documentElement.setAttribute('data-theme', t);
+        var k = 'centurion-scrabble/theme';
+        var t = localStorage.getItem(k);
+        /* « centurion » désignait le décor par défaut — feutre vert et bois —
+           avant qu'il ne devienne un thème romain à part entière. Qui l'avait
+           enregistré voulait le décor d'origine, aujourd'hui « classique » :
+           on le transpose une fois, sans quoi la bascule se ferait toute seule
+           au prochain chargement. */
+        if (t === 'centurion' && !localStorage.getItem(k + '-v2')) {
+          t = 'classique';
+          localStorage.setItem(k, t);
+        }
+        localStorage.setItem(k + '-v2', '1');
+        if (t && t !== 'classique') document.documentElement.setAttribute('data-theme', t);
       } catch (e) { /* stockage refusé : on garde le thème par défaut */ }
     </script>
   </head>

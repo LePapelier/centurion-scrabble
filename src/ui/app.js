@@ -59,22 +59,28 @@ const THEME_KEY = 'centurion-scrabble/theme';
  */
 const THEMES = [
   {
+    id: 'classique',
+    name: 'Classique',
+    blurb: 'Feutre vert, bois et ivoire.',
+    swatch: ['#16432f', '#7c5a37', '#f0e2c4'],
+  },
+  {
     id: 'centurion',
     name: 'Centurion',
-    blurb: 'Feutre vert et bois, le jeu de table.',
-    swatch: ['#16432f', '#7c5a37', '#c8412f'],
+    blurb: 'Marbre, bronze et pourpre impériale.',
+    swatch: ['#3a1a14', '#a97c2c', '#ead9b6'],
   },
   {
     id: 'espace',
     name: 'Espace',
-    blurb: 'Nébuleuse, étoiles et cadre d’acier.',
-    swatch: ['#141d42', '#4b5570', '#a855f7'],
+    blurb: 'Nébuleuse, acier et pierre de lune.',
+    swatch: ['#141d42', '#4b5570', '#dfe6f6'],
   },
   {
     id: 'verre',
     name: 'Verre',
-    blurb: 'Panneaux dépolis sur fond coloré.',
-    swatch: ['#16475f', '#9fc6d8', '#ff6b6b'],
+    blurb: 'Panneaux et tuiles dépolis.',
+    swatch: ['#16475f', '#9fc6d8', '#eaf6fc'],
   },
 ];
 const NAME_KEY = 'centurion-scrabble/nom';
@@ -416,7 +422,7 @@ export class App {
     this.theme = id;
     const racine = document.documentElement;
     // Le thème par défaut n'écrit pas d'attribut : il est le `:root` nu.
-    if (id === 'centurion') racine.removeAttribute('data-theme');
+    if (id === 'classique') racine.removeAttribute('data-theme');
     else racine.setAttribute('data-theme', id);
     try {
       localStorage.setItem(THEME_KEY, id);
@@ -427,7 +433,7 @@ export class App {
   }
 
   renderThemes() {
-    const actuel = this.theme ?? document.documentElement.dataset.theme ?? 'centurion';
+    const actuel = this.theme ?? document.documentElement.dataset.theme ?? 'classique';
     for (const option of $('themes').children) {
       option.classList.toggle('selected', option.dataset.theme === actuel);
     }
