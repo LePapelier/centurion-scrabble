@@ -389,3 +389,29 @@ fettuccines
 fettucine
 fettucines
 fetichiques
+
+# Croisés en vérifiant KHANI, et c'est le voisinage le plus déséquilibré
+# rencontré jusqu'ici : onze mots à écarter, quinze à ajouter.
+#
+# De l'ODS 8 : KHAKASSE et KHAKASSES, le peuple de Sibérie ; KHALKHA et
+# KHALKHAS, le mongol ; KHAMMESSAT et KHAMMESSATS, le métayage au cinquième ;
+# KHARIDJI et KHARIDJIS ; KHARTOUMAIS, KHARTOUMAISE et KHARTOUMAISES.
+khakasse
+khakasses
+khalkha
+khalkhas
+khammessat
+khammessats
+kharidji
+kharidjis
+khartoumais
+khartoumaise
+khartoumaises
+
+# De l'ODS 9, absents de la liste ODS 8 et confirmés valides un par un sur
+# 1mot.net : l'autre graphie, sans D, de la famille kharidjite. Le jeu portait
+# déjà KHARIDJITE et KHARIDJITES.
+khariji
+kharijis
+kharijite
+kharijites

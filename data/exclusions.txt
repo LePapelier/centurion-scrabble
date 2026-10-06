@@ -1151,3 +1151,24 @@ fetidement
 fetider
 fetuine
 fetuines
+
+# KHA- (signalé : KHANI), onze entrées. KHANI, le titre persan, est refusé
+# explicitement par 1mot.net, comme KHA lui-même. Tous deux dans Morphalou
+# seul, absents de Dicollecte.
+#
+# Avec eux les ethnonymes et titres que le lexique de langue recense et que
+# la compétition n'a pas retenus : KHAGHAN et KHAGHANS, KHAMITE, KHAMITIQUE,
+# KHAMTI, KHANOUN et KHANOUNS, KHASI et KHASIS.
+#
+# KHAN, KHANS, KHANAT et KHANATS restent, tous valides.
+kha
+khaghan
+khaghans
+khamite
+khamitique
+khamti
+khani
+khanoun
+khanouns
+khasi
+khasis
