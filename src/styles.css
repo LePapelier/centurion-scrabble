@@ -45,11 +45,130 @@
      jeu ne doit dépendre d'aucun téléchargement. */
   --display: 'Cinzel', 'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, serif;
 
+  /* Les grandes surfaces sont nommées plutôt qu'écrites en dur : c'est ce qui
+     permet à un thème de les reprendre sans toucher au reste. Voir plus bas
+     les blocs `[data-theme]`. */
+  --fond: radial-gradient(110% 80% at 50% 30%, var(--felt) 0%, #0f3122 55%, var(--bg) 100%);
+  --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .55 0 0 0 -.2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  --cadre: linear-gradient(158deg, #9a7350 0%, #7c5a37 40%, #5a3f24 100%);
+  --creux: #0c1f16;
+  --porte: linear-gradient(180deg, #8d6844 0%, #7c5a37 38%, #6a4b2c 62%, #553b21 100%);
+  --levre: linear-gradient(180deg, #9a7350 0%, #82603a 55%, #5e4224 100%);
   --radius: 8px;
   --shadow: 0 8px 24px rgb(0 0 0 / 0.35);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
 
   color-scheme: dark;
+}
+
+/* ------------------------------------------------------------------ */
+/* Thèmes                                                              */
+/* ------------------------------------------------------------------ */
+
+/* Trois décors pour le même jeu.
+
+   Les sélecteurs sont ancrés sur `html` à dessein : le sélecteur de thème
+   porte `data-theme` sur chacun de ses boutons, et sans cette ancre chaque
+   ligne s'appliquait son propre décor — texte sombre sur fond sombre, et le
+   choix devenait illisible. Chacun ne redéfinit que des variables : la
+   géométrie, les proportions des tuiles et toute la mise en page restent
+   communes. Le thème se pose sur `<html>`, et un script minuscule dans l'en-tête
+   le rétablit avant la première image pour éviter le clignotement.
+
+   Les tuiles restent opaques et contrastées dans les trois : c'est ce qu'on
+   lit en permanence, et un décor ne doit jamais se payer en lisibilité. */
+
+/* --- Espace : nébuleuse, étoiles, cadre d'acier ------------------- */
+html[data-theme='espace'] {
+  --bg: #04060f;
+  --felt: #141d42;
+  --fond:
+    radial-gradient(42% 32% at 78% 18%, rgb(142 68 220 / 0.38) 0%, transparent 70%),
+    radial-gradient(48% 36% at 18% 72%, rgb(32 118 198 / 0.34) 0%, transparent 72%),
+    radial-gradient(120% 90% at 50% 34%, var(--felt) 0%, #0a1030 48%, var(--bg) 100%);
+  /* Le champ d'étoiles remplace le grain du feutre : même procédé, un motif
+     répété en fond, mais des points nets au lieu d'un bruit. */
+  --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='260' height='260'%3E%3Cg fill='%23fff'%3E%3Ccircle cx='23' cy='41' r='1.1' opacity='.85'/%3E%3Ccircle cx='187' cy='29' r='.8' opacity='.6'/%3E%3Ccircle cx='96' cy='118' r='1.3' opacity='.9'/%3E%3Ccircle cx='238' cy='96' r='.7' opacity='.5'/%3E%3Ccircle cx='57' cy='205' r='1' opacity='.75'/%3E%3Ccircle cx='151' cy='178' r='.8' opacity='.55'/%3E%3Ccircle cx='211' cy='231' r='1.2' opacity='.8'/%3E%3Ccircle cx='128' cy='62' r='.6' opacity='.45'/%3E%3Ccircle cx='14' cy='139' r='.9' opacity='.65'/%3E%3Ccircle cx='172' cy='135' r='.6' opacity='.4'/%3E%3Ccircle cx='79' cy='9' r='.7' opacity='.5'/%3E%3Ccircle cx='245' cy='168' r='1' opacity='.7'/%3E%3C/g%3E%3C/svg%3E");
+  --cadre: linear-gradient(158deg, #7c88a8 0%, #4b5570 38%, #262d44 100%);
+  --creux: #060a1c;
+  --porte: linear-gradient(180deg, #6f7b9a 0%, #4b5570 38%, #39415c 62%, #242b40 100%);
+  --levre: linear-gradient(180deg, #7c88a8 0%, #525d7a 55%, #2b3248 100%);
+
+  --surface: rgb(8 12 32 / 0.55);
+  --surface-2: rgb(8 12 32 / 0.7);
+  --line: rgb(190 205 255 / 0.18);
+  --text: #eaeefb;
+  --text-dim: #9fabd0;
+  --accent: #a855f7;
+  --accent-dark: #6d28d9;
+  --valid: #4fe0c6;
+  --valid-dark: #1d6e63;
+  --gold: #ffd77a;
+  --danger: #f08a5d;
+
+  /* Pierre de lune plutôt qu'ivoire : la tuile reste claire et très lisible,
+     mais prend le froid du décor. */
+  --tile: #e4e9f6;
+  --tile-blank: #ded4ff;
+  --tile-edge: #b4bed6;
+  --tile-text: #1a2138;
+
+  --cell: #141c3a;
+  --cell-line: #1e2850;
+  --dl: #27518f;
+  --tl: #1b3a70;
+  --dw: #6d3a8c;
+  --tw: #a53a74;
+}
+
+/* --- Verre : panneaux dépolis sur fond coloré --------------------- */
+html[data-theme='verre'] {
+  --bg: #091a2b;
+  --felt: #16475f;
+  /* Un fond franchement coloré, sans quoi le dépoli n'a rien à laisser
+     passer : du verre devant du noir reste du noir. */
+  --fond:
+    radial-gradient(46% 34% at 14% 16%, rgb(64 196 220 / 0.5) 0%, transparent 70%),
+    radial-gradient(44% 34% at 86% 24%, rgb(150 96 230 / 0.45) 0%, transparent 72%),
+    radial-gradient(52% 40% at 62% 86%, rgb(235 150 70 / 0.34) 0%, transparent 74%),
+    linear-gradient(165deg, #10324a 0%, var(--bg) 100%);
+  --grain: none;
+  --cadre: linear-gradient(158deg, rgb(255 255 255 / 0.3) 0%, rgb(255 255 255 / 0.12) 45%, rgb(255 255 255 / 0.06) 100%);
+  --creux: rgb(4 16 26 / 0.3);
+  --porte: linear-gradient(180deg, rgb(255 255 255 / 0.26) 0%, rgb(255 255 255 / 0.12) 55%, rgb(255 255 255 / 0.06) 100%);
+  --levre: linear-gradient(180deg, rgb(255 255 255 / 0.34) 0%, rgb(255 255 255 / 0.14) 55%, rgb(255 255 255 / 0.05) 100%);
+
+  --surface: rgb(255 255 255 / 0.13);
+  --surface-2: rgb(255 255 255 / 0.18);
+  --line: rgb(255 255 255 / 0.32);
+  --text: #f4fafe;
+  --text-dim: #c0d6e4;
+  --accent: #ff6b6b;
+  --accent-dark: #c43d4e;
+  --valid: #6ff0b8;
+  --valid-dark: #1f7a5a;
+  --gold: #ffd98a;
+
+  /* Cases translucides : c'est le fond coloré qui les traverse, pas une
+     teinte posée dessus. */
+  --cell: rgb(255 255 255 / 0.1);
+  --cell-line: rgb(255 255 255 / 0.2);
+  --dl: rgb(74 162 224 / 0.52);
+  --tl: rgb(46 108 186 / 0.6);
+  --dw: rgb(206 104 158 / 0.5);
+  --tw: rgb(232 96 82 / 0.56);
+}
+
+/* Le dépoli lui-même. Il n'est posé que sur ce thème : `backdrop-filter`
+   force la composition de chaque panneau, et c'est cher sur un téléphone.
+   Les tuiles en sont exclues — elles restent franches et opaques. */
+html[data-theme='verre'] .board,
+html[data-theme='verre'] .rack,
+html[data-theme='verre'] .sheet,
+html[data-theme='verre'] .score-card,
+html[data-theme='verre'] .toast {
+  backdrop-filter: blur(16px) saturate(150%);
+  -webkit-backdrop-filter: blur(16px) saturate(150%);
 }
 
 * {
@@ -95,9 +214,7 @@ body {
 body {
   /* Feutre : grain léger par-dessus un éclairage de lampe au centre. */
   background-color: var(--bg);
-  background-image:
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .55 0 0 0 -.2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"),
-    radial-gradient(110% 80% at 50% 30%, var(--felt) 0%, #0f3122 55%, var(--bg) 100%);
+  background-image: var(--grain), var(--fond);
   background-attachment: fixed;
   color: var(--text);
   font-family: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
@@ -586,7 +703,7 @@ svg {
   aspect-ratio: 1;
   padding: var(--frame);
   border-radius: calc(var(--frame) + 5px);
-  background: linear-gradient(158deg, #9a7350 0%, #7c5a37 40%, #5a3f24 100%);
+  background: var(--cadre);
   box-shadow: var(--board-shadow);
   container-type: inline-size;
   touch-action: manipulation;
@@ -600,7 +717,7 @@ svg {
   position: absolute;
   inset: calc(var(--frame) - 4px);
   border-radius: 4px;
-  background: #0c1f16;
+  background: var(--creux);
   box-shadow:
     inset 0 3px 7px rgb(0 0 0 / 0.65),
     inset 0 -1px 0 rgb(255 255 255 / 0.04),
@@ -659,6 +776,11 @@ svg {
    Le jalon est porté par un calque au-dessus de la tuile : une case occupée en
    masquerait autrement le pourtour, et c'est justement sur une case occupée
    que la distinction compte. */
+/* Les traits portés par la case — contours de dépôt, lueur du dernier coup —
+   se mesuraient sur le plateau. Depuis que la case est un conteneur, ils se
+   mesurent sur elle, qui est environ dix-sept fois plus étroite : les valeurs
+   sont multipliées d'autant. Le facteur va de 16,5 à 17,35 selon l'écran,
+   trois pour cent d'écart au plus sur une épaisseur de trait. */
 .cell.drop-target::after,
 .cell.drop-swap::after,
 .cell.drop-blocked::after {
@@ -671,18 +793,18 @@ svg {
 }
 
 .cell.drop-target::after {
-  box-shadow: inset 0 0 0 0.5cqw var(--valid);
+  box-shadow: inset 0 0 0 8.5cqw var(--valid);
   background: color-mix(in srgb, var(--valid) 28%, transparent);
 }
 
 /* L'or teinte aussi la tuile qu'on va déloger : on voit lequel part. */
 .cell.drop-swap::after {
-  box-shadow: inset 0 0 0 0.5cqw var(--gold);
+  box-shadow: inset 0 0 0 8.5cqw var(--gold);
   background: color-mix(in srgb, var(--gold) 30%, transparent);
 }
 
 .cell.drop-blocked::after {
-  box-shadow: inset 0 0 0 0.5cqw var(--danger);
+  box-shadow: inset 0 0 0 8.5cqw var(--danger);
 }
 
 /* L'autre bout de l'échange : la place que la tuile tenu va libérer, et où
@@ -696,7 +818,7 @@ svg {
   z-index: 2;
   border-radius: 2.5px;
   pointer-events: none;
-  box-shadow: inset 0 0 0 0.5cqw var(--gold);
+  box-shadow: inset 0 0 0 8.5cqw var(--gold);
   animation: pulse 1.4s ease-in-out infinite;
 }
 
@@ -912,7 +1034,7 @@ svg {
 }
 
 @keyframes glow {
-  0%, 45% { box-shadow: 0 0 0 0.35cqw var(--accent), 0 0 2.5cqw color-mix(in srgb, var(--accent) 60%, transparent); }
+  0%, 45% { box-shadow: 0 0 0 6cqw var(--accent), 0 0 42.5cqw color-mix(in srgb, var(--accent) 60%, transparent); }
   100% { box-shadow: 0 0 0 0 transparent; }
 }
 
@@ -1002,7 +1124,7 @@ svg {
   gap: 5px;
   padding: 7px 8px 15px;
   border-radius: 7px 7px 10px 10px;
-  background: linear-gradient(180deg, #8d6844 0%, #7c5a37 38%, #6a4b2c 62%, #553b21 100%);
+  background: var(--porte);
   box-shadow:
     inset 0 1px 0 rgb(255 255 255 / 0.3),
     inset 0 -1px 0 rgb(0 0 0 / 0.45),
@@ -1021,7 +1143,7 @@ svg {
   bottom: 0;
   height: 12px;
   border-radius: 0 0 10px 10px;
-  background: linear-gradient(180deg, #9a7350 0%, #82603a 55%, #5e4224 100%);
+  background: var(--levre);
   box-shadow:
     inset 0 1px 0 rgb(255 255 255 / 0.32),
     inset 0 -2px 3px rgb(0 0 0 / 0.3);
@@ -1034,7 +1156,10 @@ svg {
   container-type: inline-size;
   /* La forme d'une tuile, pas celle d'un carré. */
   aspect-ratio: 1 / var(--tuile-ratio);
-  border-radius: calc(100cqw * var(--tuile-arrondi) * 1.25);
+  /* En pourcentage, et non en `cqw` : l'emplacement est lui-même le
+     conteneur, et un élément n'interroge jamais le sien — `cqw` retombait
+     sur la fenêtre, et la gorge vide s'affichait en pastille ronde. */
+  border-radius: calc(var(--tuile-arrondi) * 125%);
   background: rgb(38 24 12 / 0.55);
   box-shadow: inset 0 2px 4px rgb(0 0 0 / 0.5), inset 0 -1px 0 rgb(255 255 255 / 0.06);
 }
@@ -1113,6 +1238,13 @@ svg {
   inset: auto;
   z-index: 60;
   pointer-events: none;
+  /* Conteneur, et c'est indispensable : la tuile tient sa forme de `cqw`, or
+     le fantôme est posé sur `<body>`, loin de la case ou de l'emplacement
+     qu'il quitte. Sans cette ligne, `cqw` se résout contre la fenêtre et
+     l'arrondi vaut 8,5 % de la largeur de l'écran — la tuile saisie devenait
+     un galet. L'enveloppe porte déjà la taille exacte de la tuile : elle est
+     donc le bon conteneur. */
+  container-type: inline-size;
   transform: translate(-50%, -50%) scale(1.06) rotate(-3deg);
   /* `drop-shadow` épouse les coins arrondis de la tuile, là où `box-shadow`
      dessinerait l'ombre du rectangle de l'enveloppe. */
@@ -1124,6 +1256,15 @@ svg {
 .drag-ghost > * {
   animation: none;
   transition: none;
+}
+
+/* La tuile du plateau se rétrécit d'elle-même par rapport à sa case, qui est
+   carrée. L'enveloppe, elle, a déjà la taille de la tuile : il ne faut pas
+   rétrécir une seconde fois. */
+.drag-ghost > .tile {
+  left: 0;
+  width: 100%;
+  transform: none;
 }
 
 /* --- Actions ------------------------------------------------------ */
@@ -1449,6 +1590,48 @@ svg {
 .level-option.selected {
   border-color: var(--accent);
   background: color-mix(in srgb, var(--accent) 12%, var(--surface-2));
+}
+
+/* Le choix du décor reprend la présentation du choix de niveau : même colonne,
+   mêmes cartes, mêmes marques de sélection. */
+.themes {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  margin-bottom: 14px;
+}
+
+.theme-option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 13px;
+  border-radius: 5px;
+  background: var(--surface-2);
+  border: 1px solid transparent;
+  text-align: left;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.theme-option.selected {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 12%, var(--surface-2));
+}
+
+/* Trois bandes : le fond, le cadre, l'accent. De quoi reconnaître un décor
+   sans l'essayer. */
+.theme-swatch {
+  display: flex;
+  flex: none;
+  width: 30px;
+  height: 30px;
+  overflow: hidden;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 1px var(--line);
+}
+
+.theme-swatch i {
+  flex: 1;
 }
 
 /* L'insigne remplace le chiffre ; le rang reste écrit à côté du nom. */

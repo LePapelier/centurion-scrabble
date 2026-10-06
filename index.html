@@ -13,6 +13,15 @@
     <!-- Écran d'accueil iOS : sans elle, une capture de la page sert d'icône. -->
     <link rel="apple-touch-icon" href="./apple-touch-icon.png" />
     <title>Centurion Scrabble</title>
+      <script>
+      /* Posé avant la première image : le module principal est différé, et la
+         page s'afficherait une fraction de seconde dans le thème par défaut
+         avant de basculer. */
+      try {
+        var t = localStorage.getItem('centurion-scrabble/theme');
+        if (t && t !== 'centurion') document.documentElement.setAttribute('data-theme', t);
+      } catch (e) { /* stockage refusé : on garde le thème par défaut */ }
+    </script>
   </head>
   <body>
     <div class="app">
@@ -172,6 +181,8 @@
     <dialog class="sheet" id="rules-dialog" aria-label="Réglages">
       <h2>Niveau de l’adversaire</h2>
       <div class="levels" id="levels"></div>
+      <h2>Thème</h2>
+      <div class="themes" id="themes"></div>
       <button type="button" class="btn btn-ghost" id="rules-close">Fermer</button>
     </dialog>
 

@@ -47,6 +47,36 @@ const PREMIUM_LABEL = {
 
 const STORAGE_KEY = 'centurion-scrabble/partie';
 const LEVEL_KEY = 'centurion-scrabble/niveau';
+const THEME_KEY = 'centurion-scrabble/theme';
+
+/**
+ * Les décors proposés. Chacun n'est qu'un jeu de variables CSS, posé sur
+ * `<html>` : la mise en page, les proportions des tuiles et les règles ne
+ * changent jamais. Voir les blocs `[data-theme]` dans `styles.css`.
+ *
+ * Les pastilles donnent à voir le thème avant de le choisir — trois couleurs
+ * qui le résument : le fond, le cadre, et l'accent.
+ */
+const THEMES = [
+  {
+    id: 'centurion',
+    name: 'Centurion',
+    blurb: 'Feutre vert et bois, le jeu de table.',
+    swatch: ['#16432f', '#7c5a37', '#c8412f'],
+  },
+  {
+    id: 'espace',
+    name: 'Espace',
+    blurb: 'Nébuleuse, étoiles et cadre d’acier.',
+    swatch: ['#141d42', '#4b5570', '#a855f7'],
+  },
+  {
+    id: 'verre',
+    name: 'Verre',
+    blurb: 'Panneaux dépolis sur fond coloré.',
+    swatch: ['#16475f', '#9fc6d8', '#ff6b6b'],
+  },
+];
 const NAME_KEY = 'centurion-scrabble/nom';
 const SON_KEY = 'centurion-scrabble/son';
 /** Nom montré à l'adversaire quand le joueur n'en a choisi aucun. */
@@ -267,6 +297,7 @@ export class App {
     this.buildBoard();
     this.buildLetterGrid();
     this.buildLevels();
+    this.buildThemes();
     this.bindActions();
     this.bindKeyboard();
 
@@ -358,6 +389,47 @@ export class App {
         this.toast(`Adversaire : ${difficulty.name}`);
       });
       container.append(option);
+    }
+  }
+
+  buildThemes() {
+    const container = $('themes');
+    for (const theme of THEMES) {
+      const option = document.createElement('button');
+      option.type = 'button';
+      option.className = 'theme-option';
+      option.dataset.theme = theme.id;
+      option.innerHTML =
+        `<span class="theme-swatch">${theme.swatch
+          .map((c) => `<i style="background:${c}"></i>`)
+          .join('')}</span>` +
+        `<span class="level-text"><span class="level-name">${theme.name}</span>` +
+        `<span class="level-blurb">${theme.blurb}</span></span>`;
+      option.addEventListener('click', () => this.choisirTheme(theme.id));
+      container.append(option);
+    }
+    this.renderThemes();
+  }
+
+  /** Pose un thème, le retient, et met à jour la coche. */
+  choisirTheme(id) {
+    this.theme = id;
+    const racine = document.documentElement;
+    // Le thème par défaut n'écrit pas d'attribut : il est le `:root` nu.
+    if (id === 'centurion') racine.removeAttribute('data-theme');
+    else racine.setAttribute('data-theme', id);
+    try {
+      localStorage.setItem(THEME_KEY, id);
+    } catch {
+      // Stockage refusé (navigation privée) : le thème vaut pour la session.
+    }
+    this.renderThemes();
+  }
+
+  renderThemes() {
+    const actuel = this.theme ?? document.documentElement.dataset.theme ?? 'centurion';
+    for (const option of $('themes').children) {
+      option.classList.toggle('selected', option.dataset.theme === actuel);
     }
   }
 
