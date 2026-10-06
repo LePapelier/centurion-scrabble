@@ -1089,3 +1089,65 @@ unio
 urfs
 usia
 utas
+
+# FET- (signalé : FETCH), quarante-cinq entrées.
+#
+# FETCH d'abord, l'anglicisme que seul Morphalou recense, absent de
+# Dicollecte comme de l'ODS. FETCHES suivait, et FETCHS était déjà refusé.
+#
+# Avec lui tout le paradigme de FETICHER, que 1mot.net refuse explicitement —
+# sixième verbe fantôme de la série, après REGIFLER, DUIRE, LUNER, TECKER et
+# GYRER. FETICHISER, lui, existe bel et bien et reste entier.
+#
+# Le filtre a de nouveau fait le tri tout seul là où il fallait : FETICHE et
+# FETICHES sont des formes de ce verbe inexistant, mais aussi le nom, valide,
+# et l'ODS les porte — ils restent. FETICHEE et FETICHEES partent, eux : sans
+# verbe, pas de participe passé accordé. Même mécanique que pour PREDOMINEE.
+#
+# Le reste : FETABLE, FETFA et FETFAS, FETIALS, FETIDEMENT, FETIDER, FETUINE
+# et FETUINES. FETIAL, FETIALE, FETIALES et FETIAUX restent, valides.
+fetable
+fetch
+fetches
+fetfa
+fetfas
+fetials
+feticha
+fetichai
+fetichaient
+fetichais
+fetichait
+fetichames
+fetichant
+fetichas
+fetichasse
+fetichassent
+fetichasses
+fetichassiez
+fetichassions
+fetichat
+fetichates
+fetichee
+fetichees
+fetichent
+feticher
+fetichera
+feticherai
+feticheraient
+feticherais
+feticherait
+feticheras
+feticherent
+feticherez
+feticheriez
+feticherions
+feticherons
+feticheront
+fetichez
+fetichiez
+fetichions
+fetichons
+fetidement
+fetider
+fetuine
+fetuines

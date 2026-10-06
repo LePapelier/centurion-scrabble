@@ -380,3 +380,12 @@ gyros
 ugni
 umma
 utes
+
+# Trouvés en passant FET- au crible : les deux graphies des pâtes en rubans,
+# FETTUCCINE et FETTUCINE avec leurs pluriels, et FETICHIQUES, dont le
+# singulier FETICHIQUE était pourtant déjà là.
+fettuccine
+fettuccines
+fettucine
+fettucines
+fetichiques
