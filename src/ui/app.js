@@ -273,6 +273,7 @@ export class App {
     // Une partie reprise affiche ses scores tels quels, sans les recompter.
     this.shownScores = this.game.players.map((p) => p.score);
     window.addEventListener('resize', () => this.updateHalo());
+    this.suivreTailleTuile();
 
     this.bindNetwork();
 
@@ -310,6 +311,38 @@ export class App {
       const cell = event.target.closest('.cell');
       if (cell) this.onCellTap(Number(cell.dataset.index));
     });
+  }
+
+  /**
+   * Publie la taille d'une case du plateau, en pixels, dans `--tuile`.
+   *
+   * Le chevalet et le plateau vivent dans deux conteneurs différents : le
+   * second se dimensionne sur la hauteur qui lui reste, que le premier ne
+   * peut pas lire en CSS. Sans cette mesure, le chevalet répartissait sept
+   * tuiles sur la largeur du plateau là où celui-ci en loge quinze, et ses
+   * tuiles sortaient deux fois trop grandes.
+   *
+   * De là découlent aussi l'arrondi et la taille des lettres, pour que les
+   * deux endroits gardent exactement les mêmes proportions.
+   */
+  suivreTailleTuile() {
+    const racine = document.documentElement;
+    let dernier = 0;
+
+    const mesurer = () => {
+      const cote = this.cells[0]?.getBoundingClientRect().width ?? 0;
+      if (cote <= 0) return;
+      // Le chevalet rétrécit quand la tuile rétrécit, ce qui rend de la
+      // hauteur au plateau, qui peut grandir : la boucle est réelle. On
+      // n'écrit que les variations visibles, ce qui la fait converger en une
+      // passe au lieu d'osciller indéfiniment.
+      if (Math.abs(cote - dernier) < 0.25) return;
+      dernier = cote;
+      racine.style.setProperty('--tuile', `${cote.toFixed(2)}px`);
+    };
+
+    new ResizeObserver(mesurer).observe(this.boardEl);
+    mesurer();
   }
 
   buildLetterGrid() {
