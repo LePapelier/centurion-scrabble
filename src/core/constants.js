@@ -172,7 +172,14 @@ export const DIFFICULTIES = [
     blurb: 'Connaît le lexique de club, calcule peu.',
     maxWordLength: 15,
     maxTilesPlaced: 7,
-    quality: 0.60,
+    /* 0,60 laissait un trou : mesuré sur des parties simulées contre tous les
+       autres niveaux, Confirmé marquait 331 points en moyenne contre 273 à
+       Amateur et 458 à Expert. Il était collé au second et décroché du
+       premier — quatre-vingt-dix-sept points d'écart sous lui, cent
+       vingt-sept au-dessus. À 0,66 il marque 366, et les écarts de l'échelle
+       passent de 108, 58, 127, 87 à 100, 95, 87, 96. Expert ne bouge pas
+       (458 puis 453, dans le bruit) : il était jugé juste. */
+    quality: 0.66,
     spread: 0.14,
     useLeave: true,
     leaveWeight: 0.5,
