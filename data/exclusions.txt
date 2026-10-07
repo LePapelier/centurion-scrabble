@@ -1200,3 +1200,103 @@ ordureuse
 ordureux
 orduricole
 ordurierement
+
+# SHA- (signalé : SHA), quatre-vingts entrées, le plus gros voisinage traité.
+#
+# SHA et SHAS d'abord, refusés explicitement par 1mot.net : l'ODS ne les
+# compte pas parmi ses mots de trois lettres en S-. SHAH et SHAHS, eux, sont
+# valides et restent.
+#
+# Deux paradigmes fantômes partent avec : SHAMPOIGNER et SHAMPOOINGNER,
+# soixante formes à eux deux, deux graphies que seul Morphalou recense pour
+# ce que la compétition écrit autrement.
+#
+# Et des mots qui surprennent par leur absence, vérifiés un par un plutôt que
+# supposés : SHALOM et SHAKE sont refusés explicitement — SHAKER, lui, est
+# valide et reste. De même SHAMANE est refusé quand SHAMAN et SHAMANS sont
+# valides : la compétition n'a gardé que la forme nue. Le reste de la famille
+# en SHAMAN- suit, la graphie française étant CHAMANISME, qui reste en place.
+#
+# SHADDOCK, SHADOK et la famille SHAMANIQUE n'ont pas de verdict propre :
+# ils reposent sur la seule absence de l'ODS 8, comme les autres voisins
+# écartés depuis qu'on applique cette règle.
+sha
+shaddock
+shaddocks
+shadok
+shadoks
+shake
+shakes
+shalom
+shamanique
+shamaniques
+shamanisme
+shamanismes
+shamaniste
+shamanistes
+shamanistique
+shamanistiques
+shampoigna
+shampoignai
+shampoignaient
+shampoignais
+shampoignait
+shampoignames
+shampoignant
+shampoignas
+shampoignasse
+shampoignassent
+shampoignasses
+shampoignassiez
+shampoignat
+shampoignates
+shampoigne
+shampoignee
+shampoignees
+shampoignent
+shampoigner
+shampoignera
+shampoignerai
+shampoignerais
+shampoignerait
+shampoigneras
+shampoignerent
+shampoignerez
+shampoigneriez
+shampoignerions
+shampoignerons
+shampoigneront
+shampoignes
+shampoignez
+shampoigniez
+shampoignions
+shampoignons
+shampoingneur
+shampoingneurs
+shampoingneuse
+shampoingneuses
+shampooingna
+shampooingnai
+shampooingnais
+shampooingnait
+shampooingnames
+shampooingnant
+shampooingnas
+shampooingnasse
+shampooingnat
+shampooingnates
+shampooingne
+shampooingnee
+shampooingnees
+shampooingnent
+shampooingner
+shampooingnera
+shampooingnerai
+shampooingneras
+shampooingnerez
+shampooingnes
+shampooingnez
+shampooingniez
+shampooingnions
+shampooingnons
+shas

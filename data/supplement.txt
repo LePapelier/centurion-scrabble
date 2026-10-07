@@ -427,3 +427,49 @@ ordinaticien
 ordinaticienne
 ordinaticiennes
 ordinaticiens
+
+# Croisés en vérifiant SHA : trente-neuf valides que le jeu refusait, de loin
+# la plus grosse récolte. Le shabbat et la shoah de l'hébreu, la sharia et le
+# shabouot, le shamanisme par sa forme nue SHAMAN, les Shans de Birmanie, le
+# shakti et le shaktisme, le shakuachi japonais, le shahnai indien, le
+# shareware, le sharpei, la sharka des arbres fruitiers, les Shawnees, et les
+# gentilés de Shanghai et de Shawinigan.
+shabbat
+shabbats
+shabien
+shabienne
+shabiennes
+shabiens
+shabouot
+shabouots
+shahnai
+shahnais
+shakti
+shaktis
+shaktisme
+shaktismes
+shakuachi
+shakuachis
+shaman
+shamans
+shan
+shana
+shanas
+shanghaien
+shanghaienne
+shanghaiennes
+shanghaiens
+shans
+shareware
+sharewares
+sharia
+sharias
+sharka
+sharkas
+sharpei
+sharpeis
+shawiniganais
+shawiniganaise
+shawiniganaises
+shawnee
+shawnees
