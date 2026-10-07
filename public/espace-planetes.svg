@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Décor du thème Espace : des planètes au loin, posées derrière le jeu.
+
+  Dessiné en SVG et non en dégradés CSS, parce qu'un anneau demande une
+  ellipse, et qu'une ellipse ne se fait pas avec un `radial-gradient`.
+
+  Tout est très flou et très transparent : c'est un fond, pas une
+  illustration. Rien ici ne doit retenir l'œil, qui a un plateau à lire.
+  Les planètes sont placées dans les marges — en haut au-dessus du plateau,
+  et sur les bords — là où l'écran est vide.
+
+  Le cadrage est en `slice` : l'image remplit l'écran quelle que soit sa
+  forme, quitte à déborder. Le rognage dépend donc de la forme de l'écran, et
+  il est sévère, et les deux écrans ne montrent pas la même chose : un
+  téléphone voit tout en hauteur, un écran large n'en garde que la bande
+  y 252 à 508. Il n'existe donc pas de place visible partout.
+
+  D'où le partage : la géante et la lune occupent y 100 à 230, qui tombe dans
+  l'intervalle libre entre le bandeau des scores et le plateau sur un
+  téléphone ; la bleue et la verte sont plus bas, cachées par le plateau sur
+  un téléphone mais seules visibles sur un écran large.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 760"
+     preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <!-- Trois flous : plus un astre est loin, plus il est fondu. -->
+    <filter id="proche" x="-60%" y="-60%" width="220%" height="220%">
+      <feGaussianBlur stdDeviation="7" />
+    </filter>
+    <filter id="moyen" x="-60%" y="-60%" width="220%" height="220%">
+      <feGaussianBlur stdDeviation="13" />
+    </filter>
+    <filter id="lointain" x="-60%" y="-60%" width="220%" height="220%">
+      <feGaussianBlur stdDeviation="20" />
+    </filter>
+
+    <!-- La géante : éclairée par la gauche, assombrie vers le limbe droit. -->
+    <radialGradient id="geante" cx="34%" cy="30%" r="78%">
+      <stop offset="0%" stop-color="#ffd9a8" />
+      <stop offset="34%" stop-color="#f0995e" />
+      <stop offset="68%" stop-color="#c04f72" />
+      <stop offset="100%" stop-color="#5d1f53" />
+    </radialGradient>
+
+    <!-- L'anneau s'éteint à ses extrémités, comme vu par la tranche. -->
+    <linearGradient id="anneau" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#ffd9a8" stop-opacity="0" />
+      <stop offset="22%" stop-color="#ffe3bd" stop-opacity="0.85" />
+      <stop offset="50%" stop-color="#ffcf94" stop-opacity="0.5" />
+      <stop offset="78%" stop-color="#ffe3bd" stop-opacity="0.85" />
+      <stop offset="100%" stop-color="#ffd9a8" stop-opacity="0" />
+    </linearGradient>
+
+    <radialGradient id="bleue" cx="36%" cy="30%" r="76%">
+      <stop offset="0%" stop-color="#bff3ff" />
+      <stop offset="40%" stop-color="#58b6e8" />
+      <stop offset="78%" stop-color="#2a63b4" />
+      <stop offset="100%" stop-color="#121d58" />
+    </radialGradient>
+
+    <radialGradient id="verte" cx="38%" cy="32%" r="74%">
+      <stop offset="0%" stop-color="#d6ffe8" />
+      <stop offset="42%" stop-color="#5fd6a8" />
+      <stop offset="100%" stop-color="#17493f" />
+    </radialGradient>
+
+    <!-- La moitié avant de l'anneau : tout ce qui, dans le repère incliné
+         de l'anneau, passe sous le centre de la planète. On la redessine
+         par-dessus le disque, et c'est ce croisement qui donne le volume. -->
+    <clipPath id="avant">
+      <rect x="60" y="175" width="420" height="90" />
+    </clipPath>
+  </defs>
+
+  <!--  Géante annelée, dans l'intervalle libre au-dessus du plateau  -->
+  <g opacity="0.5" filter="url(#proche)">
+    <!-- L'anneau entier, derrière la planète. -->
+    <g transform="rotate(-19 258 175)">
+      <ellipse cx="258" cy="175" rx="112" ry="28"
+               fill="none" stroke="url(#anneau)" stroke-width="13" />
+    </g>
+
+    <circle cx="258" cy="175" r="55" fill="url(#geante)" />
+
+    <!-- Le même anneau, mais seulement sa moitié avant, redessinée sur le
+         disque. La découpe se fait dans le repère incliné : c'est pour cela
+         qu'elle est imbriquée dans la rotation plutôt que posée à côté. -->
+    <g transform="rotate(-19 258 175)">
+      <g clip-path="url(#avant)">
+        <ellipse cx="258" cy="175" rx="112" ry="28"
+                 fill="none" stroke="url(#anneau)" stroke-width="13" />
+      </g>
+    </g>
+  </g>
+
+  <!--  Lune pâle, dans le même intervalle  -->
+  <circle cx="105" cy="120" r="13" fill="#cfd8f5"
+          filter="url(#moyen)" opacity="0.3" />
+
+  <!--  Planète bleue, plus bas : derrière le plateau sur un téléphone, mais
+        c'est elle qu'on voit sur un écran large, dont le rognage vertical ne
+        laisse que le milieu du dessin.  -->
+  <circle cx="60" cy="330" r="46" fill="url(#bleue)"
+          filter="url(#moyen)" opacity="0.34" />
+
+  <!--  Petite verte, même raison  -->
+  <circle cx="350" cy="430" r="32" fill="url(#verte)"
+          filter="url(#lointain)" opacity="0.28" />
+</svg>

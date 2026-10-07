@@ -80,6 +80,10 @@
   --tuile-relief: inset 0 -1.5px 0 rgb(0 0 0 / 0.18);
   --tuile-relief-main: 0 2px 0 rgb(0 0 0 / 0.35), inset 0 -2px 0 rgb(0 0 0 / 0.12);
 
+  /* Couche de décor : une scène posée une seule fois, entre le grain qui se
+     répète et le fond qui s'étale. Nulle par défaut — seul l'espace s'en
+     sert, pour ses planètes. */
+  --decor: none;
   --cadre: linear-gradient(158deg, #9a7350 0%, #7c5a37 40%, #5a3f24 100%);
   --creux: #0c1f16;
   --porte: linear-gradient(180deg, #8d6844 0%, #7c5a37 38%, #6a4b2c 62%, #553b21 100%);
@@ -191,6 +195,10 @@ html[data-theme='espace'] {
   /* Le champ d'étoiles remplace le grain du feutre : même procédé, un motif
      répété en fond, mais des points nets au lieu d'un bruit. */
   --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='260' height='260'%3E%3Cg fill='%23fff'%3E%3Ccircle cx='23' cy='41' r='1.1' opacity='.85'/%3E%3Ccircle cx='187' cy='29' r='.8' opacity='.6'/%3E%3Ccircle cx='96' cy='118' r='1.3' opacity='.9'/%3E%3Ccircle cx='238' cy='96' r='.7' opacity='.5'/%3E%3Ccircle cx='57' cy='205' r='1' opacity='.75'/%3E%3Ccircle cx='151' cy='178' r='.8' opacity='.55'/%3E%3Ccircle cx='211' cy='231' r='1.2' opacity='.8'/%3E%3Ccircle cx='128' cy='62' r='.6' opacity='.45'/%3E%3Ccircle cx='14' cy='139' r='.9' opacity='.65'/%3E%3Ccircle cx='172' cy='135' r='.6' opacity='.4'/%3E%3Ccircle cx='79' cy='9' r='.7' opacity='.5'/%3E%3Ccircle cx='245' cy='168' r='1' opacity='.7'/%3E%3C/g%3E%3C/svg%3E");
+  /* Des planètes au loin, très floues et très transparentes : un fond, pas
+     une illustration. Elles sont placées dans les marges — au-dessus du
+     plateau et sur les bords — là où l'écran est vide. */
+  --decor: url('/espace-planetes.svg');
   --cadre: linear-gradient(158deg, #7c88a8 0%, #4b5570 38%, #262d44 100%);
   --creux: #060a1c;
   --porte: linear-gradient(180deg, #6f7b9a 0%, #4b5570 38%, #39415c 62%, #242b40 100%);
@@ -417,6 +425,22 @@ body {
   font-size: 16px;
   line-height: 1.4;
   -webkit-font-smoothing: antialiased;
+}
+
+/* Le décor du thème : une scène posée une fois, derrière tout le jeu.
+   
+   Elle a sa propre couche plutôt qu'une place dans le fond de `body` :
+   `background-repeat` et `background-size` s'appliquent couche par couche,
+   et les thèmes n'ont pas tous le même nombre de dégradés — la liste se
+   décalait d'un thème à l'autre, le décor héritant du cadrage d'un dégradé
+   et réciproquement. Ici, rien à compter. */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background: var(--decor) center / cover no-repeat;
+  pointer-events: none;
 }
 
 button {
