@@ -125,6 +125,13 @@ html[data-theme='centurion'] {
   --fond:
     radial-gradient(60% 42% at 50% 8%, rgb(226 158 72 / 0.22) 0%, transparent 70%),
     radial-gradient(120% 92% at 50% 38%, var(--felt) 0%, #2a110d 52%, var(--bg) 100%);
+  /* Opus reticulatum : le parement de moellons en résille des murs romains,
+     deux familles de diagonales qui se croisent en losanges. Il remplace le
+     grain du feutre — même procédé, un motif répété en fond, mais un dessin
+     au lieu d'un bruit. Très pâle : c'est une texture de mur, pas un décor.
+     L'écart des diagonales divise le côté de la tuile, donc le motif se
+     raccorde d'une tuile à l'autre sans couture. */
+  --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32'%3E%3Cpath d='M-32 -64L64 32M-32 0L64 -96M-32 -48L64 48M-32 16L64 -80M-32 -32L64 64M-32 32L64 -64M-32 -16L64 80M-32 48L64 -48M-32 0L64 96M-32 64L64 -32M-32 16L64 112M-32 80L64 -16M-32 32L64 128M-32 96L64 0' stroke='%23e2b857' stroke-width='.8' fill='none' opacity='.11'/%3E%3C/svg%3E");
   --cadre: linear-gradient(158deg, #d8a84c 0%, #a97c2c 38%, #6d4a16 100%);
   --creux: #140d09;
   --porte: linear-gradient(180deg, #c99a44 0%, #a67a2b 38%, #85601f 62%, #5c4115 100%);
@@ -485,6 +492,11 @@ svg {
      lettre. Mêmes nombres des deux côtés : c'est ce qui fait qu'une tuile du
      chevalet et une tuile posée se ressemblent malgré leur taille. */
   --tuile-lettre: 0.647;
+  /* Retrait du chiffre de valeur depuis le coin bas-droit de la tuile. Il
+     était à 4 % et 2 %, soit moins d'un pixel sous lui sur un téléphone : le
+     chiffre touchait la bordure, et les deux marges étaient du simple au
+     double. Elles sont maintenant égales et respirent. */
+  --tuile-valeur-retrait: 7%;
 }
 
 
@@ -1195,8 +1207,11 @@ svg {
 
 .tile .value {
   position: absolute;
-  right: 4%;
-  bottom: 2%;
+  right: var(--tuile-valeur-retrait);
+  bottom: var(--tuile-valeur-retrait);
+  /* Le chiffre est centré dans sa propre boîte : sans cela son interligne
+     ajoute un blanc sous lui et le retrait n'est pas celui qu'on croit. */
+  line-height: 1;
   /* 1.9cqw rapporté aux 4cqw de la tuile : même rendu, mais la mesure suit
      la tuile au lieu du plateau, et survit donc au clone du glissement. */
   font-size: 0.475em;
@@ -1408,8 +1423,11 @@ svg {
 
 .rack-tile .value {
   position: absolute;
-  right: 4%;
-  bottom: 2%;
+  right: var(--tuile-valeur-retrait);
+  bottom: var(--tuile-valeur-retrait);
+  /* Le chiffre est centré dans sa propre boîte : sans cela son interligne
+     ajoute un blanc sous lui et le retrait n'est pas celui qu'on croit. */
+  line-height: 1;
   font-size: 0.476em;
   font-weight: 600;
   opacity: 0.6;
@@ -1778,8 +1796,9 @@ svg {
 
 .letter-grid button .value {
   position: absolute;
-  right: 5%;
-  bottom: 3%;
+  right: var(--tuile-valeur-retrait);
+  bottom: var(--tuile-valeur-retrait);
+  line-height: 1;
   font-size: 0.475em;
   font-weight: 600;
   letter-spacing: -0.05em;
