@@ -118,6 +118,16 @@
 
 /* --- Centurion : marbre, bronze et pourpre impériale --------------- */
 html[data-theme='centurion'] {
+  --ornement-taille: 100%;
+  --ornement-lettre: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Cg fill='%23fff' opacity='.34'%3E%3Cpath transform='translate(8 8) rotate(45)' d='M-4.6 0 C-2 -3.1 2 -3.1 4.6 0 C2 3.1 -2 3.1 -4.6 0Z'/%3E%3Cpath transform='translate(32 32) rotate(45)' d='M-4.6 0 C-2 -3.1 2 -3.1 4.6 0 C2 3.1 -2 3.1 -4.6 0Z'/%3E%3C/g%3E%3C/svg%3E");
+  --ornement-mot: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Cg fill='%23fff' opacity='.34'%3E%3Cpath transform='translate(8 8) rotate(45)' d='M-4.6 0 C-2 -3.1 2 -3.1 4.6 0 C2 3.1 -2 3.1 -4.6 0Z'/%3E%3Cpath transform='translate(32 8) rotate(-45)' d='M-4.6 0 C-2 -3.1 2 -3.1 4.6 0 C2 3.1 -2 3.1 -4.6 0Z'/%3E%3Cpath transform='translate(8 32) rotate(-45)' d='M-4.6 0 C-2 -3.1 2 -3.1 4.6 0 C2 3.1 -2 3.1 -4.6 0Z'/%3E%3Cpath transform='translate(32 32) rotate(45)' d='M-4.6 0 C-2 -3.1 2 -3.1 4.6 0 C2 3.1 -2 3.1 -4.6 0Z'/%3E%3C/g%3E%3C/svg%3E");
+  --bonus-police: var(--display);
+  --bonus-graisse: 800;
+  --bonus-espacement: 0.1em;
+  --cadre-largeur: clamp(11px, 2.4cqw, 20px);
+  --cadre-rayon: calc(var(--cadre-largeur) * 0.42);
+  --case-rayon: 1px;
+
   --bg: #170d0a;
   --felt: #3a1a14;
   /* Lumière de torche sur de la pierre sombre, et non plus l'éclairage égal
@@ -193,6 +203,16 @@ html[data-theme='centurion'] {
 
 /* --- Espace : nébuleuse, étoiles, cadre d'acier ------------------- */
 html[data-theme='espace'] {
+  --ornement-taille: 98%;
+  --ornement-lettre: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Cg fill='%23fff' opacity='.34'%3E%3Cpath d='M9 4 C9.6 7.6 10.4 8.4 14 9 C10.4 9.6 9.6 10.4 9 14 C8.4 10.4 7.6 9.6 4 9 C7.6 8.4 8.4 7.6 9 4Z'/%3E%3Cpath d='M31 4 C31.6 7.6 32.4 8.4 36 9 C32.4 9.6 31.6 10.4 31 14 C30.4 10.4 29.6 9.6 26 9 C29.6 8.4 30.4 7.6 31 4Z'/%3E%3Cpath d='M9 26 C9.6 29.6 10.4 30.4 14 31 C10.4 31.6 9.6 32.4 9 36 C8.4 32.4 7.6 31.6 4 31 C7.6 30.4 8.4 29.6 9 26Z'/%3E%3Cpath d='M31 26 C31.6 29.6 32.4 30.4 36 31 C32.4 31.6 31.6 32.4 31 36 C30.4 32.4 29.6 31.6 26 31 C29.6 30.4 30.4 29.6 31 26Z'/%3E%3C/g%3E%3C/svg%3E");
+  --ornement-mot: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Cg stroke='%23fff' fill='none' opacity='.34'%3E%3Cellipse cx='20' cy='20' rx='17' ry='7' stroke-width='1.6' transform='rotate(-22 20 20)'/%3E%3Cellipse cx='20' cy='20' rx='17' ry='7' stroke-width='1.1' transform='rotate(22 20 20)' opacity='.6'/%3E%3C/g%3E%3C/svg%3E");
+  --bonus-police: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
+  --bonus-graisse: 700;
+  --bonus-espacement: -0.04em;
+  --cadre-largeur: clamp(7px, 1.5cqw, 13px);
+  --cadre-rayon: calc(var(--cadre-largeur) + 2px);
+  --case-rayon: 1.5px;
+
   --bg: #04060f;
   --felt: #141d42;
   --fond:
@@ -268,6 +288,16 @@ html[data-theme='espace'] {
 
 /* --- Verre : Frutiger Aero, ciel, eau et vernis -------------------- */
 html[data-theme='verre'] {
+  --ornement-taille: 100%;
+  --ornement-lettre: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Cg opacity='.46'%3E%3Ccircle cx='9' cy='9' r='3.6' fill='none' stroke='%23fff' stroke-width='1.5'/%3E%3Ccircle cx='7.6' cy='7.6' r='0.9' fill='%23fff'/%3E%3Ccircle cx='31' cy='31' r='2.6' fill='none' stroke='%23fff' stroke-width='1.5'/%3E%3Ccircle cx='30.0' cy='30.0' r='0.7' fill='%23fff'/%3E%3C/g%3E%3C/svg%3E");
+  --ornement-mot: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Cg opacity='.46'%3E%3Ccircle cx='9' cy='9' r='3.8' fill='none' stroke='%23fff' stroke-width='1.5'/%3E%3Ccircle cx='7.6' cy='7.6' r='1.0' fill='%23fff'/%3E%3Ccircle cx='31' cy='9' r='2.6' fill='none' stroke='%23fff' stroke-width='1.5'/%3E%3Ccircle cx='30.0' cy='8.0' r='0.7' fill='%23fff'/%3E%3Ccircle cx='9' cy='31' r='2.6' fill='none' stroke='%23fff' stroke-width='1.5'/%3E%3Ccircle cx='8.0' cy='30.0' r='0.7' fill='%23fff'/%3E%3Ccircle cx='31' cy='31' r='3.8' fill='none' stroke='%23fff' stroke-width='1.5'/%3E%3Ccircle cx='29.6' cy='29.6' r='1.0' fill='%23fff'/%3E%3C/g%3E%3C/svg%3E");
+  --bonus-police: ui-rounded, 'SF Pro Rounded', 'Segoe UI Variable Display', system-ui, sans-serif;
+  --bonus-graisse: 800;
+  --bonus-espacement: 0.01em;
+  --cadre-largeur: clamp(9px, 2cqw, 17px);
+  --cadre-rayon: calc(var(--cadre-largeur) + 16px);
+  --case-rayon: 6px;
+
   --bg: #0a3a52;
   --felt: #1b86a8;
   /* Ciel en haut, eau verte en bas. La lumière est posée au-dessus du cadre,
@@ -497,6 +527,24 @@ svg {
      chiffre touchait la bordure, et les deux marges étaient du simple au
      double. Elles sont maintenant égales et respirent. */
   --tuile-valeur-retrait: 7%;
+
+  /* Les cases bonus : la police de leur étiquette, et l'ornement posé
+     derrière elle. L'ornement passe par le fond de la case et non par un
+     pseudo-élément : un pseudo-élément positionné peindrait par-dessus
+     l'étiquette, alors qu'un calque de fond reste dessous. */
+  --bonus-police: inherit;
+  --bonus-graisse: 700;
+  --bonus-espacement: -0.02em;
+  --ornement-lettre: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect x='5' y='5' width='30' height='30' rx='3' stroke='%23fff' fill='none' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.6' opacity='.3'/%3E%3C/svg%3E");
+  --ornement-mot: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect x='4' y='4' width='32' height='32' rx='3' stroke='%23fff' fill='none' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.6' opacity='.32'/%3E%3Crect x='8.5' y='8.5' width='23' height='23' rx='2' stroke='%23fff' fill='none' stroke-linecap='round' stroke-linejoin='round' stroke-width='1' opacity='.22'/%3E%3C/svg%3E");
+  --ornement-taille: 88%;
+
+  /* La forme du plateau : largeur du cadre, arrondi du cadre, arrondi des
+     cases. Un plateau de bois, une dalle de pierre, une plaque d'acier et un
+     galet de verre n'ont pas les mêmes angles. */
+  --cadre-largeur: clamp(9px, 2cqw, 17px);
+  --cadre-rayon: calc(var(--cadre-largeur) + 5px);
+  --case-rayon: 2.5px;
 }
 
 
@@ -912,7 +960,7 @@ svg {
    (arête claire en haut, ombre portée en bas), surface de jeu en creux, et
    ombre au sol qui le décolle du fond. */
 .board {
-  --frame: clamp(9px, 2cqw, 17px);
+  --frame: var(--cadre-largeur);
   --board-shadow:
     inset 0 1.5px 0 rgb(255 255 255 / 0.2),
     inset 1.5px 0 0 rgb(255 255 255 / 0.07),
@@ -934,7 +982,7 @@ svg {
   max-width: 100%;
   aspect-ratio: 1;
   padding: var(--frame);
-  border-radius: calc(var(--frame) + 5px);
+  border-radius: var(--cadre-rayon);
   background: var(--cadre);
   box-shadow: var(--board-shadow);
   container-type: inline-size;
@@ -977,20 +1025,25 @@ svg {
      un élément n'interroge jamais son propre conteneur, seulement celui de
      ses ancêtres. */
   container-type: inline-size;
-  border-radius: 2.5px;
+  border-radius: var(--case-rayon);
   background: var(--cell);
+  font-family: var(--bonus-police);
   font-size: 2.35cqw;
-  font-weight: 700;
-  letter-spacing: -0.02em;
+  font-weight: var(--bonus-graisse);
+  letter-spacing: var(--bonus-espacement);
   color: rgb(255 255 255 / 0.62);
   overflow: hidden;
   transition: transform 0.09s ease;
 }
 
-.cell.dl { background: var(--dl); }
-.cell.tl { background: var(--tl); }
-.cell.dw { background: var(--dw); }
-.cell.tw { background: var(--tw); }
+/* L'ornement est le premier calque du fond : il couvre la couleur de la case
+   et reste sous l'étiquette. Les bonus de lettre et de mot en portent chacun
+   le sien — ce sont deux familles, et le plateau se lit mieux si elles ne se
+   ressemblent pas. */
+.cell.dl { background: var(--ornement-lettre) center / var(--ornement-taille) no-repeat, var(--dl); }
+.cell.tl { background: var(--ornement-lettre) center / var(--ornement-taille) no-repeat, var(--tl); }
+.cell.dw { background: var(--ornement-mot) center / var(--ornement-taille) no-repeat, var(--dw); }
+.cell.tw { background: var(--ornement-mot) center / var(--ornement-taille) no-repeat, var(--tw); }
 
 .cell.center {
   background: var(--dw);
