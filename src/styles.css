@@ -1194,10 +1194,15 @@ svg {
 }
 
 /* La lettre est centrée dans la zone qui exclut le coin de la valeur : les
-   lettres larges (K, W, X, M) ne mordent plus sur un « 10 ». */
+   lettres larges (K, W, X, M) ne mordent plus sur un « 10 ».
+   
+   La réserve a grandi en même temps que le chiffre s'est écarté du bord :
+   en rentrant celui-ci de 4 % à 7 %, on l'a rapproché d'autant de la lettre,
+   et la jambe du K venait toucher le « 1 » de son 10. Essayé jusqu'à 18 %,
+   où la lettre part trop haut à gauche et laisse un vide en bas à droite. */
 .tile,
 .rack-tile {
-  padding: 0 9% 7% 0;
+  padding: 0 14% 10% 0;
 }
 
 .tile .value,
@@ -1783,7 +1788,8 @@ svg {
   display: grid;
   place-items: center;
   aspect-ratio: 1;
-  padding: 0 9% 7% 0;
+  /* La même réserve que sur une vraie tuile : la fenêtre est un aperçu. */
+  padding: 0 14% 10% 0;
   border-radius: 4px;
   /* La fenêtre montre la tuile telle qu'elle sera posée : teinte de joker comprise. */
   background: var(--tuile-joker);
