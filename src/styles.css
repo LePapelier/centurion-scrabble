@@ -1099,6 +1099,28 @@ svg {
   pointer-events: none;
 }
 
+/* Le champ qui fait monter le clavier d'un téléphone.
+
+   Il ne peut pas être caché par `display: none` ni `visibility: hidden`, qui
+   l'empêcheraient de prendre le focus — donc opacité nulle. Il est posé au
+   milieu du plateau et non hors de l'écran, parce qu'un champ hors écran fait
+   défiler la page au moment où il prend le focus. Et sa taille de texte est
+   de seize pixels : en deçà, iOS zoome sur le champ qui prend le focus, et
+   tout le jeu saute. */
+.saisie-tactile {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  border: 0;
+  opacity: 0;
+  background: none;
+  font-size: 16px;
+  pointer-events: none;
+}
+
 /* Les repères de coordonnées. Ils tiennent dans l'épaisseur du cadre, qui ne
    fait que neuf à vingt pixels : d'où une taille calculée sur lui plutôt que
    fixée, et un plancher pour qu'ils ne disparaissent pas sur un téléphone.
@@ -1373,7 +1395,11 @@ svg {
 
 /* Le sens de la frappe, marqué par un coin plein : à droite quand on écrit en
    ligne, en bas quand on écrit en colonne. Un repère discret, mais il évite
-   d'avoir à taper une lettre pour savoir où ira la suivante. */
+   d'avoir à taper une lettre pour savoir où ira la suivante.
+
+   Il vaut sur tous les appareils : depuis que l'appui sur une case fait monter
+   le clavier du téléphone, le sens de la frappe est une information utile
+   partout. */
 .cell.cursor::before {
   content: '';
   position: absolute;
@@ -3058,6 +3084,12 @@ svg {
 @media (any-pointer: fine) {
   .clavier {
     display: block;
+  }
+
+  /* L'inverse : là où il y a un vrai clavier, la note destinée au doigt n'a
+     plus lieu d'être. */
+  .clavier-doigt {
+    display: none;
   }
 }
 

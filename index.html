@@ -106,6 +106,23 @@
                  d'état qui, elle, sert à jouer. -->
             <div class="chat-bubbles" id="chat-bubbles" aria-hidden="true"></div>
           </div>
+          <!-- Le clavier d'un téléphone ne s'ouvre que pour un champ qui a le
+               focus. Ce champ n'existe que pour ça : il ne montre rien, ne
+               prend aucun appui, et ne se met pas dans l'ordre de tabulation.
+               Ce qu'on y tape part sur le plateau. -->
+          <input
+            class="saisie-tactile"
+            id="saisie-tactile"
+            type="text"
+            inputmode="text"
+            autocapitalize="characters"
+            autocomplete="off"
+            autocorrect="off"
+            spellcheck="false"
+            enterkeyhint="send"
+            aria-hidden="true"
+            tabindex="-1"
+          />
           <div class="board-foot">
             <div class="status" id="status" role="status" aria-live="polite">
               Posez votre premier mot sur la case centrale.
@@ -194,6 +211,18 @@
       <div class="levels" id="levels"></div>
       <h2>Thème</h2>
       <div class="themes" id="themes"></div>
+
+      <!-- Au doigt, l'essentiel se découvre tout seul — le clavier s'ouvre —
+           mais pas le reste. -->
+      <section class="clavier-doigt">
+        <h2>Au clavier</h2>
+        <p class="sheet-text">
+          Touchez une case : le clavier s’ouvre et le mot s’écrit à partir de
+          là. Touchez la même case une seconde fois pour écrire vers le bas.
+          Le retour arrière reprend la lettre précédente, la touche d’envoi
+          joue le mot.
+        </p>
+      </section>
 
       <!-- Masqué sur un appareil tactile : la section n'y servirait à rien, et
            elle ferait défiler d'autant le reste du panneau. -->

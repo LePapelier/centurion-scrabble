@@ -349,6 +349,7 @@ export class App {
     this.buildThemes();
     this.bindActions();
     this.bindKeyboard();
+    this.bindSaisieTactile();
 
     // Une partie reprise affiche ses scores tels quels, sans les recompter.
     this.shownScores = this.game.players.map((p) => p.score);
@@ -527,6 +528,9 @@ export class App {
     // qu'on tient. Un glissement parti du chevalet, lui, n'est pas concerné —
     // c'est `renderRack` qui décide de son sort.
     this.cancelDrag('board');
+    // Plus de point de saisie, plus de raison d'avoir un clavier à l'écran.
+    // Ici plutôt qu'aux vingt endroits qui remettent le curseur à zéro.
+    if (!this.cursor) this.fermerClavierTactile();
     const { letters, blanks } = this.game.board;
     const highlight = new Set(this.game.lastMoveCells);
 
@@ -1065,6 +1069,7 @@ export class App {
     if (this.pending.has(index)) {
       this.pending.delete(index);
       this.cursor = { index, direction: this.cursor?.direction ?? 0 };
+      this.ouvrirClavierTactile();
       this.refresh();
       return;
     }
@@ -1076,9 +1081,12 @@ export class App {
       return;
     }
 
-    // Sans tuile sélectionnée, la case devient le point de saisie clavier.
+    // Sans tuile sélectionnée, la case devient le point de saisie clavier, et
+    // sur un appareil tactile c'est ce geste qui fait monter le clavier. Le
+    // focus doit être pris ici même : hors du geste, le navigateur le refuse.
     const sameCell = this.cursor?.index === index;
     this.cursor = { index, direction: sameCell ? 1 - this.cursor.direction : 0 };
+    this.ouvrirClavierTactile();
     this.refresh();
   }
 
@@ -1127,6 +1135,9 @@ export class App {
   }
 
   selectRackTile(rackIndex) {
+    // Le clavier virtuel occupe le bas de l'écran, c'est-à-dire exactement la
+    // place du chevalet : dès qu'on y touche, il doit redescendre.
+    this.fermerClavierTactile();
     if (this.exchangeMode) {
       if (this.marked.has(rackIndex)) this.marked.delete(rackIndex);
       else this.marked.add(rackIndex);
@@ -1595,6 +1606,107 @@ export class App {
     return true;
   }
 
+  /**
+   * Pose la lettre d'un caractère tapé sur le point de saisie, puis avance.
+   *
+   * Partagé par les deux claviers, qui ne parlent pas la même langue : celui
+   * d'un ordinateur envoie des touches, celui d'un téléphone envoie du texte.
+   * Tout ce qui est commun aux deux est ici.
+   *
+   * @param {string} caractere une seule lettre, accentuée ou non
+   * @param {boolean} [joker] exiger le joker même si la vraie lettre est en main
+   * @returns {boolean} vrai si la lettre a été posée
+   */
+  taperLettre(caractere, joker = false) {
+    if (!/^[a-zA-Zà-ÿ]$/.test(caractere)) return false;
+    const voulue = caractere
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toUpperCase()
+      .charCodeAt(0) - 65;
+    if (voulue < 0 || voulue > 25) return false;
+
+    // Taper sans avoir désigné de case doit marcher : on ouvre la saisie au
+    // centre plutôt que d'ignorer la touche.
+    if (!this.cursor || this.cursor.index < 0) {
+      const depart = this.premierPointDeSaisie();
+      if (depart < 0) return false;
+      this.cursor = { index: depart, direction: 0 };
+    }
+
+    const { index: cible, direction } = this.cursor;
+    const rack = this.game.players[HUMAN].rack;
+    // La tuile déjà préparée sur la case visée ne compte pas comme prise :
+    // on va la reprendre. Sans cette exception, retaper par-dessus la seule
+    // copie d'une lettre échouait, puisqu'elle se voyait elle-même en main.
+    const prises = new Set(
+      [...this.pending.entries()].filter(([i]) => i !== cible).map(([, p]) => p.rackIndex),
+    );
+    let index = joker ? -1 : rack.findIndex((l, i) => l === voulue && !prises.has(i));
+    if (index < 0) index = rack.findIndex((l, i) => l === BLANK && !prises.has(i));
+    if (index < 0) return false;
+
+    // Écraser une case déjà préparée plutôt que de refuser la frappe : on se
+    // corrige en retapant, pas en effaçant d'abord.
+    this.reprendrePreparee(cible);
+    if (rack[index] === BLANK) {
+      this.pending.set(cible, { letter: voulue, blank: true, rackIndex: index });
+      this.cursor = { index: this.nextCell(cible), direction };
+      this.refresh();
+    } else {
+      this.placeTile(cible, index, { advance: true });
+    }
+    return true;
+  }
+
+  /**
+   * Effacement arrière : on revient sur ses pas, comme dans un champ de texte.
+   * La case précédente le long de la direction d'écriture perd sa tuile et
+   * reçoit le point de saisie. Si elle est vide, on s'y place quand même —
+   * on recule, c'est ce qu'on attend de cette touche.
+   */
+  effacerArriere() {
+    const direction = this.cursor?.direction ?? 0;
+    if (!this.cursor || this.cursor.index < 0) {
+      const dernier = [...this.pending.keys()].pop();
+      if (dernier === undefined) return false;
+      this.pending.delete(dernier);
+      this.cursor = { index: dernier, direction };
+      this.refresh();
+      return true;
+    }
+    if (this.reprendrePreparee(this.cursor.index)) {
+      this.refresh();
+      return true;
+    }
+    const precedente = this.caseVoisine(this.cursor.index, direction === 0 ? -1 : -SIZE, false);
+    if (precedente < 0) return false;
+    this.reprendrePreparee(precedente);
+    this.cursor = { index: precedente, direction };
+    this.refresh();
+    return true;
+  }
+
+  /** Suppression avant : on vide la case où l'on est, sans bouger. */
+  supprimerSurPlace() {
+    if (!this.cursor || !this.reprendrePreparee(this.cursor.index)) return false;
+    this.refresh();
+    return true;
+  }
+
+  /** Bascule entre écrire en ligne et écrire en colonne. */
+  tournerSaisie() {
+    if (!this.cursor || this.cursor.index < 0) {
+      const depart = this.premierPointDeSaisie();
+      if (depart < 0) return false;
+      this.cursor = { index: depart, direction: 0 };
+    } else {
+      this.cursor = { index: this.cursor.index, direction: 1 - this.cursor.direction };
+    }
+    this.refresh();
+    return true;
+  }
+
   bindKeyboard() {
     window.addEventListener('keydown', (event) => {
       if (event.target.closest('dialog')) return;
@@ -1607,14 +1719,16 @@ export class App {
       // le bouton qu'on vient d'atteindre. Les lettres, elles, n'intéressent
       // personne d'autre que le plateau — sauf dans un champ de texte, où
       // elles sont évidemment pour lui.
+      //
+      // Le champ de saisie tactile est l'exception : il ne sert qu'à faire
+      // monter le clavier du téléphone, et tout ce qu'il reçoit est pour le
+      // plateau. Sans cette exception, un ordinateur dont ce champ a pris le
+      // focus n'aurait plus de frappe du tout.
       const controle = event.target.closest('button, a[href], select, input, textarea, [contenteditable]');
-      if (controle) {
+      if (controle && controle !== this.champSaisie) {
         if (controle.matches('input, textarea, [contenteditable]')) return;
         if (['Tab', ' ', 'Enter', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(event.key)) return;
       }
-
-      const direction = this.cursor?.direction ?? 0;
-      const pas = direction === 0 ? 1 : SIZE;
 
       const fleches = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1] };
       if (fleches[event.key]) {
@@ -1623,21 +1737,10 @@ export class App {
         return;
       }
 
-      // Même geste que le second clic sur une case : on bascule entre écrire
-      // vers la droite et écrire vers le bas.
       // Espace seulement, pas Tab : Tab doit rester la touche qui change de
       // bouton, sinon on enferme au clavier ceux qui n'ont que lui.
       if (event.key === ' ') {
-        if (!this.cursor || this.cursor.index < 0) {
-          const depart = this.premierPointDeSaisie();
-          if (depart < 0) return;
-          event.preventDefault();
-          this.cursor = { index: depart, direction: 0 };
-        } else {
-          event.preventDefault();
-          this.cursor = { index: this.cursor.index, direction: 1 - direction };
-        }
-        this.refresh();
+        if (this.tournerSaisie()) event.preventDefault();
         return;
       }
 
@@ -1656,79 +1759,104 @@ export class App {
         return;
       }
 
-      // Effacement arrière : on revient sur ses pas, comme dans un champ de
-      // texte. La case précédente le long de la direction d'écriture perd sa
-      // tuile et reçoit le point de saisie. Si elle est vide, on s'y place
-      // quand même — on recule, c'est ce qu'on attend de cette touche.
       if (event.key === 'Backspace') {
         event.preventDefault();
-        if (!this.cursor || this.cursor.index < 0) {
-          const dernier = [...this.pending.keys()].pop();
-          if (dernier === undefined) return;
-          this.pending.delete(dernier);
-          this.cursor = { index: dernier, direction };
-          this.refresh();
-          return;
-        }
-        if (this.reprendrePreparee(this.cursor.index)) {
-          this.refresh();
-          return;
-        }
-        const precedente = this.caseVoisine(this.cursor.index, -pas, false);
-        if (precedente < 0) return;
-        this.reprendrePreparee(precedente);
-        this.cursor = { index: precedente, direction };
-        this.refresh();
+        this.effacerArriere();
         return;
       }
 
-      // Suppression avant : on vide la case où l'on est, sans bouger.
       if (event.key === 'Delete') {
         event.preventDefault();
-        if (this.cursor && this.reprendrePreparee(this.cursor.index)) this.refresh();
+        this.supprimerSurPlace();
         return;
       }
 
-      if (!/^[a-zA-Zà-ÿ]$/.test(event.key)) return;
-
-      const voulue = event.key
-        .normalize('NFD')
-        .replace(/[\u0300-\u036f]/g, '')
-        .toUpperCase()
-        .charCodeAt(0) - 65;
-      if (voulue < 0 || voulue > 25) return;
-
-      // Taper sans avoir cliqué nulle part doit marcher : on ouvre la saisie
-      // au centre plutôt que d'ignorer la touche.
-      if (!this.cursor || this.cursor.index < 0) {
-        const depart = this.premierPointDeSaisie();
-        if (depart < 0) return;
-        this.cursor = { index: depart, direction: 0 };
-      }
-
-      const rack = this.game.players[HUMAN].rack;
-      const prises = new Set([...this.pending.values()].map((p) => p.rackIndex));
       // Majuscule : on exige le joker. C'est la convention des notations de
       // Scrabble, et le seul moyen d'imposer le joker quand on a aussi la
       // vraie lettre en main.
-      const forcerJoker = event.shiftKey;
-      let index = forcerJoker ? -1 : rack.findIndex((l, i) => l === voulue && !prises.has(i));
-      if (index < 0) index = rack.findIndex((l, i) => l === BLANK && !prises.has(i));
-      if (index < 0) return;
+      if (this.taperLettre(event.key, event.shiftKey)) event.preventDefault();
+    });
+  }
 
+  /* ---------------------------------------------------------------- */
+  /* Frappe au téléphone                                               */
+  /* ---------------------------------------------------------------- */
+
+  /**
+   * La frappe sur un appareil tactile.
+   *
+   * Trois choses la distinguent de celle d'un ordinateur, et chacune a sa
+   * conséquence dans ce qui suit.
+   *
+   * Un clavier virtuel ne s'ouvre que pour un champ qui a le focus : il faut
+   * donc un champ, et le focus doit être pris pendant le geste de
+   * l'utilisateur, car hors d'un appui le navigateur le refuse.
+   *
+   * Ce clavier n'envoie pas des touches mais du texte : sur Android, `keydown`
+   * arrive souvent sans nom de touche exploitable. On écoute donc
+   * `beforeinput`, qui dit à la fois ce qui est inséré et ce qui est effacé.
+   *
+   * Enfin, un effacement arrière dans un champ vide ne produit rien du tout.
+   * Le champ garde donc en permanence un caractère, qu'on remet après chaque
+   * événement : il y a toujours quelque chose à effacer, donc l'événement
+   * arrive toujours.
+   */
+  bindSaisieTactile() {
+    const champ = $('saisie-tactile');
+    if (!champ) return;
+    this.champSaisie = champ;
+
+    const SENTINELLE = '\u00a0';
+    const remettre = () => {
+      champ.value = SENTINELLE;
+      try {
+        champ.setSelectionRange(1, 1);
+      } catch {
+        // Certains navigateurs refusent sur un champ sans focus : sans
+        // importance, le caractère est en place et c'est lui qui compte.
+      }
+    };
+    remettre();
+
+    champ.addEventListener('beforeinput', (event) => {
+      if (!this.canArrange()) return;
       event.preventDefault();
-      const cible = this.cursor.index;
-      // Écraser une case déjà préparée plutôt que de refuser la frappe : on
-      // se corrige en retapant, pas en effaçant d'abord.
-      this.reprendrePreparee(cible);
-      if (rack[index] === BLANK) {
-        this.pending.set(cible, { letter: voulue, blank: true, rackIndex: index });
-        this.cursor = { index: this.nextCell(cible), direction };
-        this.refresh();
+      remettre();
+      const type = event.inputType;
+      if (type.startsWith('delete')) {
+        this.effacerArriere();
+      } else if (type === 'insertLineBreak' || type === 'insertParagraph') {
+        this.commitPlay();
       } else {
-        this.placeTile(cible, index, { advance: true });
+        for (const c of event.data ?? '') this.taperLettre(c);
       }
     });
+
+    // Filet : si un clavier passe outre le refus et écrit quand même, on
+    // rattrape ce qui a été posé dans le champ puis on le remet à neuf.
+    champ.addEventListener('input', () => {
+      const ecrit = champ.value.split(SENTINELLE).join('');
+      remettre();
+      if (!this.canArrange()) return;
+      for (const c of ecrit) this.taperLettre(c);
+    });
+  }
+
+  /**
+   * Fait monter le clavier du téléphone. À n'appeler que depuis le geste de
+   * l'utilisateur : ailleurs, le navigateur refuse de donner le focus.
+   */
+  ouvrirClavierTactile() {
+    if (!this.champSaisie) return;
+    // Seulement là où il n'y a pas déjà un vrai clavier. Sur un ordinateur,
+    // prendre le focus ne ferait que le retirer à ce qui l'avait.
+    if (!window.matchMedia('(any-pointer: coarse)').matches) return;
+    this.champSaisie.focus({ preventScroll: true });
+  }
+
+  /** Referme le clavier du téléphone. */
+  fermerClavierTactile() {
+    if (this.champSaisie && document.activeElement === this.champSaisie) this.champSaisie.blur();
   }
 
   /* ---------------------------------------------------------------- */
