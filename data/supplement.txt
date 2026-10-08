@@ -473,3 +473,13 @@ shawiniganaise
 shawiniganaises
 shawnee
 shawnees
+
+# Signalé refusé alors qu'il est valide : WALÉ, l'autre graphie d'AWALÉ, le
+# jeu de semailles africain. Le jeu connaissait déjà AWALE et AWALES, mais pas
+# la forme sans A, que l'ODS porte pourtant aussi. Absente des deux lexiques
+# sources, comme souvent pour cette famille de mots voyagés.
+#
+# L'accent tombe à la construction, donc WALÉ et WALÉS s'écrivent ici sans lui.
+# Et le pluriel existe, contrairement à WAX ou WESH : WALES a sa page.
+wale
+wales

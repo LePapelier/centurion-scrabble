@@ -1300,3 +1300,12 @@ shampooingniez
 shampooingnions
 shampooingnons
 shas
+
+# Croisés en vérifiant WALE : WALER et WALERS, le cheval de selle australien
+# élevé pour l'Inde. Le signe habituel d'un mot accepté à tort — présents dans
+# Morphalou, absents de l'ODS — et 1mot.net les donne tous les deux refusés.
+#
+# Leurs voisins à une lettre près sont tous de vrais verbes français (CALER,
+# GALER, HALER, RÂLER, SALER, TALER) ou WATER, et restent en place.
+waler
+walers
