@@ -54,33 +54,43 @@ const THEME_KEY = 'centurion-scrabble/theme';
  * `<html>` : la mise en page, les proportions des tuiles et les règles ne
  * changent jamais. Voir les blocs `[data-theme]` dans `styles.css`.
  *
- * Les pastilles donnent à voir le thème avant de le choisir — trois couleurs
- * qui le résument : le fond, le cadre, et l'accent.
+ * Chaque thème porte une icône plutôt qu'une palette : trois bandes de
+ * couleur disent qu'un décor est bleu ou brun, elles ne disent pas qu'il est
+ * sous l'eau ou dans l'espace. Un dessin le dit d'un coup, et dispense de la
+ * ligne de description qui était là pour rattraper la pastille.
  */
 const THEMES = [
+  // Une tuile, pour le jeu tel qu'on le connaît.
   {
     id: 'classique',
     name: 'Classique',
-    blurb: 'Feutre vert, bois et ivoire.',
-    swatch: ['#16432f', '#7c5a37', '#f0e2c4'],
+    icon: '<rect x="4.2" y="4.2" width="15.6" height="15.6" rx="2.6"/>'
+      + '<path d="M9.5 15.6 12 8.8l2.5 6.8"/><path d="M10.4 13.6h3.2"/>',
   },
+  // Un casque à cimier. La couronne de laurier, essayée d'abord, passait pour
+  // un masque : deux arcs qui se referment font un visage, et les deux feuilles
+  // à l'intérieur faisaient les yeux.
   {
     id: 'centurion',
     name: 'Centurion',
-    blurb: 'Marbre, bronze et pourpre impériale.',
-    swatch: ['#3a1a14', '#a97c2c', '#ead9b6'],
+    icon: '<path d="M5 20.6v-5.3a7 7 0 0 1 14 0v5.3"/>'
+      + '<path d="M5 16.6h14"/>'
+      + '<path d="M8.2 10C9 4.9 10.3 2.7 12 2.7s3 2.2 3.8 7.3"/>',
   },
+  // Une planète annelée et une étoile, comme le décor du thème.
   {
     id: 'espace',
     name: 'Espace',
-    blurb: 'Nébuleuse, acier et pierre de lune.',
-    swatch: ['#141d42', '#4b5570', '#dfe6f6'],
+    icon: '<circle cx="11.2" cy="13" r="5.4"/>'
+      + '<ellipse cx="11.2" cy="13" rx="9.4" ry="2.9" transform="rotate(-22 11.2 13)"/>'
+      + '<path d="M19.4 4v3.2M17.8 5.6h3.2"/>',
   },
+  // Une goutte : de l'eau et du verre, et rien qui ressemble à la planète.
   {
     id: 'verre',
     name: 'Verre',
-    blurb: 'Ciel, eau et verre lustré.',
-    swatch: ['#1b7fa6', '#6ce8a8', '#eafaff'],
+    icon: '<path d="M12 3.4c3.7 5 5.6 8.2 5.6 9.9a5.6 5.6 0 0 1-11.2 0c0-1.7 1.9-4.9 5.6-9.9Z"/>'
+      + '<path d="M9.2 14.2a3 3 0 0 0 1.6 2.5"/>',
   },
 ];
 const NAME_KEY = 'centurion-scrabble/nom';
@@ -410,11 +420,8 @@ export class App {
       option.className = 'theme-option';
       option.dataset.theme = theme.id;
       option.innerHTML =
-        `<span class="theme-swatch">${theme.swatch
-          .map((c) => `<i style="background:${c}"></i>`)
-          .join('')}</span>` +
-        `<span class="level-text"><span class="level-name">${theme.name}</span>` +
-        `<span class="level-blurb">${theme.blurb}</span></span>`;
+        `<span class="level-badge"><svg viewBox="0 0 24 24" aria-hidden="true">${theme.icon}</svg></span>` +
+        `<span class="level-name">${theme.name}</span>`;
       option.addEventListener('click', () => this.choisirTheme(theme.id));
       container.append(option);
     }

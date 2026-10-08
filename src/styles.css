@@ -2051,11 +2051,12 @@ svg {
   background: color-mix(in srgb, var(--accent) 12%, var(--surface-2));
 }
 
-/* Le choix du décor reprend la présentation du choix de niveau : même colonne,
-   mêmes cartes, mêmes marques de sélection. */
+/* Le choix du décor reprend les cartes du choix de niveau, mais sur deux
+   colonnes : sans la ligne de description, quatre cartes pleine largeur ne
+   portaient plus qu'un mot chacune et le panneau paraissait vide. */
 .themes {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: 7px;
   margin-bottom: 14px;
 }
@@ -2063,8 +2064,8 @@ svg {
 .theme-option {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 11px 13px;
+  gap: 10px;
+  padding: 9px 11px;
   border-radius: 5px;
   background: var(--surface-2);
   border: 1px solid transparent;
@@ -2075,22 +2076,6 @@ svg {
 .theme-option.selected {
   border-color: var(--accent);
   background: color-mix(in srgb, var(--accent) 12%, var(--surface-2));
-}
-
-/* Trois bandes : le fond, le cadre, l'accent. De quoi reconnaître un décor
-   sans l'essayer. */
-.theme-swatch {
-  display: flex;
-  flex: none;
-  width: 30px;
-  height: 30px;
-  overflow: hidden;
-  border-radius: 50%;
-  box-shadow: inset 0 0 0 1px var(--line);
-}
-
-.theme-swatch i {
-  flex: 1;
 }
 
 /* L'insigne remplace le chiffre ; le rang reste écrit à côté du nom. */
