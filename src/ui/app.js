@@ -237,6 +237,13 @@ export class App {
     this.blocageEnCours = false;
     this.requestId = 0;
     this.pendingRequests = new Map();
+    /**
+     * Nombre d'indices demandés et obtenus dans la partie en cours, montré à
+     * la fin. Il est porté par l'application et non par la partie, parce
+     * qu'en ligne la partie est reconstruite à chaque tour depuis l'instantané
+     * de l'hôte, qui ne sait rien des indices demandés chez les autres.
+     */
+    this.indicesUtilises = 0;
     this.toastTimer = null;
 
     /**
@@ -319,8 +326,14 @@ export class App {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (!raw) return null;
-      const game = Game.fromJSON(JSON.parse(raw));
-      return game && !game.finished ? game : null;
+      const data = JSON.parse(raw);
+      const game = Game.fromJSON(data);
+      if (!game || game.finished) return null;
+      // Le compteur voyage avec la partie, dans le même enregistrement : une
+      // partie reprise le lendemain doit se souvenir des indices déjà pris.
+      // `Game.fromJSON` ignore ce champ, qui ne le regarde pas.
+      this.indicesUtilises = Number(data.indices) || 0;
+      return game;
     } catch {
       return null;
     }
@@ -331,7 +344,10 @@ export class App {
     // sauvegarde solo, qui doit rester reprenable.
     if (this.mode !== 'solo') return;
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(this.game.toJSON()));
+      localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify({ ...this.game.toJSON(), indices: this.indicesUtilises }),
+      );
       localStorage.setItem(LEVEL_KEY, String(this.level));
     } catch {
       /* stockage indisponible : la partie reste jouable, sans reprise */
@@ -2122,6 +2138,7 @@ export class App {
     this.pending.clear();
     this.selected = null;
     this.cursor = null;
+    this.indicesUtilises = 0;
     this.cancelExchange();
     this.save();
     this.render();
@@ -2337,6 +2354,11 @@ export class App {
       }
 
       this.busy = false;
+      // Compté à la remise et non à la demande : une demande abandonnée en
+      // route n'a rien appris. « Aucun coup possible » compte aussi — c'est
+      // un renseignement, et il évite de chercher pour rien.
+      this.indicesUtilises += 1;
+      this.save();
       const move = message.move;
       if (!move) this.toast('Aucun coup possible avec ce chevalet.', 'error');
       else {
@@ -2440,6 +2462,13 @@ export class App {
       block.append(name, value);
       scores.append(block);
     });
+
+    // Combien d'indices ont été pris. Le compteur est celui de cet appareil :
+    // en ligne, chacun ne connaît que les siens, et c'est bien de ceux-là
+    // qu'il s'agit dans sa propre fenêtre de fin.
+    const n = this.indicesUtilises;
+    $('end-indices').textContent =
+      n === 0 ? 'Aucun indice utilisé.' : n === 1 ? 'Un indice utilisé.' : `${n} indices utilisés.`;
 
     $('end-dialog').showModal();
     this.sons.jouer(this.game.winner === HUMAN ? 'victoire' : 'defaite');

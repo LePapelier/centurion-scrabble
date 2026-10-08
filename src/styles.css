@@ -2206,6 +2206,15 @@ svg {
 }
 
 
+/* Le compte des indices, sous les scores : une ligne de bilan, pas un score.
+   Elle est donc de la taille et de la couleur des textes secondaires. */
+.end-indices {
+  margin: 11px 0 3px;
+  font-size: 0.82rem;
+  color: var(--text-dim);
+  text-align: center;
+}
+
 .end-scores {
   display: grid;
   grid-template-columns: 1fr 1fr;
