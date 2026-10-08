@@ -194,6 +194,23 @@
       <div class="levels" id="levels"></div>
       <h2>Thème</h2>
       <div class="themes" id="themes"></div>
+
+      <!-- Masqué sur un appareil tactile : la section n'y servirait à rien, et
+           elle ferait défiler d'autant le reste du panneau. -->
+      <section class="clavier" id="clavier-aide">
+        <h2>Au clavier</h2>
+        <dl class="touches">
+          <dt><kbd>A</kbd>…<kbd>Z</kbd></dt><dd>pose la lettre et avance</dd>
+          <dt><kbd>⇧</kbd>+lettre</dt><dd>impose le joker</dd>
+          <dt><kbd>←</kbd><kbd>↑</kbd><kbd>→</kbd><kbd>↓</kbd></dt><dd>déplacent le point de saisie, et donnent le sens</dd>
+          <dt><kbd>Espace</kbd></dt><dd>bascule entre ligne et colonne</dd>
+          <dt><kbd>⌫</kbd></dt><dd>reprend la lettre précédente</dd>
+          <dt><kbd>Suppr</kbd></dt><dd>reprend celle du point de saisie</dd>
+          <dt><kbd>Entrée</kbd></dt><dd>joue le mot</dd>
+          <dt><kbd>Échap</kbd></dt><dd>reprend tout</dd>
+        </dl>
+      </section>
+
       <button type="button" class="btn btn-ghost" id="rules-close">Fermer</button>
     </dialog>
 

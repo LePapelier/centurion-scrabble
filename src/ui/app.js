@@ -472,7 +472,12 @@ export class App {
       const letter = letters[i];
 
       cell.classList.toggle('highlight', highlight.has(i) && letter >= 0);
-      cell.classList.toggle('cursor', this.cursor?.index === i && letter < 0 && !pending);
+      // Le point de saisie clavier, et le sens dans lequel la frappe avance :
+      // sans ce second repère, on ne sait pas si la lettre suivante ira à
+      // droite ou en dessous, et il faut taper pour l'apprendre.
+      const curseurIci = this.cursor?.index === i && letter < 0 && !pending;
+      cell.classList.toggle('cursor', curseurIci);
+      cell.classList.toggle('cursor-bas', curseurIci && this.cursor.direction === 1);
 
       const wanted = pending
         ? `p${pending.letter}${pending.blank ? 'b' : ''}`
@@ -1459,54 +1464,202 @@ export class App {
     });
   }
 
+  /**
+   * Case voisine dans une direction donnée, en sautant celles qui sont déjà
+   * occupées. Rend -1 si on sort du plateau ou de la ligne.
+   *
+   * @param {number} index case de départ
+   * @param {number} pas `1` ou `-1` horizontalement, `SIZE` ou `-SIZE`
+   *   verticalement
+   * @param {boolean} sauterOccupees au clavier on enjambe les lettres déjà
+   *   posées, parce qu'on ne peut rien en faire ; les flèches, elles, servent
+   *   aussi à se promener, et s'arrêtent où on les envoie.
+   */
+  caseVoisine(index, pas, sauterOccupees = true) {
+    const horizontal = Math.abs(pas) === 1;
+    const ligne = Math.floor(index / SIZE);
+    let suivante = index + pas;
+    while (suivante >= 0 && suivante < CELLS) {
+      // Une case à gauche de la première colonne tombe à la fin de la ligne
+      // précédente : c'est le même nombre, et ce n'est pas la même case.
+      if (horizontal && Math.floor(suivante / SIZE) !== ligne) return -1;
+      if (!sauterOccupees) return suivante;
+      if (this.game.board.letters[suivante] < 0) return suivante;
+      suivante += pas;
+    }
+    return -1;
+  }
+
+  /** Point de saisie de départ : le centre s'il est libre, sinon la première
+   *  case libre du plateau. On ne peut pas taper sans point d'entrée, et
+   *  demander un clic avant la première touche serait une porte fermée. */
+  premierPointDeSaisie() {
+    const centre = Math.floor(CELLS / 2);
+    if (this.game.board.letters[centre] < 0 && !this.pending.has(centre)) return centre;
+    for (let i = 0; i < CELLS; i++) {
+      if (this.game.board.letters[i] < 0 && !this.pending.has(i)) return i;
+    }
+    return -1;
+  }
+
+  /**
+   * Déplace le point de saisie à la flèche. La direction de frappe suit la
+   * flèche : qui part vers la droite écrira vers la droite.
+   */
+  deplacerCurseur(dx, dy) {
+    if (!this.cursor || this.cursor.index < 0) {
+      const depart = this.premierPointDeSaisie();
+      if (depart < 0) return;
+      this.cursor = { index: depart, direction: dx !== 0 ? 0 : 1 };
+      this.refresh();
+      return;
+    }
+    const pas = dx !== 0 ? dx : dy * SIZE;
+    const vise = this.caseVoisine(this.cursor.index, pas, false);
+    if (vise < 0) return;
+    this.cursor = { index: vise, direction: dx !== 0 ? 0 : 1 };
+    this.refresh();
+  }
+
+  /** Retire la tuile préparée d'une case, s'il y en a une. */
+  reprendrePreparee(index) {
+    if (index < 0 || !this.pending.has(index)) return false;
+    this.pending.delete(index);
+    return true;
+  }
+
   bindKeyboard() {
     window.addEventListener('keydown', (event) => {
       if (event.target.closest('dialog')) return;
+      if (event.ctrlKey || event.metaKey || event.altKey) return;
       if (!this.canArrange()) return;
+
+      // Quand un élément a le focus, les touches de navigation et
+      // d'activation lui appartiennent : voler Tab, c'est supprimer la
+      // navigation au clavier, et voler Espace, c'est empêcher d'appuyer sur
+      // le bouton qu'on vient d'atteindre. Les lettres, elles, n'intéressent
+      // personne d'autre que le plateau — sauf dans un champ de texte, où
+      // elles sont évidemment pour lui.
+      const controle = event.target.closest('button, a[href], select, input, textarea, [contenteditable]');
+      if (controle) {
+        if (controle.matches('input, textarea, [contenteditable]')) return;
+        if (['Tab', ' ', 'Enter', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(event.key)) return;
+      }
+
+      const direction = this.cursor?.direction ?? 0;
+      const pas = direction === 0 ? 1 : SIZE;
+
+      const fleches = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1] };
+      if (fleches[event.key]) {
+        event.preventDefault();
+        this.deplacerCurseur(...fleches[event.key]);
+        return;
+      }
+
+      // Même geste que le second clic sur une case : on bascule entre écrire
+      // vers la droite et écrire vers le bas.
+      // Espace seulement, pas Tab : Tab doit rester la touche qui change de
+      // bouton, sinon on enferme au clavier ceux qui n'ont que lui.
+      if (event.key === ' ') {
+        if (!this.cursor || this.cursor.index < 0) {
+          const depart = this.premierPointDeSaisie();
+          if (depart < 0) return;
+          event.preventDefault();
+          this.cursor = { index: depart, direction: 0 };
+        } else {
+          event.preventDefault();
+          this.cursor = { index: this.cursor.index, direction: 1 - direction };
+        }
+        this.refresh();
+        return;
+      }
 
       if (event.key === 'Enter') {
         event.preventDefault();
         this.commitPlay();
         return;
       }
+
       if (event.key === 'Escape') {
-        this.recall();
-        return;
-      }
-      if (event.key === 'Backspace') {
-        event.preventDefault();
-        const last = [...this.pending.keys()].pop();
-        if (last !== undefined) {
-          this.pending.delete(last);
-          this.cursor = { index: last, direction: this.cursor?.direction ?? 0 };
+        if (this.pending.size > 0) this.recall();
+        else if (this.cursor) {
+          this.cursor = null;
           this.refresh();
         }
         return;
       }
 
-      if (!/^[a-zA-Zà-ÿ]$/.test(event.key) || !this.cursor || this.cursor.index < 0) return;
+      // Effacement arrière : on revient sur ses pas, comme dans un champ de
+      // texte. La case précédente le long de la direction d'écriture perd sa
+      // tuile et reçoit le point de saisie. Si elle est vide, on s'y place
+      // quand même — on recule, c'est ce qu'on attend de cette touche.
+      if (event.key === 'Backspace') {
+        event.preventDefault();
+        if (!this.cursor || this.cursor.index < 0) {
+          const dernier = [...this.pending.keys()].pop();
+          if (dernier === undefined) return;
+          this.pending.delete(dernier);
+          this.cursor = { index: dernier, direction };
+          this.refresh();
+          return;
+        }
+        if (this.reprendrePreparee(this.cursor.index)) {
+          this.refresh();
+          return;
+        }
+        const precedente = this.caseVoisine(this.cursor.index, -pas, false);
+        if (precedente < 0) return;
+        this.reprendrePreparee(precedente);
+        this.cursor = { index: precedente, direction };
+        this.refresh();
+        return;
+      }
 
-      const wanted = event.key
+      // Suppression avant : on vide la case où l'on est, sans bouger.
+      if (event.key === 'Delete') {
+        event.preventDefault();
+        if (this.cursor && this.reprendrePreparee(this.cursor.index)) this.refresh();
+        return;
+      }
+
+      if (!/^[a-zA-Zà-ÿ]$/.test(event.key)) return;
+
+      const voulue = event.key
         .normalize('NFD')
-        .replace(/[̀-ͯ]/g, '')
+        .replace(/[\u0300-\u036f]/g, '')
         .toUpperCase()
         .charCodeAt(0) - 65;
-      if (wanted < 0 || wanted > 25) return;
+      if (voulue < 0 || voulue > 25) return;
+
+      // Taper sans avoir cliqué nulle part doit marcher : on ouvre la saisie
+      // au centre plutôt que d'ignorer la touche.
+      if (!this.cursor || this.cursor.index < 0) {
+        const depart = this.premierPointDeSaisie();
+        if (depart < 0) return;
+        this.cursor = { index: depart, direction: 0 };
+      }
 
       const rack = this.game.players[HUMAN].rack;
-      const used = new Set([...this.pending.values()].map((p) => p.rackIndex));
-      let index = rack.findIndex((l, i) => l === wanted && !used.has(i));
-      if (index < 0) index = rack.findIndex((l, i) => l === BLANK && !used.has(i));
+      const prises = new Set([...this.pending.values()].map((p) => p.rackIndex));
+      // Majuscule : on exige le joker. C'est la convention des notations de
+      // Scrabble, et le seul moyen d'imposer le joker quand on a aussi la
+      // vraie lettre en main.
+      const forcerJoker = event.shiftKey;
+      let index = forcerJoker ? -1 : rack.findIndex((l, i) => l === voulue && !prises.has(i));
+      if (index < 0) index = rack.findIndex((l, i) => l === BLANK && !prises.has(i));
       if (index < 0) return;
 
       event.preventDefault();
-      const target = this.cursor.index;
+      const cible = this.cursor.index;
+      // Écraser une case déjà préparée plutôt que de refuser la frappe : on
+      // se corrige en retapant, pas en effaçant d'abord.
+      this.reprendrePreparee(cible);
       if (rack[index] === BLANK) {
-        this.pending.set(target, { letter: wanted, blank: true, rackIndex: index });
-        this.cursor = { index: this.nextCell(target), direction: this.cursor.direction };
+        this.pending.set(cible, { letter: voulue, blank: true, rackIndex: index });
+        this.cursor = { index: this.nextCell(cible), direction };
         this.refresh();
       } else {
-        this.placeTile(target, index, { advance: true });
+        this.placeTile(cible, index, { advance: true });
       }
     });
   }
