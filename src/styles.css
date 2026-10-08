@@ -363,7 +363,8 @@ html[data-theme='verre'] {
       #0d5878 86%,
       var(--bg) 100%);
   /* Le décor : la scène elle-même, dessinée à part. Voir son en-tête pour le
-     partage haut/bas/côtés, qui tient au rognage de l'image selon l'écran. */
+     partage haut/bas/côtés, qui tient au rognage de l'image selon l'écran.
+     Il en existe une seconde version pour les grands écrans, plus bas. */
   --decor: url('/verre-aero.svg');
   /* Des bulles, pas du grain : le motif se répète comme le feutre, mais ce
      qu'il sème sont des gouttes, chacune avec son reflet. */
@@ -2623,6 +2624,17 @@ svg {
 /* Grand écran — placé en dernier pour surcharger toutes les règles     */
 /* de base, quel que soit l'ordre dans lequel elles ont été ajoutées.   */
 /* ------------------------------------------------------------------ */
+
+/* Au-delà de ce seuil la mise en page change : le jeu se met en colonne et le
+   panneau de l'historique apparaît à droite. Le décor de Verre doit changer
+   avec elle — le dessin vertical, rogné à une bande de 250 unités sur 760, n'y
+   montre plus que de l'eau. Même seuil que la mise en page, pour qu'ils
+   basculent ensemble. */
+@media (min-width: 900px) and (min-height: 700px) {
+  html[data-theme='verre'] {
+    --decor: url('/verre-aero-large.svg');
+  }
+}
 
 @media (min-width: 900px) and (min-height: 700px) {
   .app {
