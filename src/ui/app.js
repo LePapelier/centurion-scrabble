@@ -1503,21 +1503,24 @@ export class App {
   }
 
   /**
-   * Déplace le point de saisie à la flèche. La direction de frappe suit la
-   * flèche : qui part vers la droite écrira vers la droite.
+   * Déplace le point de saisie à la flèche, sans toucher au sens d'écriture.
+   * Les deux choses sont séparées exprès : on se déplace sur le plateau bien
+   * plus souvent qu'on ne change de sens, et une flèche qui réoriente la
+   * saisie retourne le mot en cours sans qu'on l'ait demandé. Le sens est à
+   * la barre d'espace, et à elle seule.
    */
   deplacerCurseur(dx, dy) {
+    const direction = this.cursor?.direction ?? 0;
     if (!this.cursor || this.cursor.index < 0) {
       const depart = this.premierPointDeSaisie();
       if (depart < 0) return;
-      this.cursor = { index: depart, direction: dx !== 0 ? 0 : 1 };
+      this.cursor = { index: depart, direction };
       this.refresh();
       return;
     }
-    const pas = dx !== 0 ? dx : dy * SIZE;
-    const vise = this.caseVoisine(this.cursor.index, pas, false);
+    const vise = this.caseVoisine(this.cursor.index, dx !== 0 ? dx : dy * SIZE, false);
     if (vise < 0) return;
-    this.cursor = { index: vise, direction: dx !== 0 ? 0 : 1 };
+    this.cursor = { index: vise, direction };
     this.refresh();
   }
 
