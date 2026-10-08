@@ -1082,10 +1082,13 @@ export class App {
     if (!this.canArrange()) return;
     if (this.exchangeMode) return;
 
+    // Reprendre une tuile préparée, et rien d'autre : ce geste-là dit « je
+    // retire », pas « je vais écrire ici ». Il ne déplace donc pas le point de
+    // saisie et ne fait pas monter le clavier du téléphone. Un point de saisie
+    // déjà ouvert ailleurs reste où il est — on corrige souvent une lettre au
+    // milieu d'un mot qu'on est en train de taper.
     if (this.pending.has(index)) {
       this.pending.delete(index);
-      this.cursor = { index, direction: this.cursor?.direction ?? 0 };
-      this.ouvrirClavierTactile();
       this.refresh();
       return;
     }
