@@ -145,6 +145,11 @@ html[data-theme='centurion'] {
   --cadre-largeur: clamp(11px, 2.4cqw, 20px);
   --cadre-rayon: calc(var(--cadre-largeur) * 0.42);
   --case-rayon: 1px;
+  --tuile-arrondi: 0.035;
+  --chevalet-rayon: 3px 3px 5px 5px;
+  --chevalet-rayon-bas: 0 0 5px 5px;
+  --chevalet-levre: 15px;
+  --gorge: rgb(32 18 8 / 0.62);
 
   --bg: #170d0a;
   --felt: #3a1a14;
@@ -239,6 +244,11 @@ html[data-theme='espace'] {
   --cadre-largeur: clamp(7px, 1.5cqw, 13px);
   --cadre-rayon: calc(var(--cadre-largeur) + 2px);
   --case-rayon: 1.5px;
+  --tuile-arrondi: 0.05;
+  --chevalet-rayon: 2px 2px 14px 14px;
+  --chevalet-rayon-bas: 0 0 14px 14px;
+  --chevalet-levre: 9px;
+  --gorge: rgb(10 16 38 / 0.55);
 
   --bg: #04060f;
   --felt: #141d42;
@@ -328,6 +338,11 @@ html[data-theme='verre'] {
   --cadre-largeur: clamp(9px, 2cqw, 17px);
   --cadre-rayon: calc(var(--cadre-largeur) + 16px);
   --case-rayon: 6px;
+  --tuile-arrondi: 0.16;
+  --chevalet-rayon: 16px 16px 20px 20px;
+  --chevalet-rayon-bas: 0 0 20px 20px;
+  --chevalet-levre: 11px;
+  --gorge: rgb(6 48 72 / 0.3);
 
   --bg: #0b4a63;
   --felt: #1b86a8;
@@ -545,10 +560,16 @@ svg {
   /* Hauteur divisée par largeur. Une tuile de Scrabble n'est pas un carré
      parfait : elle est un peu plus haute que large. Sur le plateau, elle se
      loge en hauteur dans sa case et laisse paraître un filet de chaque côté. */
+  /* La tuile emprunte sa police à l'étiquette des cases bonus : c'est le même
+     objet vu de deux façons, et le plateau se lit mal quand les deux ne sont
+     pas de la même main. Chaque thème n'a donc qu'une police à choisir. */
+  --tuile-police: var(--bonus-police);
   --tuile-ratio: 1.06;
   /* Arrondi en fraction de la largeur de la tuile, et non en pixels : sinon
      le même rayon s'applique à une tuile de 20 px et à une de 40 px, et la
      petite paraît deux fois plus ronde. */
+  /* L'arrondi de la tuile suit celui des cases : un plateau à angles vifs ne
+     supporte pas des tuiles en galets, et l'inverse non plus. */
   --tuile-arrondi: 0.085;
   /* La lettre occupe 64,7 % de la largeur de la tuile, la valeur 47,6 % de la
      lettre. Mêmes nombres des deux côtés : c'est ce qui fait qu'une tuile du
@@ -595,6 +616,15 @@ svg {
   --cadre-largeur: clamp(9px, 2cqw, 17px);
   --cadre-rayon: calc(var(--cadre-largeur) + 5px);
   --case-rayon: 2.5px;
+
+  /* Le chevalet : son arrondi, celui de sa lèvre avant, la hauteur de cette
+     lèvre, et le fond de ses gorges. Une planche de bois, un rebord de
+     pierre, un plateau d'acier et une barre de verre ne se taillent pas de
+     la même façon. */
+  --chevalet-rayon: 7px 7px 10px 10px;
+  --chevalet-rayon-bas: 0 0 10px 10px;
+  --chevalet-levre: 12px;
+  --gorge: rgb(38 24 12 / 0.55);
   /* Le relief du cadre et le creux où repose la grille. Nommés pour qu'un
      thème puisse les refaire — ou les supprimer : un plateau de verre n'a ni
      bois ni gorge, il n'a qu'une arête. */
@@ -1336,6 +1366,7 @@ svg {
 .tile,
 .rack-tile {
   padding: 0 14% 10% 0;
+  font-family: var(--tuile-police);
 }
 
 .tile .value,
@@ -1499,8 +1530,8 @@ svg {
      doigt. Elles en gardent la forme, pas la taille. */
   grid-template-columns: repeat(7, 1fr);
   gap: 5px;
-  padding: 7px 8px 15px;
-  border-radius: 7px 7px 10px 10px;
+  padding: 7px 8px calc(var(--chevalet-levre) + 3px);
+  border-radius: var(--chevalet-rayon);
   background: var(--porte);
   box-shadow:
     inset 0 1px 0 rgb(255 255 255 / 0.3),
@@ -1518,8 +1549,8 @@ svg {
   left: 0;
   right: 0;
   bottom: 0;
-  height: 12px;
-  border-radius: 0 0 10px 10px;
+  height: var(--chevalet-levre);
+  border-radius: var(--chevalet-rayon-bas);
   background: var(--levre);
   box-shadow:
     inset 0 1px 0 rgb(255 255 255 / 0.32),
@@ -1537,7 +1568,7 @@ svg {
      conteneur, et un élément n'interroge jamais le sien — `cqw` retombait
      sur la fenêtre, et la gorge vide s'affichait en pastille ronde. */
   border-radius: calc(var(--tuile-arrondi) * 125%);
-  background: rgb(38 24 12 / 0.55);
+  background: var(--gorge);
   box-shadow: inset 0 2px 4px rgb(0 0 0 / 0.5), inset 0 -1px 0 rgb(255 255 255 / 0.06);
 }
 
