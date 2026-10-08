@@ -86,9 +86,15 @@ const THEMES = [
       + '<path d="M19.4 4v3.2M17.8 5.6h3.2"/>',
   },
   // Une goutte : de l'eau et du verre, et rien qui ressemble à la planète.
+  //
+  // Le nom montré est « Aqua », l'identifiant reste `verre`. Celui-ci est
+  // écrit dans le stockage du navigateur, dans l'attribut `data-theme`, dans
+  // les sélecteurs CSS, dans les noms des deux fichiers de décor et dans la
+  // table des timbres : le changer obligerait à migrer la préférence déjà
+  // enregistrée, pour un renommage qui ne regarde que l'affichage.
   {
     id: 'verre',
-    name: 'Verre',
+    name: 'Aqua',
     icon: '<path d="M12 3.4c3.7 5 5.6 8.2 5.6 9.9a5.6 5.6 0 0 1-11.2 0c0-1.7 1.9-4.9 5.6-9.9Z"/>'
       + '<path d="M9.2 14.2a3 3 0 0 0 1.6 2.5"/>',
   },
@@ -179,6 +185,29 @@ const LEVEL_ICONS = {
   3: '<path d="M5 10l7-6 7 6"/><path d="M5 15l7-6 7 6"/><path d="M5 20l7-6 7 6"/>',
   4: '<path d="m12 3 2.5 5.4 5.9.8-4.3 4.1 1.1 5.9L12 16.3 6.8 19.2l1.1-5.9L3.6 9.2l5.9-.8z"/>',
   5: '<path d="M4 19h16"/><path d="m4 19-1.2-11L8 12l4-7.5 4 7.5 5.2-4L20 19z"/>',
+};
+
+/**
+ * L'étoile de la case centrale.
+ *
+ * Elle était écrite — le caractère « ★ » — et dépendait donc de la police du
+ * thème. Or celle-ci change avec lui : en monospace, sur le thème Espace, le
+ * glyphe sortait plus petit que sur les autres et calé plus haut. Un dessin
+ * ne dépend d'aucune police, et se mesure en part de la case.
+ *
+ * Cinq branches, rayon extérieur 9,6 et intérieur 3,67 — le rapport d'or
+ * inverse, qui est celui de l'étoile régulière.
+ */
+const etoileCentrale = () => {
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  svg.setAttribute('viewBox', '0 0 24 24');
+  svg.setAttribute('aria-hidden', 'true');
+  svg.setAttribute('class', 'etoile');
+  const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+  path.setAttribute('d', 'M12 2.4 14.16 9.03 21.13 9.03 15.49 13.13 17.64 19.77'
+    + ' 12 15.67 6.36 19.77 8.51 13.13 2.87 9.03 9.84 9.03Z');
+  svg.append(path);
+  return svg;
 };
 
 const levelIcon = (level) =>
@@ -537,7 +566,7 @@ export class App {
         }
         cell.append(tile);
       } else if (i === CENTER) {
-        cell.textContent = '★';
+        cell.append(etoileCentrale());
       } else if (PREMIUM_LABEL[PREMIUMS[i]]) {
         cell.textContent = PREMIUM_LABEL[PREMIUMS[i]];
       }

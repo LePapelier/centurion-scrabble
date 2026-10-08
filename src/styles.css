@@ -1202,10 +1202,17 @@ svg {
 .cell.center {
   background: var(--dw);
   color: var(--bonus-texte);
-  /* L'étoile n'est pas une étiquette de deux lettres comme « MD » : elle peut
-     occuper la case, à la mesure d'une lettre de tuile. */
-  font-size: 4.4cqw;
-  line-height: 1;
+}
+
+/* L'étoile est dessinée et non écrite — voir `etoileCentrale` dans `app.js`.
+   Sa taille se prend donc sur la case et non sur une police, ce qui lui donne
+   la même présence sur les quatre thèmes. Elle est pleine, contrairement aux
+   autres dessins du jeu, que la règle générale met en trait. */
+.cell.center .etoile {
+  width: 60%;
+  height: 60%;
+  fill: currentColor;
+  stroke: none;
 }
 
 /* Destination survolée pendant qu'une tuile est déplacé : vert si la case
