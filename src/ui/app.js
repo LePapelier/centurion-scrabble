@@ -354,6 +354,34 @@ export class App {
     }
 
     board.append(fragment);
+
+    /* Les repères de coordonnées, posés dans le cadre.
+
+       La notation est celle du Scrabble français : les lignes portent les
+       lettres A à O de haut en bas, les colonnes les chiffres 1 à 15 de gauche
+       à droite. C'est ce qui permet d'écrire « H4 » pour un mot horizontal et
+       « 4H » pour un mot vertical parti de la même case — l'ordre dit le sens,
+       et il ne le dirait plus si on échangeait les deux axes.
+
+       Les deux réglettes sont des calques posés sur le cadre, et non des
+       lignes de la grille : le plateau est un `grid` de quinze sur quinze, et
+       y ajouter une rangée décalerait toutes les cases. Elles reprennent le
+       même pas et le même écart, ce qui les aligne sans rien calculer. */
+    const colonnes = document.createElement('div');
+    colonnes.className = 'reglette reglette-colonnes';
+    const lignes = document.createElement('div');
+    lignes.className = 'reglette reglette-lignes';
+    for (const r of [colonnes, lignes]) r.setAttribute('aria-hidden', 'true');
+    for (let i = 0; i < SIZE; i++) {
+      const chiffre = document.createElement('span');
+      chiffre.textContent = String(i + 1);
+      colonnes.append(chiffre);
+      const lettre = document.createElement('span');
+      lettre.textContent = String.fromCharCode(65 + i);
+      lignes.append(lettre);
+    }
+    board.append(colonnes, lignes);
+
     board.addEventListener('click', (event) => {
       // Un glissement qui vient de se terminer produit aussi un clic : il ne
       // doit pas être pris pour un appui sur la case d'arrivée.

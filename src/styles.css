@@ -146,6 +146,7 @@ html[data-theme='centurion'] {
   --cadre-rayon: calc(var(--cadre-largeur) * 0.42);
   --case-rayon: 1px;
   --tuile-arrondi: 0.035;
+  --reglette-texte: rgb(255 231 184 / 0.5);
   --chevalet-rayon: 3px 3px 5px 5px;
   --chevalet-rayon-bas: 0 0 5px 5px;
   --chevalet-levre: 15px;
@@ -245,6 +246,7 @@ html[data-theme='espace'] {
   --cadre-rayon: calc(var(--cadre-largeur) + 2px);
   --case-rayon: 1.5px;
   --tuile-arrondi: 0.05;
+  --reglette-texte: rgb(205 222 255 / 0.44);
   --chevalet-rayon: 2px 2px 14px 14px;
   --chevalet-rayon-bas: 0 0 14px 14px;
   --chevalet-levre: 9px;
@@ -339,6 +341,7 @@ html[data-theme='verre'] {
   --cadre-rayon: calc(var(--cadre-largeur) + 16px);
   --case-rayon: 6px;
   --tuile-arrondi: 0.16;
+  --reglette-texte: rgb(255 255 255 / 0.62);
   --chevalet-rayon: 16px 16px 20px 20px;
   --chevalet-rayon-bas: 0 0 20px 20px;
   --chevalet-levre: 11px;
@@ -622,6 +625,10 @@ svg {
      lèvre, et le fond de ses gorges. Une planche de bois, un rebord de
      pierre, un plateau d'acier et une barre de verre ne se taillent pas de
      la même façon. */
+  /* Les repères de coordonnées dans le cadre : assez présents pour se lire
+     quand on les cherche, assez pâles pour qu'on ne les voie pas sinon. */
+  --reglette-texte: rgb(255 238 212 / 0.38);
+
   --chevalet-rayon: 7px 7px 10px 10px;
   --chevalet-rayon-bas: 0 0 10px 10px;
   --chevalet-levre: 12px;
@@ -1090,6 +1097,51 @@ svg {
   background: var(--creux);
   box-shadow: var(--creux-ombre);
   pointer-events: none;
+}
+
+/* Les repères de coordonnées. Ils tiennent dans l'épaisseur du cadre, qui ne
+   fait que neuf à vingt pixels : d'où une taille calculée sur lui plutôt que
+   fixée, et un plancher pour qu'ils ne disparaissent pas sur un téléphone.
+
+   Le pas et l'écart sont ceux de la grille, ce qui les aligne sans calcul :
+   une réglette est un `grid` de quinze parts égales tendu entre les deux bords
+   intérieurs du cadre, exactement comme les cases. */
+.reglette {
+  position: absolute;
+  display: grid;
+  gap: 2px;
+  font-family: var(--bonus-police);
+  /* Trois bornes. La taille suit le plateau, comme celle des étiquettes des
+     cases — 1,75cqw contre leurs 2,35cqw, donc toujours plus discrète. Le
+     plafond la retient dans l'épaisseur du cadre, qui ne grandit pas au même
+     rythme. Le plancher l'empêche de devenir illisible sur un téléphone. */
+  font-size: clamp(6px, 1.75cqw, calc(var(--frame) * 0.82));
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: 0;
+  color: var(--reglette-texte);
+  pointer-events: none;
+}
+
+.reglette span {
+  display: grid;
+  place-items: center;
+}
+
+.reglette-colonnes {
+  top: 0;
+  left: var(--frame);
+  right: var(--frame);
+  height: var(--frame);
+  grid-template-columns: repeat(15, minmax(0, 1fr));
+}
+
+.reglette-lignes {
+  top: var(--frame);
+  bottom: var(--frame);
+  left: 0;
+  width: var(--frame);
+  grid-template-rows: repeat(15, minmax(0, 1fr));
 }
 
 .board.bingo {
