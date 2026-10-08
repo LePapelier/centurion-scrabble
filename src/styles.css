@@ -332,16 +332,27 @@ html[data-theme='verre'] {
   --cadre-rayon: calc(var(--cadre-largeur) + 16px);
   --case-rayon: 6px;
 
-  --bg: #0a3a52;
+  --bg: #0b4a63;
   --felt: #1b86a8;
-  /* Ciel en haut, eau verte en bas. La lumière est posée au-dessus du cadre,
+  /* Le dégradé ne fait plus que le fond de scène : le ciel tout en haut, l'eau
+     au milieu, le vert de l'herbe tout en bas. Ce qui porte le thème est
+     au-dessus, dans `--decor`. La lumière est posée au-dessus du cadre,
      centrée et hors champ : au coin supérieur gauche, elle tombait en plein
      sur le bandeau des scores et les effaçait. */
   --fond:
-    radial-gradient(72% 46% at 50% -10%, rgb(196 247 255 / 0.55) 0%, transparent 72%),
-    radial-gradient(58% 42% at 84% 98%, rgb(108 232 168 / 0.42) 0%, transparent 74%),
-    radial-gradient(48% 34% at 10% 88%, rgb(64 196 220 / 0.3) 0%, transparent 72%),
-    linear-gradient(178deg, #2ba9cb 0%, #1b7fa6 36%, #0f5476 70%, var(--bg) 100%);
+    radial-gradient(70% 38% at 50% -14%, rgb(226 252 255 / 0.46) 0%, transparent 70%),
+    radial-gradient(90% 30% at 50% 104%, rgb(96 214 128 / 0.55) 0%, transparent 76%),
+    radial-gradient(52% 36% at 8% 86%, rgb(78 214 228 / 0.32) 0%, transparent 72%),
+    linear-gradient(177deg,
+      #7fd8f2 0%,
+      #39aed6 18%,
+      #1f87b4 44%,
+      #126a90 68%,
+      #0d5878 86%,
+      var(--bg) 100%);
+  /* Le décor : la scène elle-même, dessinée à part. Voir son en-tête pour le
+     partage haut/bas/côtés, qui tient au rognage de l'image selon l'écran. */
+  --decor: url('/verre-aero.svg');
   /* Des bulles, pas du grain : le motif se répète comme le feutre, mais ce
      qu'il sème sont des gouttes, chacune avec son reflet. */
   --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cg fill='none'%3E%3Ccircle cx='54' cy='72' r='17' fill='%23fff' opacity='.07'/%3E%3Ccircle cx='48' cy='64' r='5' fill='%23fff' opacity='.16'/%3E%3Ccircle cx='212' cy='38' r='11' fill='%23fff' opacity='.06'/%3E%3Ccircle cx='208' cy='33' r='3.5' fill='%23fff' opacity='.15'/%3E%3Ccircle cx='136' cy='196' r='23' fill='%23fff' opacity='.05'/%3E%3Ccircle cx='127' cy='184' r='7' fill='%23fff' opacity='.14'/%3E%3Ccircle cx='265' cy='168' r='9' fill='%23fff' opacity='.07'/%3E%3Ccircle cx='262' cy='164' r='3' fill='%23fff' opacity='.16'/%3E%3Ccircle cx='32' cy='244' r='13' fill='%23fff' opacity='.06'/%3E%3Ccircle cx='27' cy='238' r='4' fill='%23fff' opacity='.15'/%3E%3C/g%3E%3C/svg%3E");
