@@ -1769,9 +1769,22 @@ export class App {
         return;
       }
 
+      // Échap défait ce qui est en cours, en commençant par le plus petit.
+      // Une tuile tenue en main se repose avant qu'on touche au reste :
+      // reprendre tout le coup parce qu'on voulait seulement reposer la tuile
+      // qu'on venait de prendre serait la mauvaise surprise.
+      //
+      // Le point de saisie passe après le coup préparé, et non avant : pendant
+      // qu'on tape, il est toujours là, et le faire passer devant obligerait à
+      // deux Échap pour reprendre un mot — alors qu'un seul suffisait.
       if (event.key === 'Escape') {
-        if (this.pending.size > 0) this.recall();
-        else if (this.cursor) {
+        event.preventDefault();
+        if (this.selected !== null) {
+          this.selected = null;
+          this.refresh();
+        } else if (this.pending.size > 0) {
+          this.recall();
+        } else if (this.cursor) {
           this.cursor = null;
           this.refresh();
         }
