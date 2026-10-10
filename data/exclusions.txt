@@ -1328,3 +1328,14 @@ walks
 # Ses neuf voisins à une lettre près ont tous été vérifiés dans l'ODS, et tous
 # y sont : GEX, TEX, MAX, MIX, MEC, MEL, MER, MES, MET. Aucun ne bouge.
 mex
+
+# Croisés en vérifiant HACKER : HACK et HACKS, acceptés à tort. Ils étaient
+# d'ailleurs les seuls mots en HACK- que le jeu connaissait en plus de l'ODS,
+# qui ne les porte pas — et 1mot.net les refuse.
+#
+# Voisins à une lettre près passés en revue : JACK, LACK, PACK, RACK, YACK,
+# HAIK et HACH, tous valides, tous laissés en place. HACH — le hachich — est
+# absent de la liste ODS 8 dont on se sert comme témoin, mais 1mot.net le donne
+# valide avec son pluriel : c'est le témoin qui a un trou, pas le jeu.
+hack
+hacks

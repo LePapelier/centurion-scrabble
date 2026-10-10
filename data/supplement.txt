@@ -496,3 +496,61 @@ walkovers
 # Invariable, comme WAX et WESH : TEXMEXS n'a pas de page, et la liste ODS n'en
 # porte pas trace non plus. On n'ajoute donc que la forme simple.
 texmex
+
+# Signalé refusé alors qu'il est valide : HACKER. Le trou était bien plus
+# large que le mot signalé — c'est tout le verbe qui manquait. Le jeu ne
+# connaissait que le nom HACKER et ses dérivés en -EUR et -EUSE ; l'ODS
+# porte cinquante-deux mots en HACK-, et quarante-six étaient refusés.
+#
+# D'où l'ajout de la conjugaison entière de HACKER, et avec elle le
+# HACKATHON, le HACKING, l'HACKTIVISME et son HACKTIVISTE, plus HACKLE,
+# qui n'a rien à voir : la plume de coq dont on monte les mouches de pêche.
+#
+# Les accents tombent à la construction : HACKÂT et HACKÂMES s'écrivent
+# donc ici sans circonflexe, HACKÉE et HACKÉES sans aigu.
+hacka
+hackai
+hackaient
+hackais
+hackait
+hackames
+hackant
+hackas
+hackasse
+hackassent
+hackasses
+hackassiez
+hackassions
+hackat
+hackates
+hackathon
+hackathons
+hacke
+hackee
+hackees
+hackent
+hackera
+hackerai
+hackeraient
+hackerais
+hackerait
+hackeras
+hackerent
+hackerez
+hackeriez
+hackerions
+hackerons
+hackeront
+hackes
+hackez
+hackiez
+hacking
+hackings
+hackions
+hackle
+hackles
+hackons
+hacktivisme
+hacktivismes
+hacktiviste
+hacktivistes

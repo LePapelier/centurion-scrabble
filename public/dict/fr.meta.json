@@ -1,8 +1,8 @@
 {
   "source": "Morphalou 3.1 (ATILF/CNRS, LGPL-LR) réuni à an-array-of-french-words (MIT, Dicollecte)",
-  "words": 642533,
+  "words": 642577,
   "common": 311106,
-  "nodes": 87403,
-  "edges": 213340,
-  "builtAt": "2026-10-10T10:09:22.700Z"
+  "nodes": 87407,
+  "edges": 213353,
+  "builtAt": "2026-10-10T15:56:41.175Z"
 }
