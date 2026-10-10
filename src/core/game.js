@@ -45,6 +45,40 @@ function freshBag() {
   return shuffle(bag);
 }
 
+/**
+ * Tirage au sort de celui qui commence, à la règle du Scrabble.
+ *
+ * Chacun tire une tuile : la plus proche de A l'emporte, et un joker passe
+ * devant toutes les lettres. En cas d'égalité, les ex æquo retirent entre eux.
+ * Les tuiles tirées retournent au sac, qui est rebattu, avant que les
+ * chevalets soient servis — elles doivent pouvoir ressortir ensuite, comme au
+ * jeu de table.
+ *
+ * @param {number[]} bag le sac, modifié sur place
+ * @param {number} joueurs nombre de joueurs autour de la table
+ * @returns {{premier: number, tours: {siege: number, lettre: number}[][]}}
+ *   le siège qui commence, et le détail de chaque tour de tirage — le dernier
+ *   étant celui qui a départagé.
+ */
+function tirerAuSort(bag, joueurs) {
+  const tours = [];
+  let candidats = Array.from({ length: joueurs }, (_, i) => i);
+  // Le joker avant le A, puis l'ordre alphabétique.
+  const rang = (lettre) => (lettre === BLANK ? -1 : lettre);
+  // Garde-fou : il faut au moins deux ex æquo pour recommencer, et le sac ne
+  // contient que cent deux tuiles. Vingt tours ne peuvent pas être atteints,
+  // mais une boucle sans borne sur un tirage aléatoire ne se défend pas.
+  for (let garde = 0; garde < 20 && candidats.length > 1; garde++) {
+    const tour = candidats.map((siege) => ({ siege, lettre: bag.pop() }));
+    tours.push(tour);
+    for (const { lettre } of tour) bag.push(lettre);
+    shuffle(bag);
+    const meilleur = Math.min(...tour.map((t) => rang(t.lettre)));
+    candidats = tour.filter((t) => rang(t.lettre) === meilleur).map((t) => t.siege);
+  }
+  return { premier: candidats[0] ?? 0, tours };
+}
+
 export function rackValue(rack) {
   return rack.reduce((sum, letter) => sum + VALUES[letter], 0);
 }
@@ -108,7 +142,17 @@ export class Game {
       ];
     }
 
-    this.current = options.firstPlayer ?? HUMAN;
+    // Qui commence se tire à la lettre, comme au vrai jeu. `firstPlayer` reste
+    // pour les cas où le siège est déjà connu — une reprise, ou un invité qui
+    // reçoit la table de l'hôte : le tirage a eu lieu, il ne se rejoue pas.
+    if (options.firstPlayer !== undefined) {
+      this.current = options.firstPlayer;
+      this.tirage = options.tirage ?? null;
+    } else {
+      const { premier, tours } = tirerAuSort(this.bag, this.players.length);
+      this.current = premier;
+      this.tirage = tours;
+    }
     this.history = [];
     this.scorelessTurns = 0;
     this.finished = false;
@@ -317,6 +361,11 @@ export class Game {
       winner: this.winner === null ? null : local(this.winner),
       ending: this.ending ? { ...this.ending, wentOut: this.ending.wentOut === null ? null : local(this.ending.wentOut) } : null,
       lastMoveCells: this.lastMoveCells,
+      // Le tirage voyage avec le reste, sièges tournés comme eux : chacun doit
+      // pouvoir lire chez lui la lettre que chacun a tirée.
+      tirage: (this.tirage ?? []).map((tour) =>
+        tour.map(({ siege, lettre }) => ({ siege: local(siege), lettre })),
+      ),
     };
   }
 
@@ -353,6 +402,7 @@ export class Game {
     // voit : transmise toute faite, elle tutoierait le mauvais joueur.
     game.endReason = endingText(game.players, game.ending);
     game.lastMoveCells = snap.lastMoveCells ?? [];
+    game.tirage = snap.tirage ?? null;
     game.level = 0;
     return game;
   }
@@ -375,6 +425,7 @@ export class Game {
       winner: this.winner,
       endReason: this.endReason,
       lastMoveCells: this.lastMoveCells,
+      tirage: this.tirage ?? null,
     };
   }
 
@@ -395,6 +446,9 @@ export class Game {
     game.ending = data.ending ?? null;
     game.endReason = data.endReason;
     game.lastMoveCells = data.lastMoveCells ?? [];
+    // Les parties enregistrées avant le tirage n'en portent pas : elles
+    // reprennent sans, et la fenêtre n'en dit rien.
+    game.tirage = data.tirage ?? null;
     return game;
   }
 }

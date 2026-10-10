@@ -312,8 +312,12 @@ export class App {
     this.myName = enregistre === DEFAULT_NAME ? '' : enregistre;
 
     this.level = Number(localStorage.getItem(LEVEL_KEY)) || 3;
-    this.game = this.restore() ?? new Game({ level: this.level });
+    const reprise = this.restore();
+    this.game = reprise ?? new Game({ level: this.level });
     this.level = this.game.level;
+    // Une partie neuve annonce son tirage au montage ; une partie reprise non,
+    // le tirage ayant eu lieu la fois d'avant.
+    this.tirageAAnnoncer = !reprise;
 
     this.worker.addEventListener('message', (event) => this.onWorkerMessage(event.data));
   }
@@ -374,6 +378,10 @@ export class App {
     this.bindNetwork();
 
     this.render();
+    if (this.tirageAAnnoncer) {
+      const phrase = this.phraseTirage();
+      if (phrase) this.toast(phrase);
+    }
     if (this.game.current === COMPUTER && !this.game.finished) this.runComputerTurn();
     else this.verifierBlocage();
   }
@@ -1020,6 +1028,26 @@ export class App {
   }
 
   /** Nom d'un siège tel que ce joueur-ci doit le lire. */
+  /**
+   * Phrase du tirage au sort : qui a tiré quoi, et qui commence.
+   *
+   * Rend `null` pour une partie enregistrée avant que le tirage existe, qui
+   * n'en porte pas — on n'annonce alors rien plutôt que d'inventer.
+   */
+  phraseTirage() {
+    const tours = this.game.tirage;
+    if (!tours?.length) return null;
+    const nom = (siege) => (siege === HUMAN ? 'vous' : this.seatName(siege));
+    const lettre = (l) => (l === BLANK ? 'le joker' : letterChar(l));
+    const dernier = tours[tours.length - 1];
+    const tires = dernier.map((t) => `${lettre(t.lettre)} pour ${nom(t.siege)}`).join(', ');
+    const premier = this.game.current;
+    const qui = premier === HUMAN ? 'Vous commencez.' : `${this.seatName(premier)} commence.`;
+    // Les tours précédents n'ont pas départagé : le dire, sinon le joueur ne
+    // comprend pas pourquoi deux lettres identiques ne décident de rien.
+    return `${tours.length > 1 ? 'Tirage, après égalité :' : 'Tirage :'} ${tires}. ${qui}`;
+  }
+
   seatName(seat) {
     if (seat === HUMAN) return 'Vous';
     return this.game.players[seat]?.name ?? 'Adversaire';
@@ -2158,7 +2186,11 @@ export class App {
     this.cancelExchange();
     this.save();
     this.render();
-    this.toast('Nouvelle partie. À vous de jouer.');
+    this.toast(this.phraseTirage() ?? 'Nouvelle partie. À vous de jouer.');
+    // Jusqu'ici le joueur commençait toujours : ce chemin n'avait aucune
+    // raison de réveiller l'adversaire. Le tirage peut désormais lui donner
+    // la main, et sans cette ligne la partie resterait en suspens.
+    if (this.game.current === COMPUTER && !this.game.finished) this.runComputerTurn();
   }
 
   /**
@@ -2779,10 +2811,10 @@ export class App {
     }
 
     this.netStarted = true;
-    // Le premier à jouer est tiré au sort parmi tous les présents : à quatre,
-    // commencer serait un avantage systématique pour l'hôte.
-    const first = Math.floor(Math.random() * this.seats.length);
-    this.game = new Game({ names: this.tableNames(), firstPlayer: first });
+    // Le premier à jouer sort du tirage à la lettre, comme en solo : à quatre,
+    // commencer serait sans cela un avantage systématique pour l'hôte.
+    this.game = new Game({ names: this.tableNames() });
+    const first = this.game.current;
 
     this.pending.clear();
     this.selected = null;
@@ -2794,9 +2826,7 @@ export class App {
     this.render();
     this.broadcast();
     $('mp-dialog').close();
-    this.toast(
-      first === HUMAN ? 'Partie lancée. Vous commencez.' : `Partie lancée. ${this.seatName(first)} commence.`,
-    );
+    this.toast(this.phraseTirage() ?? (first === HUMAN ? 'Partie lancée. Vous commencez.' : `Partie lancée. ${this.seatName(first)} commence.`));
   }
 
   /** Annonce à chacun que la partie démarre, avec la table telle qu'elle est. */
