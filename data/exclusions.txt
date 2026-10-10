@@ -1309,3 +1309,13 @@ shas
 # GALER, HALER, RÂLER, SALER, TALER) ou WATER, et restent en place.
 waler
 walers
+
+# Signalé accepté à tort : WALK et WALKS, la marche anglaise. Le signe
+# habituel — présents dans Morphalou, absents de l'ODS, qui ne porte en WALK-
+# que WALKMAN, WALKOVER et WALKYRIE — et 1mot.net les donne refusés tous les
+# deux, WALKING avec eux.
+#
+# Leurs voisins à une lettre près sont WALE, WALI et leurs pluriels, tous
+# valides, tous laissés en place.
+walk
+walks

@@ -483,3 +483,9 @@ shawnees
 # Et le pluriel existe, contrairement à WAX ou WESH : WALES a sa page.
 wale
 wales
+
+# Trouvé en vérifiant WALK : WALKOVER et WALKOVERS, la victoire obtenue sans
+# adversaire en face. Valides, et le jeu les refusait, alors qu'il connaissait
+# déjà WALKMAN et WALKYRIE de la même famille d'emprunts.
+walkover
+walkovers
