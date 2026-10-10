@@ -1319,3 +1319,12 @@ walers
 # valides, tous laissés en place.
 walk
 walks
+
+# Signalé accepté à tort : MEX. Le signe habituel — présent dans Morphalou,
+# absent de l'ODS, qui ne porte en MEX- que la famille de MEXICAIN — et
+# 1mot.net le donne refusé. Ce n'est d'ailleurs pas un mot : une commune du
+# canton de Vaud, et le code du Mexique.
+#
+# Ses neuf voisins à une lettre près ont tous été vérifiés dans l'ODS, et tous
+# y sont : GEX, TEX, MAX, MIX, MEC, MEL, MER, MES, MET. Aucun ne bouge.
+mex

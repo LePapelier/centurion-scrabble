@@ -489,3 +489,10 @@ wales
 # déjà WALKMAN et WALKYRIE de la même famille d'emprunts.
 walkover
 walkovers
+
+# Trouvé en vérifiant MEX : TEXMEX, la cuisine mexicaine adaptée au goût
+# américain. Valide, et absent des deux lexiques sources.
+#
+# Invariable, comme WAX et WESH : TEXMEXS n'a pas de page, et la liste ODS n'en
+# porte pas trace non plus. On n'ajoute donc que la forme simple.
+texmex
