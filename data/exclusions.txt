@@ -1351,3 +1351,23 @@ hacks
 # Tous de vrais mots, tous laissés en place.
 deyra
 deyras
+
+# Signalé accepté à tort : AHO. L'interjection est espagnole, et le sigle est
+# un code de langue ; 1mot.net le refuse, et l'ODS ne le porte pas.
+#
+# La règle des voisins a fait tomber tout un petit groupe de la même espèce,
+# vérifié un par un sur 1mot.net : ACO et ACA, voisins de AHO et l'un de
+# l'autre, puis ABA, AVA et UCA, voisins de ACA. Tous absents de l'ODS, tous
+# venus du seul Morphalou. Les pluriels que le jeu acceptait avec eux — ABAS
+# et ACAS — partent de même.
+#
+# Les autres voisins de ce groupe sont tous dans l'ODS et restent en place :
+# PHO, RHO, ADO, AGA, ANA, ARA, AXA, ADA, ACE.
+aho
+aco
+aca
+acas
+aba
+abas
+ava
+uca

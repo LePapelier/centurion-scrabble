@@ -568,3 +568,8 @@ daira
 dairas
 darija
 darijas
+
+# Trouvé en écartant ACA : AÇAI et AÇAIS, la baie d'Amazonie. Valide, à une
+# lettre de ACA, et le jeu le refusait. La cédille tombe à la construction.
+acai
+acais
