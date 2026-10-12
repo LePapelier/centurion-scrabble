@@ -554,3 +554,17 @@ hacktivisme
 hacktivismes
 hacktiviste
 hacktivistes
+
+# Trouvés en vérifiant DEYRA, qui était la graphie fautive de celui-ci :
+# DAÏRA et DAÏRAS, la subdivision administrative algérienne. Valides, et le
+# jeu les refusait.
+#
+# DARIJA et DARIJAS sont venus avec, par le même voisinage : l'arabe dialectal
+# du Maghreb, à une lettre de DAÏRA. Valides eux aussi, et absents des deux
+# lexiques sources.
+#
+# Le tréma tombe à la construction : DAÏRA s'écrit donc ici sans lui.
+daira
+dairas
+darija
+darijas

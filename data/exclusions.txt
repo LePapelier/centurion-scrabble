@@ -1339,3 +1339,15 @@ mex
 # valide avec son pluriel : c'est le témoin qui a un trou, pas le jeu.
 hack
 hacks
+
+# Signalé accepté à tort : DEYRA, et son pluriel DEYRAS. Signature habituelle
+# — présents dans Morphalou, absents de l'ODS, qui ne porte en DEY- que DEY et
+# DEYS — et 1mot.net n'a tout simplement pas de page pour eux.
+#
+# C'est une graphie fautive : le district algérien s'écrit DAÏRA, qui est
+# valide et que le jeu refusait. Il est ajouté au supplément.
+#
+# Voisins à une lettre près : DEVRA pour l'un, DEGRAS et DEVRAS pour l'autre.
+# Tous de vrais mots, tous laissés en place.
+deyra
+deyras
