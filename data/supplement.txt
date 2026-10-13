@@ -580,3 +580,34 @@ acais
 # le SKETCH, ses deux voisins dans la liste.
 skeleton
 skeletons
+
+# Trouvés en vérifiant SHIT — lequel était bien accepté, et à juste titre :
+# le mot est dans l'ODS, au sens du haschich. Le balayage de la famille a
+# en revanche montré un trou de dix-neuf mots sur quarante-cinq.
+#
+# Le SHIBA du Japon, le SHIDO du judo, la SHIGELLE et le SHIITAKE, le
+# SHIKHARA des temples hindous, le SHIMMIES du shimmy, le SHINGLE des
+# toitures, la SHISHA, le SHIVAÏSME et son SHIVAÏTE. Tous valides, tous
+# refusés par le jeu, qui connaissait pourtant déjà le SHIATSU, le SHINTO,
+# le SHIRE et la SHIGELLOSE de la même liste.
+#
+# Le tréma tombe à la construction : SHIVAÏSME s'écrit donc ici sans lui.
+shiba
+shibas
+shido
+shidos
+shigelle
+shigelles
+shiitake
+shiitakes
+shikhara
+shikharas
+shimmies
+shingle
+shingles
+shisha
+shishas
+shivaisme
+shivaismes
+shivaite
+shivaites
