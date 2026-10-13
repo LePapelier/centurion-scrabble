@@ -573,3 +573,10 @@ darijas
 # lettre de ACA, et le jeu le refusait. La cédille tombe à la construction.
 acai
 acais
+
+# Trouvés en vérifiant SKEET — lequel était bien accepté, et à juste titre :
+# SKELETON et SKELETONS, la luge sur laquelle on descend tête la première.
+# Valides, et le jeu les refusait, alors qu'il connaissait déjà le SKEET et
+# le SKETCH, ses deux voisins dans la liste.
+skeleton
+skeletons
