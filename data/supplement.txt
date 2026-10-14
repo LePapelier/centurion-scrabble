@@ -611,3 +611,18 @@ shivaisme
 shivaismes
 shivaite
 shivaites
+
+# Rien à ajouter pour KSIS, qui était bien accepté — mais une mise en garde
+# sur la méthode, car elle a failli faire écarter un mot juste.
+#
+# La liste ODS 8 qui sert de témoin à ces vérifications a un trou régulier :
+# elle porte les noms de lettres grecques au singulier et non au pluriel.
+# KSI, XI, PSI, PHI, ETA et IOTA y sont ; KSIS, XIS, PSIS, PHIS, ETAS et
+# IOTAS n'y sont pas. Ce n'est pas une règle d'invariabilité — 1mot.net donne
+# ces pluriels valides, et les pluriels ordinaires sont bien dans la liste,
+# SKIS, THES, ANES, AMIS, BETAS. C'est le témoin qui est incomplet.
+#
+# Deuxième trou connu du même genre : HACH, le hachich, absent de la liste et
+# pourtant valide. La règle à suivre : une famille entière absente du témoin
+# est un vrai trou du jeu, une absence isolée ne prouve rien et demande une
+# vérification sur 1mot.net.

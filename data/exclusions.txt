@@ -1371,3 +1371,13 @@ aba
 abas
 ava
 uca
+
+# Croisés en vérifiant KSIS — lequel est bien valide, voir le supplément :
+# CHI et CHE, acceptés à tort. Le premier est la graphie anglaise du qi, le
+# second l'interjection espagnole ; 1mot.net les refuse tous les deux, et
+# l'ODS ne les porte pas. Leurs pluriels étaient déjà refusés.
+#
+# Les autres voisins de CHI sont tous dans l'ODS et restent : GHI, KHI, PHI,
+# COI, CRI, CHU.
+chi
+che
