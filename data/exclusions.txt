@@ -1381,3 +1381,13 @@ uca
 # COI, CRI, CHU.
 chi
 che
+
+# Signalé accepté à tort : DOWN, et son pluriel DOWNS. Les deux ont leur page
+# sur 1mot.net, et les deux y sont refusés. L'ODS ne porte aucun mot en DOW-,
+# pas un seul — ce n'est donc pas une absence isolée du témoin comme pour HACH
+# ou les pluriels de lettres grecques, mais bien un trou franc.
+#
+# Ni l'un ni l'autre n'a de voisin à une lettre près dans le jeu : il n'y avait
+# rien à vérifier autour.
+down
+downs
