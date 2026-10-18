@@ -385,8 +385,14 @@ html[data-theme='verre'] {
      partage haut/bas/côtés, qui tient au rognage de l'image selon l'écran.
      Il en existe une seconde version pour les grands écrans, plus bas. */
   --decor: url('/verre-aero.svg');
-  /* Les plantes du fond, sur leur propre couche parce qu'elles ondulent. */
-  --vegetation: url('/aqua-vegetation.svg');
+  /* Les plantes et les grosses bulles, sur leurs propres couches parce
+     qu'elles bougent. Les bulles sont coupées en deux plans qui dérivent à
+     des rythmes différents : c'est ce décalage qui fait l'eau. */
+  --plantes: url('/aqua-plantes.svg');
+  --bulles-loin: url('/aqua-bulles-loin.svg');
+  --bulles-pres: url('/aqua-bulles-pres.svg');
+  --bulles-geste-loin: bulles-ronde 41s linear infinite;
+  --bulles-geste-pres: bulles-ronde 26s linear infinite;
   /* Des bulles, pas du grain : le motif se répète comme le feutre, mais ce
      qu'il sème sont des gouttes, chacune avec son reflet. */
   --grain: none;
@@ -555,27 +561,28 @@ body::before {
   content: '';
   position: fixed;
   inset: 0;
-  z-index: -3;
+  z-index: -4;
   background: var(--decor) center / cover no-repeat;
   pointer-events: none;
 }
 
-/* La végétation d'Aqua, sortie du décor pour pouvoir onduler.
+/* Les plantes d'Aqua, sorties du décor pour pouvoir se balancer.
 
-   Elle est dessinée dans le même repère que le décor et cadrée pareil
-   (`cover`, centré), si bien qu'elle retombe exactement là où elle était
-   quand elle faisait partie de l'image. Ce qu'elle gagne à vivre seule :
+   Le dessin est dans le même repère que le décor et cadré pareil (`cover`,
+   centré), si bien qu'elles retombent exactement là où elles étaient quand
+   elles faisaient partie de l'image. Ce qu'elles gagnent à vivre seules :
    l'animation est dans le SVG, et aucune des couches floues du décor n'a
-   besoin d'être recalculée pour qu'une algue bouge.
+   besoin d'être recalculée pour qu'une algue se penche.
 
-   Elle se glisse entre le décor et les bulles — les bulles montent devant
-   les plantes, comme lorsque tout était dans le même dessin. */
+   C'est la couche la plus haute des quatre, comme dans le décor d'origine où
+   les plantes étaient dessinées en dernier : elles sont au premier plan, tout
+   passe derrière. */
 body::after {
   content: '';
   position: fixed;
   inset: 0;
-  z-index: -2;
-  background: var(--vegetation, none) center / cover no-repeat;
+  z-index: -1;
+  background: var(--plantes, none) center / cover no-repeat;
   pointer-events: none;
 }
 
@@ -2760,7 +2767,9 @@ svg {
 @media (min-width: 900px) and (min-height: 700px) {
   html[data-theme='verre'] {
     --decor: url('/verre-aero-large.svg');
-    --vegetation: url('/aqua-vegetation-large.svg');
+    --plantes: url('/aqua-plantes-large.svg');
+    --bulles-loin: url('/aqua-bulles-loin-large.svg');
+    --bulles-pres: url('/aqua-bulles-pres-large.svg');
   }
 }
 
@@ -3207,9 +3216,69 @@ kbd {
 .anime {
   position: fixed;
   inset: 0;
-  z-index: -1;
+  z-index: -2;
   overflow: hidden;
   pointer-events: none;
+}
+
+/* Les grosses bulles du décor d'Aqua, sur deux plans.
+
+   Elles sont dessinées une à une, chacune à sa place, et ces places sont
+   calculées : grosses et franches hors du plateau, minuscules et pâles
+   derrière lui, pour que les cases restent lisibles. Elles ne peuvent donc
+   pas monter — une bulle qui traverse l'écran emporte sa taille dans la
+   mauvaise zone. Elles dérivent sur place, en rond.
+
+   Et c'est le calque qu'on déplace, pas les bulles : un SVG de fond qui
+   s'anime est retramé en entier à chaque image, et animer les trente-quatre
+   bulles séparément faisait tomber une image sur dix sur un téléphone au
+   processeur ralenti quatre fois. Un calque déjà tramé qu'on translate ne
+   coûte rien. Deux plans suffisent à ce que le bloc ne se lise pas : le
+   proche va plus vite et plus loin que le lointain, comme un parallaxe. */
+.bulles {
+  position: fixed;
+  inset: 0;
+  z-index: -3;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.bulles::before,
+.bulles::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+  will-change: transform;
+}
+
+.bulles::before {
+  --ax: 5px;
+  --ay: 9px;
+  background-image: var(--bulles-loin, none);
+  animation: var(--bulles-geste-loin, none);
+}
+
+.bulles::after {
+  /* L'abscisse négative fait tourner ce plan-ci dans l'autre sens. */
+  --ax: -11px;
+  --ay: 17px;
+  background-image: var(--bulles-pres, none);
+  animation: var(--bulles-geste-pres, none);
+}
+
+/* Un tour fermé plutôt qu'un aller-retour : une bulle qui refait son chemin à
+   l'envers se voit, une bulle qui décrit une ellipse ne se voit pas. Le
+   quart de tour haut vaut 0,55 de la hauteur et non 0,5, pour que le haut de
+   l'ellipse soit un peu plus plat que le bas — c'est le sens de la poussée. */
+@keyframes bulles-ronde {
+  0% { transform: translate3d(0, 0, 0); }
+  25% { transform: translate3d(var(--ax), calc(-0.55 * var(--ay)), 0); }
+  50% { transform: translate3d(0, calc(-1 * var(--ay)), 0); }
+  75% { transform: translate3d(calc(-1 * var(--ax)), calc(-0.55 * var(--ay)), 0); }
+  100% { transform: translate3d(0, 0, 0); }
 }
 
 .anime::before,
@@ -3271,7 +3340,9 @@ kbd {
    ferait ici plus de mal que de bien. On les éteint franchement. */
 @media (prefers-reduced-motion: reduce) {
   .anime::before,
-  .anime::after {
+  .anime::after,
+  .bulles::before,
+  .bulles::after {
     animation: none !important;
   }
 }

@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  La végétation du thème Aqua, format large.
+  Les plantes du thème Aqua, format large.
 
-  Elle est dans son propre fichier, et non dans le décor, pour une raison de
-  coût : le décor porte des flous gaussiens jusqu'à trente-quatre, et animer
-  quoi que ce soit à l'intérieur obligerait à les recalculer en plein écran à
-  chaque image. Ici il n'y a aucun flou.
+  Elles sont dans leur propre fichier, et non dans le décor, pour une raison
+  de coût : le décor porte des flous gaussiens jusqu'à trente-quatre, et
+  animer quoi que ce soit à l'intérieur obligerait à les recalculer en plein
+  écran à chaque image. Ici il n'y a aucun flou.
 
   Le cadrage reprend exactement celui du décor — même boîte, même "slice" —
-  pour que les plantes retombent là où elles étaient.
+  pour que tout retombe là où c'était.
 
-  Le mouvement est un "skewX" autour de la ligne du sol : seule l'inclinaison
-  compte pour une plante, et comme ce geste ne décale un point qu'en fonction
-  de sa distance au centre, les pieds restent plantés. Une rotation les aurait
-  fait glisser.
+  Le balancement est un "skewX" autour de la ligne du sol : seule
+  l'inclinaison compte pour une plante, et comme ce geste ne décale un point
+  qu'en fonction de sa distance au centre, les pieds restent plantés. Une
+  rotation les aurait fait glisser.
 -->
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid slice"><style>
     /* Le centre de transformation est la ligne du sol, en unités du dessin.
