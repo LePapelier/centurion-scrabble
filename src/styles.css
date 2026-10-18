@@ -385,6 +385,8 @@ html[data-theme='verre'] {
      partage haut/bas/côtés, qui tient au rognage de l'image selon l'écran.
      Il en existe une seconde version pour les grands écrans, plus bas. */
   --decor: url('/verre-aero.svg');
+  /* Les plantes du fond, sur leur propre couche parce qu'elles ondulent. */
+  --vegetation: url('/aqua-vegetation.svg');
   /* Des bulles, pas du grain : le motif se répète comme le feutre, mais ce
      qu'il sème sont des gouttes, chacune avec son reflet. */
   --grain: none;
@@ -553,8 +555,27 @@ body::before {
   content: '';
   position: fixed;
   inset: 0;
-  z-index: -1;
+  z-index: -3;
   background: var(--decor) center / cover no-repeat;
+  pointer-events: none;
+}
+
+/* La végétation d'Aqua, sortie du décor pour pouvoir onduler.
+
+   Elle est dessinée dans le même repère que le décor et cadrée pareil
+   (`cover`, centré), si bien qu'elle retombe exactement là où elle était
+   quand elle faisait partie de l'image. Ce qu'elle gagne à vivre seule :
+   l'animation est dans le SVG, et aucune des couches floues du décor n'a
+   besoin d'être recalculée pour qu'une algue bouge.
+
+   Elle se glisse entre le décor et les bulles — les bulles montent devant
+   les plantes, comme lorsque tout était dans le même dessin. */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  background: var(--vegetation, none) center / cover no-repeat;
   pointer-events: none;
 }
 
@@ -2739,6 +2760,7 @@ svg {
 @media (min-width: 900px) and (min-height: 700px) {
   html[data-theme='verre'] {
     --decor: url('/verre-aero-large.svg');
+    --vegetation: url('/aqua-vegetation-large.svg');
   }
 }
 
