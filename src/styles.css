@@ -260,7 +260,7 @@ html[data-theme='espace'] {
     radial-gradient(120% 90% at 50% 34%, var(--felt) 0%, #0a1030 48%, var(--bg) 100%);
   /* Le champ d'étoiles remplace le grain du feutre : même procédé, un motif
      répété en fond, mais des points nets au lieu d'un bruit. */
-  --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='260' height='260'%3E%3Cg fill='%23fff'%3E%3Ccircle cx='23' cy='41' r='1.1' opacity='.85'/%3E%3Ccircle cx='187' cy='29' r='.8' opacity='.6'/%3E%3Ccircle cx='96' cy='118' r='1.3' opacity='.9'/%3E%3Ccircle cx='238' cy='96' r='.7' opacity='.5'/%3E%3Ccircle cx='57' cy='205' r='1' opacity='.75'/%3E%3Ccircle cx='151' cy='178' r='.8' opacity='.55'/%3E%3Ccircle cx='211' cy='231' r='1.2' opacity='.8'/%3E%3Ccircle cx='128' cy='62' r='.6' opacity='.45'/%3E%3Ccircle cx='14' cy='139' r='.9' opacity='.65'/%3E%3Ccircle cx='172' cy='135' r='.6' opacity='.4'/%3E%3Ccircle cx='79' cy='9' r='.7' opacity='.5'/%3E%3Ccircle cx='245' cy='168' r='1' opacity='.7'/%3E%3C/g%3E%3C/svg%3E");
+  --grain: none;
   /* Des planètes au loin, très floues et très transparentes : un fond, pas
      une illustration. Elles sont placées dans les marges — au-dessus du
      plateau et sur les bords — là où l'écran est vide. */
@@ -319,6 +319,22 @@ html[data-theme='espace'] {
   --tl: #1b3a70;
   --dw: #6d3a8c;
   --tw: #a53a74;
+  /* Le ciel se met à bouger. Deux champs d'étoiles dérivent en diagonale :
+     le champ serré est le plus lointain et va presque deux fois moins vite
+     que les étoiles vives, qui sont au premier plan. C'est ce décalage, et
+     non la vitesse, qui donne la profondeur.
+
+     Les scintillements n'ont ni la même période ni le même creux, sans quoi
+     tout le ciel respirerait d'un seul tenant, ce qui se voit aussitôt. */
+  --anime-1: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='260' height='260'%3E%3Cg fill='%23fff'%3E%3Ccircle cx='23' cy='41' r='1.1' opacity='.85'/%3E%3Ccircle cx='187' cy='29' r='.8' opacity='.6'/%3E%3Ccircle cx='96' cy='118' r='1.3' opacity='.9'/%3E%3Ccircle cx='238' cy='96' r='.7' opacity='.5'/%3E%3Ccircle cx='57' cy='205' r='1' opacity='.75'/%3E%3Ccircle cx='151' cy='178' r='.8' opacity='.55'/%3E%3Ccircle cx='211' cy='231' r='1.2' opacity='.8'/%3E%3Ccircle cx='128' cy='62' r='.6' opacity='.45'/%3E%3Ccircle cx='14' cy='139' r='.9' opacity='.65'/%3E%3Ccircle cx='172' cy='135' r='.6' opacity='.4'/%3E%3Ccircle cx='79' cy='9' r='.7' opacity='.5'/%3E%3Ccircle cx='245' cy='168' r='1' opacity='.7'/%3E%3C/g%3E%3C/svg%3E");
+  --anime-taille-1: 260px 260px;
+  --anime-pas-1: 260px;
+  --anime-geste-1: fond-derive 320s linear infinite, fond-scintille-doux 11s ease-in-out infinite;
+  --anime-2: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='420' height='420'%3E%3Ccircle cx='312.9' cy='387.5' r='5.5' fill='%23cfe4ff' opacity='0.1'/%3E%3Ccircle cx='312.9' cy='387.5' r='2.1' fill='%23fff' opacity='0.8'/%3E%3Ccircle cx='53.4' cy='356.1' r='6.2' fill='%23cfe4ff' opacity='0.1'/%3E%3Ccircle cx='53.4' cy='356.1' r='2.4' fill='%23fff' opacity='0.9'/%3E%3Ccircle cx='43.9' cy='70.9' r='3.9' fill='%23cfe4ff' opacity='0.1'/%3E%3Ccircle cx='43.9' cy='70.9' r='1.5' fill='%23fff' opacity='0.8'/%3E%3Ccircle cx='383.9' cy='212.1' r='5.5' fill='%23cfe4ff' opacity='0.1'/%3E%3Ccircle cx='383.9' cy='212.1' r='2.1' fill='%23fff' opacity='0.6'/%3E%3Ccircle cx='394.2' cy='393.5' r='4.9' fill='%23cfe4ff' opacity='0.1'/%3E%3Ccircle cx='394.2' cy='393.5' r='1.9' fill='%23fff' opacity='0.7'/%3E%3Ccircle cx='53.8' cy='308.4' r='5.2' fill='%23cfe4ff' opacity='0.1'/%3E%3Ccircle cx='53.8' cy='308.4' r='2' fill='%23fff' opacity='0.9'/%3E%3Ccircle cx='412.3' cy='403.5' r='4.9' fill='%23cfe4ff' opacity='0.1'/%3E%3Ccircle cx='412.3' cy='403.5' r='1.9' fill='%23fff' opacity='0.8'/%3E%3Ccircle cx='200.5' cy='331.3' r='4.2' fill='%23cfe4ff' opacity='0.1'/%3E%3Ccircle cx='200.5' cy='331.3' r='1.6' fill='%23fff' opacity='0.7'/%3E%3Ccircle cx='239.2' cy='342.4' r='4.2' fill='%23cfe4ff' opacity='0.1'/%3E%3Ccircle cx='239.2' cy='342.4' r='1.6' fill='%23fff' opacity='0.8'/%3E%3C/svg%3E");
+  --anime-taille-2: 420px 420px;
+  --anime-pas-2: 420px;
+  --anime-geste-2: fond-derive 185s linear infinite, fond-scintille-vif 6.5s ease-in-out -2.4s infinite;
+
 }
 
 /* --- Verre : Frutiger Aero, ciel, eau et vernis -------------------- */
@@ -371,7 +387,7 @@ html[data-theme='verre'] {
   --decor: url('/verre-aero.svg');
   /* Des bulles, pas du grain : le motif se répète comme le feutre, mais ce
      qu'il sème sont des gouttes, chacune avec son reflet. */
-  --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cg fill='none'%3E%3Ccircle cx='54' cy='72' r='17' fill='%23fff' opacity='.07'/%3E%3Ccircle cx='48' cy='64' r='5' fill='%23fff' opacity='.16'/%3E%3Ccircle cx='212' cy='38' r='11' fill='%23fff' opacity='.06'/%3E%3Ccircle cx='208' cy='33' r='3.5' fill='%23fff' opacity='.15'/%3E%3Ccircle cx='136' cy='196' r='23' fill='%23fff' opacity='.05'/%3E%3Ccircle cx='127' cy='184' r='7' fill='%23fff' opacity='.14'/%3E%3Ccircle cx='265' cy='168' r='9' fill='%23fff' opacity='.07'/%3E%3Ccircle cx='262' cy='164' r='3' fill='%23fff' opacity='.16'/%3E%3Ccircle cx='32' cy='244' r='13' fill='%23fff' opacity='.06'/%3E%3Ccircle cx='27' cy='238' r='4' fill='%23fff' opacity='.15'/%3E%3C/g%3E%3C/svg%3E");
+  --grain: none;
 
   /* Le vernis de l'époque : moitié haute claire, cassure nette au milieu,
      moitié basse plus sourde. C'est ce liseré dur qui fait l'effet, bien plus
@@ -450,6 +466,17 @@ html[data-theme='verre'] {
   --tl: rgb(40 128 200 / 0.66);
   --dw: rgb(214 110 170 / 0.56);
   --tw: rgb(244 118 86 / 0.62);
+  /* Les bulles montent. Les grosses vont plus vite que les petites : c'est
+     vrai dans l'eau, et c'est aussi ce qui les met au premier plan. */
+  --anime-1: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cg opacity='0.4'%3E%3Ccircle cx='213.8' cy='216.2' r='3.8' fill='none' stroke='%23fff' stroke-width='0.7' opacity='.6'/%3E%3Ccircle cx='213.8' cy='216.2' r='3.5' fill='%23dff6ff' opacity='.1'/%3E%3Ccircle cx='213.4' cy='214.7' r='0.8' fill='%23fff' opacity='.9'/%3E%3C/g%3E%3Cg opacity='0.5'%3E%3Ccircle cx='25.1' cy='211.4' r='5.6' fill='none' stroke='%23fff' stroke-width='0.7' opacity='.6'/%3E%3Ccircle cx='25.1' cy='211.4' r='5.2' fill='%23dff6ff' opacity='.1'/%3E%3Ccircle cx='26.1' cy='209.3' r='1.1' fill='%23fff' opacity='.9'/%3E%3C/g%3E%3Cg opacity='0.3'%3E%3Ccircle cx='221.1' cy='44.3' r='4.9' fill='none' stroke='%23fff' stroke-width='0.7' opacity='.6'/%3E%3Ccircle cx='221.1' cy='44.3' r='4.5' fill='%23dff6ff' opacity='.1'/%3E%3Ccircle cx='220.8' cy='42.3' r='1' fill='%23fff' opacity='.9'/%3E%3C/g%3E%3Cg opacity='0.3'%3E%3Ccircle cx='65' cy='92.8' r='6.5' fill='none' stroke='%23fff' stroke-width='0.7' opacity='.6'/%3E%3Ccircle cx='65' cy='92.8' r='6' fill='%23dff6ff' opacity='.1'/%3E%3Ccircle cx='66.1' cy='90.3' r='1.3' fill='%23fff' opacity='.9'/%3E%3C/g%3E%3Cg opacity='0.2'%3E%3Ccircle cx='45.4' cy='165' r='4.3' fill='none' stroke='%23fff' stroke-width='0.7' opacity='.6'/%3E%3Ccircle cx='45.4' cy='165' r='4' fill='%23dff6ff' opacity='.1'/%3E%3Ccircle cx='46' cy='163.3' r='0.9' fill='%23fff' opacity='.9'/%3E%3C/g%3E%3C/svg%3E");
+  --anime-taille-1: 240px 240px;
+  --anime-pas-1: 240px;
+  --anime-geste-1: fond-monte 34s linear infinite;
+  --anime-2: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='360' height='360'%3E%3Cg opacity='0.3'%3E%3Ccircle cx='309.3' cy='226.7' r='13.8' fill='none' stroke='%23fff' stroke-width='1.2' opacity='.6'/%3E%3Ccircle cx='309.3' cy='226.7' r='12.7' fill='%23dff6ff' opacity='.1'/%3E%3Ccircle cx='309.7' cy='220.9' r='2.8' fill='%23fff' opacity='.9'/%3E%3C/g%3E%3Cg opacity='0.3'%3E%3Ccircle cx='309.7' cy='150.4' r='15' fill='none' stroke='%23fff' stroke-width='1.3' opacity='.6'/%3E%3Ccircle cx='309.7' cy='150.4' r='13.8' fill='%23dff6ff' opacity='.1'/%3E%3Ccircle cx='307.2' cy='144.6' r='3' fill='%23fff' opacity='.9'/%3E%3C/g%3E%3Cg opacity='0.2'%3E%3Ccircle cx='88.1' cy='61.5' r='16' fill='none' stroke='%23fff' stroke-width='1.4' opacity='.6'/%3E%3Ccircle cx='88.1' cy='61.5' r='14.7' fill='%23dff6ff' opacity='.1'/%3E%3Ccircle cx='91.2' cy='55.5' r='3.2' fill='%23fff' opacity='.9'/%3E%3C/g%3E%3C/svg%3E");
+  --anime-taille-2: 360px 360px;
+  --anime-pas-2: 360px;
+  --anime-geste-2: fond-monte 19s linear infinite;
+
 }
 
 /* Le dépoli lui-même. Il n'est posé que sur ce thème : `backdrop-filter`
@@ -3137,4 +3164,92 @@ kbd {
   font-size: 0.78rem;
   font-weight: 600;
   text-align: center;
+}
+
+/* --- Calques animés du décor --------------------------------------- */
+
+/* Deux motifs qui dérivent lentement derrière le jeu : des étoiles pour
+   Espace, des bulles qui montent pour Aqua.
+
+   Ils ne sont pas animés à l'intérieur des SVG de décor, bien que ce soit
+   possible — un SVG posé en image de fond joue ses animations déclaratives.
+   Mais ces décors portent des flous gaussiens jusqu'à trente-quatre, et les
+   animer obligerait à recalculer le flou en plein écran à chaque image. Ici,
+   rien n'est recalculé : ce sont des `transform`, que le navigateur compose
+   sans repeindre, sur des motifs tramés une seule fois.
+
+   Chaque calque déborde d'une tuile en haut et en bas, et se déplace
+   d'exactement une tuile : au terme de la course le motif se retrouve sur
+   lui-même, et la boucle ne se voit pas. C'est pour cela que `--anime-pas`
+   doit toujours valoir la hauteur de la tuile. */
+.anime {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.anime::before,
+.anime::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(-1 * var(--pas));
+  bottom: calc(-1 * var(--pas));
+  background-repeat: repeat;
+  will-change: transform;
+}
+
+.anime::before {
+  --pas: var(--anime-pas-1, 0px);
+  background-image: var(--anime-1, none);
+  background-size: var(--anime-taille-1, auto);
+  animation: var(--anime-geste-1, none);
+}
+
+.anime::after {
+  --pas: var(--anime-pas-2, 0px);
+  background-image: var(--anime-2, none);
+  background-size: var(--anime-taille-2, auto);
+  animation: var(--anime-geste-2, none);
+}
+
+/* La montée des bulles n'est pas tout à fait droite : une dérive latérale de
+   sept pixels, qui revient à zéro au terme de la course pour ne pas casser la
+   boucle. Sans elle le mouvement est celui d'un ascenseur. */
+@keyframes fond-monte {
+  0% { transform: translate3d(0, 0, 0); }
+  25% { transform: translate3d(7px, calc(-0.25 * var(--pas)), 0); }
+  50% { transform: translate3d(0, calc(-0.5 * var(--pas)), 0); }
+  75% { transform: translate3d(-7px, calc(-0.75 * var(--pas)), 0); }
+  100% { transform: translate3d(0, calc(-1 * var(--pas)), 0); }
+}
+
+/* La dérive des étoiles est diagonale, donc la tuile doit être carrée : le pas
+   sert pour les deux axes. */
+@keyframes fond-derive {
+  to { transform: translate3d(calc(-1 * var(--pas)), calc(-1 * var(--pas)), 0); }
+}
+
+/* Deux scintillements plutôt qu'un seul réglé par variable : le même nom
+   d'animation sur les deux calques leur donnerait le même creux, et deux
+   champs d'étoiles qui respirent ensemble se voient immédiatement. */
+@keyframes fond-scintille-doux {
+  50% { opacity: 0.72; }
+}
+
+@keyframes fond-scintille-vif {
+  50% { opacity: 0.32; }
+}
+
+/* Une animation infinie réduite à un centième de milliseconde tourne des
+   milliers de fois par seconde : la règle générale, qui écrase les durées,
+   ferait ici plus de mal que de bien. On les éteint franchement. */
+@media (prefers-reduced-motion: reduce) {
+  .anime::before,
+  .anime::after {
+    animation: none !important;
+  }
 }
