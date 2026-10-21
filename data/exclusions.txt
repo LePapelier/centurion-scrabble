@@ -1391,3 +1391,99 @@ che
 # rien à vérifier autour.
 down
 downs
+
+# Signalé accepté à tort : ZON. L'ODS n'en veut pas, et 1mot.net le refuse.
+# Ce n'est pas une absence isolée du témoin comme HACH ou les pluriels de
+# lettres grecques : la famille de ZONE y est au complet, cinquante-huit
+# formes, de ZONA à ZONURE. Il manquait juste ce ZON-là, qui n'existe pas.
+#
+# En vérifiant autour, soixante-trois autres formes en ZON- se sont révélées
+# dans le même cas. Elles se rangent en deux tas.
+#
+# Le premier est le verbe ZONZONNER — bourdonner — et ses quarante formes,
+# plus ZONZON et ZONZONS. Morphalou le conjugue entièrement ; l'ODS ne le
+# porte pas, et 1mot.net refuse ZONZONS.
+#
+# Le second est du vocabulaire savant que Morphalou embarque et que la
+# compétition ne reconnaît pas : l'œil (la zonule de Zinn et ses opérations),
+# la minéralogie, la zoologie. 1mot.net refuse ZONULOLYSE et ZONITES.
+zon
+zonabris
+zonaire
+zonaires
+zonateuse
+zonateuses
+zonateux
+zoneographie
+zoneographies
+zonite
+zonites
+zonitis
+zonoedre
+zonoedres
+zonula
+zonulaire
+zonulaires
+zonulas
+zonule
+zonules
+zonulolyse
+zonulolyses
+zonulotomie
+zonulotomies
+zonzon
+zonzonna
+zonzonnai
+zonzonnaient
+zonzonnais
+zonzonnait
+zonzonnames
+zonzonnant
+zonzonnas
+zonzonnasse
+zonzonnassent
+zonzonnasses
+zonzonnassiez
+zonzonnassions
+zonzonnat
+zonzonnates
+zonzonne
+zonzonnee
+zonzonnees
+zonzonnement
+zonzonnent
+zonzonner
+zonzonnera
+zonzonnerai
+zonzonneraient
+zonzonnerais
+zonzonnerait
+zonzonneras
+zonzonnerent
+zonzonnerez
+zonzonneriez
+zonzonnerions
+zonzonnerons
+zonzonneront
+zonzonnes
+zonzonnez
+zonzonniez
+zonzonnions
+zonzonnons
+zonzons
+
+# Les voisins de ZON à une lettre près : BON, CON, DON, EON, GON, ION, MON,
+# NON, SON, TON, WON, ZEN, ZOB, ZOE, ZOO, ZOU, ZONA et ZONE sont tous dans
+# l'ODS et restent. Un seul ne l'était pas, HON, et de proche en proche trois
+# autres avec lui. Les quatre ont leur page sur 1mot.net, les quatre y sont
+# refusés ; leurs pluriels aussi, quand ils en ont une.
+#
+# HOC est le jeu de cartes de Mazarin, CHON une planche des Vosges, HONK le
+# cri de l'oie en anglais. Aucun n'a jamais été dans l'ODS.
+hon
+hoc
+hocs
+chon
+chons
+honk
+honks
