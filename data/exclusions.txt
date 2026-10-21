@@ -1487,3 +1487,26 @@ chon
 chons
 honk
 honks
+
+# Signalé accepté à tort : HANSEL, et son pluriel HANSELS. Les deux ont leur
+# page sur 1mot.net, les deux y sont refusés ; c'est un mot anglais, le
+# cadeau de bonne étrenne. L'ODS, lui, porte toute la famille de la Hanse —
+# HANS, HANSART, HANSE, HANSÉATE, HANSÉATIQUE — donc son silence sur HANSEL
+# n'est pas un trou du témoin.
+#
+# Les voisins d'une lettre : HANSES, qui est dans l'ODS et reste. Il n'y en a
+# pas d'autre dans le jeu.
+#
+# Restaient, dans la même famille, les mots tirés du nom du médecin Hansen :
+# la lèpre et ses dérivés. Morphalou les porte, l'ODS non, et 1mot.net n'a de
+# page pour aucun des trois — il en a bien une pour HANSEN, qu'il refuse.
+hansel
+hansels
+hanseniase
+hanseniases
+hansenien
+hansenienne
+hanseniennes
+hanseniens
+hansenose
+hansenoses

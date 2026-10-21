@@ -626,3 +626,12 @@ shivaites
 # pourtant valide. La règle à suivre : une famille entière absente du témoin
 # est un vrai trou du jeu, une absence isolée ne prouve rien et demande une
 # vérification sur 1mot.net.
+
+# Trouvé en vérifiant HANSEL : le jeu refusait HANS, qui est le pluriel de
+# HAN, le cri du bûcheron. Il est dans l'ODS, 1mot.net le donne valide avec
+# un extrait de l'ODS à l'appui, et le jeu acceptait déjà le singulier.
+#
+# Il manquait pour une raison de source : Morphalou ne connaît « Hans » que
+# comme prénom, donc capitalisé, et la chaîne de construction écarte les
+# majuscules pour ne pas laisser entrer les noms propres.
+hans
