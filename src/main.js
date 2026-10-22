@@ -37,6 +37,65 @@ async function loadMeta() {
   }
 }
 
+/**
+ * Le dictionnaire n'est lu qu'au chargement de la page. Sur un téléphone, où
+ * l'onglet reste ouvert des jours, une correction du lexique ne parvient donc
+ * jamais au joueur : il garde en mémoire la version qu'il avait en ouvrant le
+ * jeu, et un mot écarté la veille continue de passer.
+ *
+ * À chaque retour sur la page, on redemande le manifeste — quelques centaines
+ * d'octets, déjà exclus du cache — et on compare sa date à celle qu'on tient.
+ * Si elle a changé, la page se recharge : c'est la seule façon sûre de tout
+ * reprendre d'un coup, le dictionnaire du fil principal comme la copie du
+ * worker. La partie en cours est enregistrée à chaque coup, elle revient
+ * telle quelle.
+ *
+ * Le rechargement attend un moment sans risque : une partie solo, aucune
+ * tuile posée en attente de validation, et pas de calcul en cours. En partie
+ * à deux il n'a jamais lieu — recharger couperait la liaison WebRTC, et le
+ * dictionnaire qui fait foi est de toute façon celui de l'hôte.
+ */
+function veillerSurLeDictionnaire(app, empreinte) {
+  // Le manifeste est minuscule, mais rien ne presse : une correction peut
+  // attendre le prochain quart d'heure.
+  const REPOS = 15 * 60 * 1000;
+  let dernierExamen = Date.now();
+  let perime = false;
+  let guet = null;
+
+  const sansRisque = () => app.mode === 'solo' && !app.busy && app.pending.size === 0;
+
+  const recharger = () => {
+    if (!sansRisque()) return;
+    clearInterval(guet);
+    try {
+      sessionStorage.setItem(MAJ_KEY, '1');
+    } catch {
+      /* stockage refusé : on rechargera sans le dire */
+    }
+    location.reload();
+  };
+
+  const examiner = async () => {
+    if (perime) return recharger();
+    if (document.hidden || Date.now() - dernierExamen < REPOS) return;
+    dernierExamen = Date.now();
+    const meta = await loadMeta();
+    if (!meta.builtAt || meta.builtAt === empreinte) return;
+    perime = true;
+    // Le moment n'est peut-être pas venu — on guette, sans plus rien demander
+    // au réseau.
+    guet = setInterval(recharger, 20000);
+    recharger();
+  };
+
+  document.addEventListener('visibilitychange', examiner);
+  window.addEventListener('focus', examiner);
+}
+
+/** Marque posée avant un rechargement, pour en dire un mot au retour. */
+const MAJ_KEY = 'centurion:dict-maj';
+
 async function start() {
   const loader = document.getElementById('loader');
 
@@ -66,6 +125,17 @@ async function start() {
 
     // Point d'entrée pour inspecter une partie depuis la console du navigateur.
     if (import.meta.env.DEV) window.__centurion = app;
+
+    veillerSurLeDictionnaire(app, meta.builtAt);
+
+    try {
+      if (sessionStorage.getItem(MAJ_KEY)) {
+        sessionStorage.removeItem(MAJ_KEY);
+        app.toast('Dictionnaire mis à jour.');
+      }
+    } catch {
+      /* stockage refusé : rien à dire */
+    }
 
     loader.classList.add('done');
     setTimeout(() => loader.remove(), 350);
