@@ -318,6 +318,17 @@ export class App {
     // Une partie neuve annonce son tirage au montage ; une partie reprise non,
     // le tirage ayant eu lieu la fois d'avant.
     this.tirageAAnnoncer = !reprise;
+    /** Empreinte du tirage déjà montré, pour ne pas le rejouer. */
+    this.tirageMontre = null;
+    /** Le joueur a pressé le mouvement, ou fermé la boîte. */
+    this.tirageSaut = false;
+    this.tirageArrete = false;
+    /** Fin anticipée de l'attente en cours, posée par `attendreTirage`. */
+    this.tirageSauter = null;
+    /** L'attente en cours ne se presse pas : seule la fermeture l'abrège. */
+    this.tirageIncompressible = false;
+    /** Numéro de l'annonce en cours, pour que la précédente se retire. */
+    this.tirageMarque = 0;
 
     this.worker.addEventListener('message', (event) => this.onWorkerMessage(event.data));
   }
@@ -378,12 +389,14 @@ export class App {
     this.bindNetwork();
 
     this.render();
-    if (this.tirageAAnnoncer) {
-      const phrase = this.phraseTirage();
-      if (phrase) this.toast(phrase);
-    }
-    if (this.game.current === COMPUTER && !this.game.finished) this.runComputerTurn();
-    else this.verifierBlocage();
+    // L'adversaire attend la fin du tirage : sans cela il poserait son mot
+    // derrière la boîte, et le joueur découvrirait un plateau déjà entamé.
+    const suite = () => {
+      if (this.game.current === COMPUTER && !this.game.finished) this.runComputerTurn();
+      else this.verifierBlocage();
+    };
+    if (this.tirageAAnnoncer) this.montrerTirage().then(suite);
+    else suite();
   }
 
   buildBoard() {
@@ -1046,6 +1059,179 @@ export class App {
     // Les tours précédents n'ont pas départagé : le dire, sinon le joueur ne
     // comprend pas pourquoi deux lettres identiques ne décident de rien.
     return `${tours.length > 1 ? 'Tirage, après égalité :' : 'Tirage :'} ${tires}. ${qui}`;
+  }
+
+  /**
+   * Le tirage, joué devant le joueur : une tuile par siège, sortie du sac,
+   * retournée l'une après l'autre, et la meilleure lettre l'emporte.
+   *
+   * Les tuiles sont celles du chevalet — même classe, mêmes variables de
+   * thème — pour que ce soit une tuile du jeu qu'on retourne et non une
+   * image de tuile. Le détail des tours est déjà dans la partie : on ne
+   * tire rien ici, on montre ce qui a été tiré.
+   *
+   * Rend une promesse tenue quand la boîte se referme, pour que l'adversaire
+   * n'enchaîne pas son coup par-dessus l'annonce.
+   */
+  async montrerTirage() {
+    const tours = this.game?.tirage;
+    const dialog = $('tirage-dialog');
+    const piste = $('tirage-tuiles');
+    const verdict = $('tirage-verdict');
+    this.tirageMontre = JSON.stringify(tours ?? null);
+
+    // Sans tirage — une partie d'avant son existence — ou sans la boîte, la
+    // phrase suffit : elle dit la même chose.
+    if (!tours?.length || typeof dialog?.showModal !== 'function' || !piste) {
+      const phrase = this.phraseTirage();
+      if (phrase) this.toast(phrase);
+      return;
+    }
+
+    // Une annonce peut en interrompre une autre : une nouvelle partie lancée
+    // pendant celle-ci, ou, en ligne, un état rediffusé. La marque dit à la
+    // plus ancienne de se retirer sans toucher à ce que la nouvelle installe.
+    const marque = (this.tirageMarque = (this.tirageMarque ?? 0) + 1);
+    const perime = () => this.tirageArrete || marque !== this.tirageMarque;
+
+    if (dialog.open) dialog.close();
+
+    this.tirageSaut = reducedMotion.matches;
+    this.tirageArrete = false;
+    this.tirageIncompressible = false;
+    dialog.classList.toggle('sans-geste', this.tirageSaut);
+    piste.textContent = '';
+    verdict.textContent = '';
+
+    const arreter = () => {
+      if (marque !== this.tirageMarque) return;
+      this.tirageArrete = true;
+      this.tirageSaut = true;
+      this.tirageSauter?.();
+    };
+    const presser = () => {
+      this.tirageSaut = true;
+      dialog.classList.add('sans-geste');
+      // Le dernier temps, lui, ne se presse pas : c'est celui qui laisse lire
+      // le verdict, et sans lui la boîte s'ouvrirait et se refermerait dans
+      // la même image.
+      if (!this.tirageIncompressible) this.tirageSauter?.();
+    };
+    dialog.addEventListener('close', arreter, { once: true });
+    // Le bouton et la boîte reprennent leur gestionnaire à chaque annonce :
+    // celui d'avant fermait pour une partie qui n'est plus la bonne.
+    // Un appui n'importe où presse le mouvement ; le bouton, lui, ferme.
+    dialog.onclick = (event) => {
+      if (event.target.id === 'tirage-ok') dialog.close();
+      else presser();
+    };
+
+    dialog.showModal();
+
+    // Sous mouvement réduit, on ne déroule pas les égalités : seul le tour
+    // qui a décidé est montré, et d'emblée ouvert.
+    const montres = this.tirageSaut ? tours.slice(-1) : tours;
+
+    for (let i = 0; i < montres.length; i++) {
+      const tour = montres[i];
+      const dernier = i === montres.length - 1;
+      piste.textContent = '';
+      const cartes = tour.map((entree, rang) => {
+        const carte = this.carteTirage(entree, rang);
+        piste.append(carte);
+        return carte;
+      });
+
+      await this.attendreTirage(460);
+      if (perime()) return;
+
+      for (const carte of cartes) {
+        carte.querySelector('.tirage-carte').classList.add('ouverte');
+        this.sons.jouer('pose');
+        await this.attendreTirage(340);
+      }
+      if (perime()) return;
+      await this.attendreTirage(240);
+      if (perime()) return;
+
+      // Le même classement que le tirage lui-même : le joker devant le A.
+      const rangs = tour.map((t) => (t.lettre === BLANK ? -1 : t.lettre));
+      const meilleur = Math.min(...rangs);
+      cartes.forEach((carte, k) => carte.classList.add(rangs[k] === meilleur ? 'gagne' : 'perd'));
+
+      if (!dernier) {
+        // Le dire, sinon deux lettres identiques qui ne décident rien ne se
+        // comprennent pas.
+        verdict.textContent = 'Égalité : on recommence.';
+        await this.attendreTirage(1100);
+        if (perime()) return;
+        continue;
+      }
+
+      const premier = this.game.current;
+      verdict.textContent =
+        premier === HUMAN ? 'Vous commencez.' : `${this.seatName(premier)} commence.`;
+    }
+
+    // Le temps de lire. Celui qui a pressé le mouvement en a moins besoin.
+    await this.attendreTirage(this.tirageSaut ? 1800 : 2400, { incompressible: true });
+    if (!perime()) dialog.close();
+  }
+
+  /** Une tuile du tirage, face cachée, avec le nom de qui l'a tirée. */
+  carteTirage({ siege, lettre }, rang) {
+    const joueur = document.createElement('div');
+    joueur.className = 'tirage-joueur';
+    joueur.style.animationDelay = `${rang * 90}ms`;
+
+    const carte = document.createElement('div');
+    carte.className = 'tirage-carte';
+    const pivot = document.createElement('div');
+    pivot.className = 'tirage-pivot';
+    const dos = document.createElement('div');
+    dos.className = 'tirage-dos';
+    // Pas `tileElement` : lui écrit la lettre même sur un joker, ce qui vaut
+    // pour un joker posé sur le plateau, qui en porte une. Celui-ci sort du
+    // sac et n'en porte aucune — une tuile vierge, comme au chevalet.
+    const joker = lettre === BLANK;
+    const tuile = document.createElement('div');
+    tuile.className = joker ? 'rack-tile blank' : 'rack-tile';
+    if (!joker) tuile.append(document.createTextNode(letterChar(lettre)));
+    const valeur = document.createElement('span');
+    valeur.className = 'value';
+    valeur.textContent = String(joker ? 0 : VALUES[lettre]);
+    tuile.append(valeur);
+    pivot.append(dos, tuile);
+    carte.append(pivot);
+
+    const nom = document.createElement('span');
+    nom.className = 'tirage-nom';
+    nom.textContent = this.seatName(siege);
+
+    joueur.append(carte, nom);
+    return joueur;
+  }
+
+  /**
+   * Attente du tirage, interruptible : un appui sur la boîte, ou sa
+   * fermeture, rend la main tout de suite.
+   */
+  attendreTirage(ms, { incompressible = false } = {}) {
+    return new Promise((resolve) => {
+      if (this.tirageArrete || (this.tirageSaut && !incompressible)) {
+        resolve();
+        return;
+      }
+      const finir = () => {
+        clearTimeout(minuteur);
+        this.tirageSauter = null;
+        this.tirageIncompressible = false;
+        resolve();
+      };
+      const minuteur = setTimeout(finir, ms);
+      this.tirageSauter = finir;
+      this.tirageIncompressible = incompressible;
+    });
   }
 
   seatName(seat) {
@@ -2186,11 +2372,13 @@ export class App {
     this.cancelExchange();
     this.save();
     this.render();
-    this.toast(this.phraseTirage() ?? 'Nouvelle partie. À vous de jouer.');
     // Jusqu'ici le joueur commençait toujours : ce chemin n'avait aucune
     // raison de réveiller l'adversaire. Le tirage peut désormais lui donner
-    // la main, et sans cette ligne la partie resterait en suspens.
-    if (this.game.current === COMPUTER && !this.game.finished) this.runComputerTurn();
+    // la main, et sans cette ligne la partie resterait en suspens — après
+    // l'annonce, pour qu'il ne joue pas derrière la boîte.
+    this.montrerTirage().then(() => {
+      if (this.game.current === COMPUTER && !this.game.finished) this.runComputerTurn();
+    });
   }
 
   /**
@@ -2814,7 +3002,6 @@ export class App {
     // Le premier à jouer sort du tirage à la lettre, comme en solo : à quatre,
     // commencer serait sans cela un avantage systématique pour l'hôte.
     this.game = new Game({ names: this.tableNames() });
-    const first = this.game.current;
 
     this.pending.clear();
     this.selected = null;
@@ -2826,7 +3013,7 @@ export class App {
     this.render();
     this.broadcast();
     $('mp-dialog').close();
-    this.toast(this.phraseTirage() ?? (first === HUMAN ? 'Partie lancée. Vous commencez.' : `Partie lancée. ${this.seatName(first)} commence.`));
+    this.montrerTirage();
   }
 
   /** Annonce à chacun que la partie démarre, avec la table telle qu'elle est. */
@@ -3130,6 +3317,13 @@ export class App {
 
     $('mp-dialog').close();
     this.render();
+    // La première image d'une partie neuve porte le tirage que l'hôte vient
+    // de faire : l'invité le voit comme lui. L'empreinte évite de le rejouer
+    // quand un retardataire s'assoit et que l'état est rediffusé.
+    if (!this.game.finished && snap.history.length === 0
+        && JSON.stringify(this.game.tirage ?? null) !== this.tirageMontre) {
+      this.montrerTirage();
+    }
     if (this.game.finished) this.showEnd();
     else this.verifierBlocage();
   }

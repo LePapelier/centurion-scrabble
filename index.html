@@ -342,6 +342,16 @@
       <button type="button" class="btn btn-ghost" id="chat-close">Fermer</button>
     </dialog>
 
+    <!-- Tirage du premier joueur. Les tuiles sont construites à la volée :
+         leur nombre dépend de la table, et leurs lettres du sac. -->
+    <dialog class="sheet tirage-sheet" id="tirage-dialog" aria-label="Tirage du premier joueur">
+      <h2>Qui commence ?</h2>
+      <p class="sheet-text">Chacun tire une lettre. La plus proche du A l’emporte, et le joker passe devant tout.</p>
+      <div class="tirage-piste" id="tirage-tuiles"></div>
+      <p class="tirage-verdict" id="tirage-verdict" aria-live="polite"></p>
+      <button type="button" class="btn btn-ghost" id="tirage-ok">Continuer</button>
+    </dialog>
+
     <!-- Fin de partie -->
     <dialog class="sheet" id="end-dialog" aria-label="Fin de partie">
       <h2 id="end-title">Partie terminée</h2>

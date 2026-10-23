@@ -3346,3 +3346,148 @@ kbd {
     animation: none !important;
   }
 }
+
+/* ------------------------------------------------------------------ */
+/* Le tirage du premier joueur                                         */
+/* ------------------------------------------------------------------ */
+
+/* Une tuile par siège, tirée du sac et retournée devant le joueur. Le dessin
+   est celui du chevalet — même classe, mêmes variables de thème — pour que ce
+   soit bien une tuile du jeu qu'on retourne, et non une image de tuile. */
+.tirage-piste {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 18px;
+  margin: 18px 0 14px;
+  /* Deux tours de tirage n'ont pas le même nombre de tuiles : sans hauteur
+     minimale, la boîte sauterait au passage de l'un à l'autre. */
+  min-height: 104px;
+}
+
+.tirage-joueur {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  /* La tuile sort du sac : elle monte, et le nom suit. */
+  animation: tirage-monte 280ms cubic-bezier(0.2, 0.9, 0.3, 1.2) both;
+  transition: opacity 260ms, filter 260ms, transform 260ms;
+}
+
+.tirage-joueur.gagne {
+  transform: translateY(-4px) scale(1.06);
+}
+
+/* La tuile gagnante porte le liseré doré du panneau : sans lui, la seule
+   différence avec les autres serait leur pâleur, ce qui se lit mal quand il
+   n'y a que deux tuiles. */
+.tirage-joueur.gagne .rack-tile {
+  box-shadow:
+    var(--tuile-ombre),
+    var(--tuile-biseau),
+    0 0 0 2px var(--gold),
+    0 8px 20px rgb(0 0 0 / 0.35);
+}
+
+.tirage-joueur.perd {
+  opacity: 0.42;
+  filter: saturate(0.5);
+}
+
+@keyframes tirage-monte {
+  from { transform: translateY(16px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+/* Le conteneur de la tuile : c'est lui qui donne l'échelle, comme
+   l'emplacement du chevalet donne la sienne. `container-type` est
+   indispensable — la tuile lit sa lettre et son arrondi en `cqw`. */
+.tirage-carte {
+  container-type: inline-size;
+  position: relative;
+  width: clamp(52px, 17vw, 72px);
+  aspect-ratio: 1 / var(--tuile-ratio);
+  perspective: 700px;
+}
+
+.tirage-pivot {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+  transition: transform 460ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.tirage-carte.ouverte .tirage-pivot {
+  transform: rotateY(180deg);
+}
+
+.tirage-pivot > * {
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+/* Le dos : la même tuile, vue de l'autre côté. Pas de lettre, et un losange
+   à peine marqué — sans lui, le retournement ne se verrait pas. */
+.tirage-dos {
+  position: absolute;
+  inset: 0;
+  border-radius: calc(100cqw * var(--tuile-arrondi));
+  background: var(--tuile-face);
+  box-shadow: var(--tuile-ombre), var(--tuile-biseau);
+}
+
+.tirage-dos::after {
+  content: '';
+  position: absolute;
+  inset: 32%;
+  border: 1px solid currentColor;
+  border-radius: 2px;
+  color: var(--tile-text);
+  opacity: 0.16;
+  transform: rotate(45deg);
+}
+
+/* La face : la tuile du chevalet telle quelle, retournée pour se présenter
+   quand le pivot tourne. */
+.tirage-carte .rack-tile {
+  transform: rotateY(180deg);
+  transition: none;
+}
+
+.tirage-nom {
+  font-size: 13px;
+  color: var(--text-dim);
+  max-width: 11ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tirage-joueur.gagne .tirage-nom {
+  color: var(--gold);
+  font-weight: 600;
+}
+
+.tirage-verdict {
+  min-height: 1.4em;
+  margin: 0 0 14px;
+  text-align: center;
+  font-size: 16px;
+  color: var(--text);
+}
+
+/* Un appui fait tout défiler d'un coup : plus rien ne doit s'animer. */
+.tirage-sheet.sans-geste .tirage-joueur,
+.tirage-sheet.sans-geste .tirage-pivot {
+  animation: none;
+  transition: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tirage-joueur,
+  .tirage-pivot {
+    animation: none;
+    transition: none;
+  }
+}
