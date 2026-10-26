@@ -635,3 +635,14 @@ shivaites
 # comme prénom, donc capitalisé, et la chaîne de construction écarte les
 # majuscules pour ne pas laisser entrer les noms propres.
 hans
+
+# Signalé refusé à tort : ALIEN, l'extraterrestre, et son pluriel ALIENS.
+# L'ODS les porte, 1mot.net les donne valides avec un extrait de l'ODS à
+# l'appui, et ils sont les deux seuls mots en ALIE- que le jeu n'avait pas :
+# les cinquante-quatre autres, toute la famille d'aliéner, étaient déjà là.
+#
+# Ils manquaient parce qu'aucun des deux lexiques de source ne les porte :
+# ni Morphalou, ni Dicollecte. C'est un emprunt récent à l'anglais, entré au
+# dictionnaire du jeu avant d'entrer dans les lexiques de langue.
+alien
+aliens

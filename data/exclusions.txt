@@ -1510,3 +1510,21 @@ hanseniennes
 hanseniens
 hansenose
 hansenoses
+
+# Croisés en vérifiant ALIEN : APIEN et ALPIEN, acceptés à tort, avec leurs
+# féminins et leurs pluriels. L'ODS ne porte ni l'un ni l'autre — il a ALPIN
+# pour les Alpes — et 1mot.net n'a de page pour aucune de ces huit formes. Il
+# en a bien une pour APIENNE, qu'il refuse, et il en a pour des mots qui
+# n'existent pas davantage, ALPINER ou ALPINISE : leur absence à eux est donc
+# une absence pleine.
+#
+# Les autres voisins d'ALIEN sont tous dans l'ODS et restent : ILIEN, ARIEN,
+# AVIEN, MALIEN, SALIEN, ALBIEN, ALIENA, ALIENE.
+apien
+apiens
+apienne
+apiennes
+alpien
+alpiens
+alpienne
+alpiennes
