@@ -122,10 +122,23 @@ export function letterIndex(char) {
   return code >= 0 && code <= 25 ? code : -1;
 }
 
+/**
+ * Le nom d'une case, lu comme les bordures du plateau le donnent : la ligne
+ * est une lettre de A à O, la colonne un nombre de 1 à 15.
+ *
+ * L'ancienne version nommait la colonne par une lettre et la ligne par un
+ * nombre, à la manière d'un échiquier : la case M2 s'annonçait « B13 », et
+ * l'indice envoyait le joueur à l'autre bout du plateau.
+ *
+ * La notation officielle inverse les deux termes pour dire le sens — H8 à
+ * l'horizontale, 8H à la verticale. Elle n'est pas reprise ici : « 3L » et
+ * « L3 » se ressembleraient trop pour qui lit les bordures sans connaître la
+ * convention. Le sens est dit en toutes lettres là où il sert.
+ */
 export function coordName(index) {
-  const row = Math.floor(index / SIZE);
-  const col = index % SIZE;
-  return `${String.fromCharCode(65 + col)}${row + 1}`;
+  const ligne = String.fromCharCode(65 + Math.floor(index / SIZE));
+  const colonne = (index % SIZE) + 1;
+  return `${ligne}${colonne}`;
 }
 
 /**

@@ -2611,8 +2611,12 @@ export class App {
           return b.score > a.score ? b : a;
         });
         // La case annoncée est le début du mot nommé, non la première lettre
-        // posée : c'est là que le joueur va poser les yeux.
-        this.toast(`Essayez ${main.word} en ${coordName(main.cells[0])} (+${move.score})`);
+        // posée : c'est là que le joueur va poser les yeux. Le sens se lit
+        // sur l'écart entre ses cases : d'une ligne à l'autre, le mot
+        // descend ; de case en case, il court.
+        const vertical = main.cells.at(-1) - main.cells[0] >= SIZE;
+        const sens = vertical ? 'à la verticale' : 'à l’horizontale';
+        this.toast(`Essayez ${main.word} en ${coordName(main.cells[0])}, ${sens} (+${move.score})`);
       }
       this.renderControls();
       return;
