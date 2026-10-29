@@ -646,3 +646,75 @@ hans
 # dictionnaire du jeu avant d'entrer dans les lexiques de langue.
 alien
 aliens
+
+# Signalé refusé à tort : KITE, la voile de traction, et son pluriel. L'ODS
+# les porte, 1mot.net les donne valides avec un extrait de l'ODS à l'appui, et
+# aucun des deux lexiques de source ne les connaît — encore un emprunt entré
+# au dictionnaire du jeu avant d'entrer dans ceux de la langue.
+#
+# Toute sa famille manquait du même coup : le kitesurfeur et sa kitesurfeuse,
+# alors que le jeu acceptait déjà KITESURF. Et avec eux deux pluriels qui
+# n'avaient aucune raison d'être absents, KITSCHS — le singulier était là — et
+# le gentilé de Saint-Kitts.
+kite
+kites
+kitesurfeur
+kitesurfeurs
+kitesurfeuse
+kitesurfeuses
+kitschs
+kittitien
+kittitienne
+kittitiennes
+kittitiens
+
+# Croisé en vérifiant les voisins de KITE : KIFE, qui est dans l'ODS et que le
+# jeu refusait. Il ne venait pas seul — c'est le verbe KIFER tout entier qui
+# manquait, trente-sept formes. Les lexiques de source n'ont que la graphie à
+# deux F, KIFFER, que le jeu acceptait déjà ; l'ODS porte les deux.
+#
+# 1mot.net donne KIFER, KIFE et KIFA valides, chacun avec son extrait de
+# l'ODS, et la liste témoin porte la conjugaison complète.
+kifa
+kifai
+kifaient
+kifais
+kifait
+kifames
+kifant
+kifas
+kifasse
+kifassent
+kifasses
+kifassiez
+kifassions
+kifat
+kifates
+kife
+kifee
+kifees
+kifent
+kifer
+kifera
+kiferai
+kiferaient
+kiferais
+kiferait
+kiferas
+kiferent
+kiferez
+kiferiez
+kiferions
+kiferons
+kiferont
+kifes
+kifez
+kifiez
+kifions
+kifons
+
+# Rien à ajouter pour KIFF et KIFFS, qui étaient bien acceptés — mais un
+# troisième trou du témoin à noter, après HACH et les pluriels de lettres
+# grecques. La liste ODS 8 qui sert de référence ici ne les porte pas, alors
+# que 1mot.net les donne tous deux valides avec un extrait de l'ODS à l'appui,
+# KIFF étant le chanvre indien. Ils restent.

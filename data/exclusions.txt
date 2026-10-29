@@ -1528,3 +1528,21 @@ alpien
 alpiens
 alpienne
 alpiennes
+
+# Croisés en vérifiant KITE : KITOL et KITOLS, acceptés à tort. C'est un
+# dérivé de la vitamine A que Morphalou porte et que l'ODS ignore. 1mot.net
+# n'a de page ni pour l'un ni pour l'autre, alors qu'il en a pour des mots qui
+# n'existent pas davantage — KITEL, KITOS, KITAL, KLIT, tous refusés : leur
+# absence à eux est donc une absence pleine.
+#
+# Les autres voisins de KITE à une lettre près sont tous dans l'ODS et
+# restent : BITE, CITE, DITE, GITE, LITE, MITE, PITE, RITE, SITE, VITE, KOTE,
+# KINE, KITS.
+kitol
+kitols
+
+# Vu en remettant la famille de KIF d'aplomb : KIFKIFS, le pluriel de KIFKIF,
+# accepté à tort. L'adjectif est invariable — la liste témoin porte KIFKIF et
+# aucun pluriel, et 1mot.net n'a pas de page pour celui-ci. Sa page de KIFKIF
+# en annonce bien un, mais sur la foi du WikWik, pas de l'ODS.
+kifkifs
