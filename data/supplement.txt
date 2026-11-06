@@ -731,3 +731,15 @@ ejet
 ejets
 eject
 ejects
+
+# Vérifié à propos de GLOU : le jeu a raison de le refuser. L'ODS ne le porte
+# pas, 1mot.net le refuse, lui et son pluriel — seul GLOUGLOU est un mot, et
+# il était déjà accepté. Rien à ajouter de ce côté.
+#
+# Mais la famille autour montrait deux manques. Le fromage de Gloucester, et
+# GLOUP avec son pluriel, l'interjection de ce qu'on avale de travers. Les
+# quatre sont dans l'ODS, 1mot.net les donne valides.
+gloucester
+gloucesters
+gloup
+gloups

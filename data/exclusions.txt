@@ -1556,3 +1556,72 @@ kifkifs
 # REJET.
 ejectrice
 ejectrices
+
+# Vus en vérifiant GLOU : cinquante et une formes en GLOU- que le jeu
+# acceptait et que l'ODS ne porte pas. Elles se rangent en trois tas.
+#
+# Le verbe GLOUTONNER et ses trente-trois formes propres. L'ODS a le glouton,
+# la gloutonne, la gloutonnerie et l'adverbe, mais pas le verbe ; 1mot.net
+# n'a de page ni pour GLOUTONNER, ni pour GLOUTONNENT, ni pour GLOUTONNA.
+# GLOUTONNE et GLOUTONNES, eux, restent : ce sont aussi l'adjectif féminin et
+# son pluriel, et à ce titre ils sont bien dans l'ODS.
+#
+# Les participes passés accordés de deux verbes qui ne les prennent pas :
+# glousser et glouglouter ne se conjuguent qu'intransitivement, et l'ODS
+# s'arrête donc à GLOUSSE et GLOUGLOUTE. De même pour les participes présents
+# accordés en GLOUGLOUTANTE.
+#
+# Et quelques formations que Morphalou porte seul : l'agent qui glousse ou
+# qui glougloute, le glougloutement, GLOUSSOTER — dont 1mot.net refuse la
+# forme GLOUSSOTE — et GLOUTER.
+glougloutante
+glougloutantes
+glougloutants
+glougloutee
+glougloutees
+glougloutement
+glouglouteur
+gloussee
+gloussees
+glousseur
+glousseuse
+gloussoter
+glouter
+gloutonna
+gloutonnai
+gloutonnaient
+gloutonnais
+gloutonnait
+gloutonnames
+gloutonnant
+gloutonnante
+gloutonnantes
+gloutonnants
+gloutonnas
+gloutonnasse
+gloutonnassent
+gloutonnasses
+gloutonnassiez
+gloutonnassions
+gloutonnat
+gloutonnates
+gloutonnee
+gloutonnees
+gloutonnent
+gloutonner
+gloutonnera
+gloutonnerai
+gloutonneraient
+gloutonnerais
+gloutonnerait
+gloutonneras
+gloutonnerent
+gloutonnerez
+gloutonneriez
+gloutonnerions
+gloutonnerons
+gloutonneront
+gloutonnez
+gloutonniez
+gloutonnions
+gloutonnons
