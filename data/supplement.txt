@@ -743,3 +743,24 @@ gloucester
 gloucesters
 gloup
 gloups
+
+# Signalé refusé à tort : REBEU, avec son féminin, ses deux pluriels et la
+# seconde graphie, REUBEU. Les dix formes sont dans l'ODS et 1mot.net les
+# donne valides, chacune avec son extrait. Aucun des deux lexiques de source
+# ne les connaît : c'est du verlan lexicalisé, que la compétition a admis
+# avant les dictionnaires de langue.
+rebeu
+rebeue
+rebeues
+rebeus
+rebeux
+reubeu
+reubeue
+reubeues
+reubeus
+reubeux
+
+# Croisé en passant la famille en revue : REBETIKO, la chanson grecque, et
+# son pluriel. Dans l'ODS, valides sur 1mot.net, absents du jeu.
+rebetiko
+rebetikos

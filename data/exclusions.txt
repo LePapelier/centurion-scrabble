@@ -1625,3 +1625,9 @@ gloutonnez
 gloutonniez
 gloutonnions
 gloutonnons
+
+# Voisins de REBEU à une lettre près : REBEC est dans l'ODS et reste. REJEU
+# n'y est pas, ni son pluriel REJEUX, et 1mot.net refuse les deux — sa page
+# ne les tient que du WikWik, pas de l'ODS.
+rejeu
+rejeux
