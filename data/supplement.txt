@@ -764,3 +764,11 @@ reubeux
 # son pluriel. Dans l'ODS, valides sur 1mot.net, absents du jeu.
 rebetiko
 rebetikos
+
+# Vus en écartant WAKA : les seuls mots en WAK- que l'ODS porte manquaient au
+# jeu. L'algue comestible et le sport nautique, chacun avec son pluriel ;
+# 1mot.net les donne valides.
+wakame
+wakames
+wakeboard
+wakeboards
