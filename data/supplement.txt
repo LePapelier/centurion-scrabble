@@ -772,3 +772,43 @@ wakame
 wakames
 wakeboard
 wakeboards
+
+# Signalé à propos de SKA : le mot passait, mais pas son pluriel. SKAS est
+# dans l'ODS, 1mot.net le donne valide extrait à l'appui, et aucun des deux
+# lexiques de source ne porte ni l'un ni l'autre — SKA n'était là que parce
+# qu'il avait déjà été rattrapé.
+#
+# Le reste du préfixe manquait pareillement : le skatepark, le skibob, le
+# skicross, ceux qui font du skiff ou du skysurf, l'écumoire de piscine, un
+# arbuste et le gentilé de Skopje. Vingt-quatre formes, toutes dans l'ODS ;
+# 1mot.net confirme SKATEPARK, SKIMMER et SKOPIOTE.
+skas
+skatepark
+skateparks
+skibob
+skibobs
+skicross
+skifeur
+skifeurs
+skifeuse
+skifeuses
+skiffeur
+skiffeurs
+skiffeuse
+skiffeuses
+skimmer
+skimmers
+skimmia
+skimmias
+skopiote
+skopiotes
+skysurfeur
+skysurfeurs
+skysurfeuse
+skysurfeuses
+
+# Rien à ajouter pour SIKA et SIKAS, qui étaient bien acceptés — mais un
+# quatrième trou du témoin à noter, après les pluriels de lettres grecques,
+# HACH, et KIFF. La liste ODS 8 ne porte pas le cerf japonais, alors que
+# 1mot.net le donne valide avec un extrait de l'ODS, treize points, pluriel
+# SIKAS. Le voisinage, lui, y est au complet : SIKH, SIKHARA, SIKASSOIS.

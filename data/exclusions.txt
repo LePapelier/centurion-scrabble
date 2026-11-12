@@ -1647,3 +1647,49 @@ waka
 wakas
 wakizashi
 wakizashis
+
+# Vues en remettant le préfixe SK- d'aplomb : trente-cinq formes que le jeu
+# acceptait et que l'ODS ne porte pas. C'est du vocabulaire savant que
+# Morphalou embarque seul — la douleur du squelette, la radiographie par
+# l'ombre, le béhaviorisme de Skinner, deux minéraux, une secte russe — plus
+# SKUNGS, graphie que l'ODS ne connaît pas (il a SKUNKS et SKUNS), et le
+# SKYSURFING, dont il n'a que le skysurf et le skysurfeur.
+#
+# 1mot.net n'a de page pour aucune d'elles, ni pour SKIAGRAMME, ni pour
+# SKINNERIEN, ni pour SKOPTSY, alors qu'il en a pour des assemblages qui
+# n'existent pas davantage, SKINA et SKIAN, tous deux refusés.
+skelalgie
+skelalgies
+skenite
+skenites
+skeptophylaxie
+skeptophylaxies
+skiagramme
+skiagrammes
+skiagraphie
+skiagraphies
+skinnerien
+skinnerienne
+skinneriennes
+skinneriens
+skinnerisme
+skinnerismes
+skiographie
+skiographies
+skioptique
+skioptiques
+skioscopie
+skioscopies
+sklodowskite
+sklodowskites
+skodique
+skodiques
+skodisme
+skodismes
+skopets
+skoptsy
+skungs
+skutterudite
+skutterudites
+skysurfing
+skysurfings
