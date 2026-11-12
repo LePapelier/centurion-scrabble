@@ -812,3 +812,16 @@ skysurfeuses
 # HACH, et KIFF. La liste ODS 8 ne porte pas le cerf japonais, alors que
 # 1mot.net le donne valide avec un extrait de l'ODS, treize points, pluriel
 # SIKAS. Le voisinage, lui, y est au complet : SIKH, SIKHARA, SIKASSOIS.
+
+# Signalé refusé à tort : DIOT, la saucisse de Savoie, et son pluriel. Dans
+# l'ODS, valides sur 1mot.net avec son extrait, et absents des deux lexiques
+# de source.
+#
+# Deux autres manquaient sous le même préfixe, et 1mot.net les donne valides
+# aussi : le marchand ambulant dioula, et le dioïde des mathématiques.
+dioide
+dioides
+diot
+diots
+dioula
+dioulas
