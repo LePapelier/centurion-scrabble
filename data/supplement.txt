@@ -825,3 +825,24 @@ diot
 diots
 dioula
 dioulas
+
+# Signalé refusé à tort : ROMS, et ROM au singulier. Les deux sont dans
+# l'ODS — la mémoire morte comme le nom du peuple — 1mot.net les donne
+# valides, et aucun des deux lexiques de source ne les porte.
+#
+# Trois autres manquaient sous le même préfixe, tous trois dans l'ODS et
+# valides sur 1mot.net : le chou-fleur romanesco, le romazava malgache, et
+# ROMSTEAK, la quatrième graphie du morceau de bœuf — le jeu avait déjà
+# ROMSTECK, RUMSTEAK et RUMSTEAKS.
+#
+# Et RAM, que le jeu refusait alors que l'ODS le porte. Il y est invariable :
+# son pluriel part, plus bas, dans les exclusions.
+rom
+roms
+romanesco
+romanescos
+romazava
+romazavas
+romsteak
+romsteaks
+ram

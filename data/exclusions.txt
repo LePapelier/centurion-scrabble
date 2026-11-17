@@ -1809,3 +1809,48 @@ dioxopiperazine
 piot
 piots
 riot
+
+# Vues en remettant le préfixe ROM- d'aplomb : vingt-neuf formes que le jeu
+# acceptait et que l'ODS ne porte pas. Des adverbes que personne n'emploie
+# (ROMAINEMENT, ROMANESQUEMENT, ROMANTIQUEMENT), des noms d'action tirés de
+# verbes (ROMANCAGE, ROMANCEMENT, ROMANTISATION), un minéral, et deux formes
+# masculines dont seul le féminin est un mot : 1mot.net refuse ROMBIER et
+# ROMPEUR, mais donne ROMBIERE valide, qui reste.
+romainement
+romancage
+romancages
+romancailliere
+romancement
+romancements
+romancie
+romancierement
+romancine
+romandisme
+romandismes
+romanechite
+romanechites
+romaneshti
+romaneshtis
+romanesquement
+romanistique
+romanistiques
+romanticiste
+romantiquement
+romantisation
+romantisations
+romatiere
+romatieres
+rombier
+romeite
+romeites
+rompeur
+rompeuse
+
+# Voisins de ROM et ROMS : DOM, NOM, REM, ROB, ROC, ROI, ROS, ROT et leurs
+# pluriels sont dans l'ODS et restent. Trois ne l'étaient pas. ROOM et ROOMS
+# ne sont qu'anglais, 1mot.net les refuse. RAMS est le pluriel d'un mot que
+# l'ODS porte invariable : la mémoire vive s'écrit RAM au pluriel comme au
+# singulier, et c'est ce singulier-là qui manquait au jeu.
+rams
+room
+rooms
