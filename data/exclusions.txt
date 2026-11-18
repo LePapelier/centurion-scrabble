@@ -1875,3 +1875,63 @@ ayous
 ayu
 ayus
 abu
+
+# Vues en remettant le préfixe YA- d'aplomb : quarante-cinq formes que le jeu
+# acceptait et que l'ODS ne porte pas. Un verbe YAILLER conjugué de bout en
+# bout, le voile yachmak, le laser YAG, l'esprit yaksa, la maladie YAWS —
+# l'ODS l'appelle pian — et le yazici. 1mot.net refuse YAWS et YAG, et n'a de
+# page ni pour YAILLER, ni pour YACHMAK, ni pour YAKSA.
+yachmak
+yachmaks
+yag
+yags
+yailla
+yaillai
+yaillaient
+yaillais
+yaillait
+yaillames
+yaillant
+yaillas
+yaillasse
+yaillassent
+yaillasses
+yaillassiez
+yaillassions
+yaillat
+yaillates
+yaille
+yaillee
+yaillees
+yaillent
+yailler
+yaillera
+yaillerai
+yailleraient
+yaillerais
+yaillerait
+yailleras
+yaillerent
+yaillerez
+yailleriez
+yaillerions
+yaillerons
+yailleront
+yailles
+yaillez
+yailliez
+yaillions
+yaillons
+yaksa
+yaws
+yazici
+yazicis
+
+# Voisins de YAM à une lettre près : DAM, JAM, RAM, YAK sont dans l'ODS et
+# restent. CAM et TAM n'y sont pas, ni leurs pluriels, et 1mot.net refuse les
+# quatre. CAMA et TAMA, eux, sont valides — le second manquait, il est ajouté
+# au supplément.
+cam
+cams
+tam
+tams

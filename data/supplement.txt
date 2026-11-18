@@ -852,3 +852,80 @@ ram
 # 1mot.net les donne valides, vingt et vingt et un points.
 ayyoubide
 ayyoubides
+
+# Signalé refusé à tort : YAM, le jeu de dés, et son pluriel. Dans l'ODS,
+# valides sur 1mot.net, absents des deux lexiques de source.
+#
+# Le préfixe entier était à la traîne : soixante et une formes de l'ODS
+# manquaient au jeu. Le verbe suisse YASSER et ses quarante formes, le yassa
+# sénégalais, le yasseur et la yasseuse, les yazidis et leur yazidisme, le
+# yaourtier — le jeu n'avait que la yaourtière —, le yamba, le yaka, et les
+# gentilés de Yamoussoukro et de Yaoundé. 1mot.net confirme YAM, YAMS,
+# YASSER, YASSA, YAKA, YAZIDI.
+yachtsmans
+yaka
+yakas
+yam
+yamba
+yambas
+yamoussoukrois
+yamoussoukroise
+yamoussoukroises
+yams
+yaoundeen
+yaoundeenne
+yaoundeennes
+yaoundeens
+yaourtier
+yaourtiers
+yassa
+yassai
+yassaient
+yassais
+yassait
+yassames
+yassant
+yassas
+yassasse
+yassassent
+yassasses
+yassassiez
+yassassions
+yassat
+yassates
+yasse
+yassent
+yasser
+yassera
+yasserai
+yasseraient
+yasserais
+yasserait
+yasseras
+yasserent
+yasserez
+yasseriez
+yasserions
+yasserons
+yasseront
+yasses
+yasseur
+yasseurs
+yasseuse
+yasseuses
+yassez
+yassiez
+yassions
+yassons
+yazidi
+yazidie
+yazidies
+yazidis
+yazidisme
+yazidismes
+
+# Croisés en vérifiant les voisins de YAM : TAMA, le tambour d'aisselle, et
+# son pluriel. L'ODS les porte, 1mot.net donne TAMA valide avec son extrait,
+# et le jeu les refusait tous les deux.
+tama
+tamas
