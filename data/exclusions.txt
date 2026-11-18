@@ -1854,3 +1854,24 @@ rompeuse
 rams
 room
 rooms
+
+# Signalé accepté à tort : AYU, le poisson japonais, et son pluriel.
+# 1mot.net les refuse tous les deux et l'ODS ne les porte pas — il a AY,
+# AYATOLLAH, AYMARA, AYURVEDA, AYUNTAMIENTO : le voisinage n'a rien d'un trou
+# du témoin.
+#
+# Quatre autres formes en AY- partaient avec eux, toutes refusées par
+# 1mot.net : AYAM, le poulet indonésien, AYE, dont l'ODS ne porte pas non plus
+# le redoublement, et AYOUS, l'arbre africain, dont le site n'a que la page de
+# AYOU, refusée elle aussi.
+#
+# Le voisin ABU, enfin : code et nom propre, refusé par 1mot.net, quand ABUS
+# est bien dans l'ODS et reste.
+ayam
+ayams
+aye
+ayes
+ayous
+ayu
+ayus
+abu

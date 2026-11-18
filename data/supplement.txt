@@ -846,3 +846,9 @@ romazavas
 romsteak
 romsteaks
 ram
+
+# Vus en écartant AYU : les seuls mots en AY- que l'ODS porte et que le jeu
+# n'avait pas. La dynastie kurde du douzième siècle, avec son pluriel ;
+# 1mot.net les donne valides, vingt et vingt et un points.
+ayyoubide
+ayyoubides
