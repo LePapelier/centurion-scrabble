@@ -1935,3 +1935,16 @@ cam
 cams
 tam
 tams
+
+# Signalé accepté à tort : OKENIE, et avec elle OKENIA le mollusque et
+# OKENITE le minéral, chacune avec son pluriel. L'ODS ne porte rien de tout
+# cela — il a OKA, OKAPI, OKOUME, OKRA — et 1mot.net n'a de page pour aucune
+# des trois, alors qu'il en a pour des assemblages qui n'existent pas
+# davantage, OK, OKE, OKI, OKO, OKEY, tous refusés. Sa page de BORDITE, qui
+# dit le mot synonyme d'okénite en minéralogie, le refuse elle aussi.
+okenia
+okenias
+okenie
+okenies
+okenite
+okenites

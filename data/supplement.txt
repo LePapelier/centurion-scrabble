@@ -929,3 +929,11 @@ yazidismes
 # et le jeu les refusait tous les deux.
 tama
 tamas
+
+# Vus en écartant OKENIE : les deux seuls mots en OK- que l'ODS porte et que
+# le jeu n'avait pas. Le fromage canadien et le gombo, chacun avec son
+# pluriel ; 1mot.net les donne valides, extrait de l'ODS à l'appui.
+oka
+okas
+okra
+okras
