@@ -981,3 +981,47 @@ royaumiez
 royaumions
 royaumons
 oyes
+
+# Signalé : TUNER est aussi un verbe. Le jeu n'en avait que le nom — l'appareil
+# et le tuning — alors que l'ODS conjugue le verbe en entier et porte celui
+# qui le pratique. Trente-huit formes manquaient, de TUNA à TUNONS, avec
+# TUNEUR et TUNEUSE. 1mot.net donne TUNA, TUNAIT et TUNEUR valides, chacun
+# avec son extrait de l'ODS.
+tuna
+tunai
+tunaient
+tunais
+tunait
+tunames
+tunant
+tunas
+tunasse
+tunassent
+tunasses
+tunassiez
+tunassions
+tunat
+tunates
+tunee
+tunees
+tunent
+tunera
+tunerai
+tuneraient
+tunerais
+tunerait
+tuneras
+tunerent
+tunerez
+tuneriez
+tunerions
+tunerons
+tuneront
+tuneur
+tuneurs
+tuneuse
+tuneuses
+tunez
+tuniez
+tunions
+tunons
