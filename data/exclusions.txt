@@ -1948,3 +1948,55 @@ okenie
 okenies
 okenite
 okenites
+
+# Vues en remettant OYES d'aplomb, trente-neuf formes que l'ODS ne porte pas.
+#
+# D'abord trois en OY- : OYANTS, alors qu'ouïr n'accorde pas son participe
+# présent — 1mot.net refuse OYANTE — et OYAPOK, qui est la rivière ; le
+# marsupial s'écrit YAPOK ou YAPOCK, et ces deux-là restent.
+#
+# Puis les voisins d'OYES à une lettre près. MYES, RYES, ODES, OIES, OPES,
+# ORES, OSES, OTES, OVES, MOYES et NOYES sont dans l'ODS et restent. HOYES et
+# ROYES n'y sont pas, 1mot.net les refuse, et ils ne venaient pas seuls : ce
+# sont deux verbes entiers que Morphalou porte seul, HOYER et ROYER. Avec eux
+# partent la plante hoya, le poisson royan, le genre royena, et ROYALTY au
+# singulier — l'ODS ne connaît que le pluriel ROYALTIES, qui reste.
+oyants
+oyapok
+oyapoks
+hoya
+hoye
+hoyee
+hoyees
+hoyes
+roya
+royai
+royaient
+royais
+royait
+royaltie
+royalty
+royames
+royan
+royans
+royant
+royas
+royasse
+royassent
+royasses
+royassiez
+royassions
+royat
+royates
+roye
+royee
+royees
+royena
+royenas
+royer
+royerent
+royes
+royez
+royiez
+royions
+royons

@@ -937,3 +937,47 @@ oka
 okas
 okra
 okras
+
+# Signalé refusé à tort : OYES, le pluriel d'OYE, la vieille graphie de l'oie.
+# Dans l'ODS, valide sur 1mot.net extrait à l'appui, et c'était le seul mot en
+# OY- qui manquait au jeu — il avait déjà OYE, OYEZ, OYANT et le reste d'ouïr.
+#
+# En vérifiant ses voisins, le verbe ROYAUMER est apparu : l'ODS le conjugue
+# en entier, trente-cinq formes, et le jeu n'en avait aucune. 1mot.net le
+# donne valide, lui et ROYAUMA, ROYAUMANT, ROYAUMEZ.
+royauma
+royaumai
+royaumaient
+royaumais
+royaumait
+royaumames
+royaumant
+royaumas
+royaumasse
+royaumassent
+royaumasses
+royaumassiez
+royaumassions
+royaumat
+royaumates
+royaumee
+royaumees
+royaument
+royaumer
+royaumera
+royaumerai
+royaumeraient
+royaumerais
+royaumerait
+royaumeras
+royaumerent
+royaumerez
+royaumeriez
+royaumerions
+royaumerons
+royaumeront
+royaumez
+royaumiez
+royaumions
+royaumons
+oyes
